@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK — Filtros do Mercado
 // @namespace    pokeafk-market-filtros
-// @version      0.11.1
+// @version      0.12.0
 // @description  Filtra anúncios de Pokémon, mostra tiers no mercado, no mapa e na ficha, recomenda golpes, naturezas e IVs e faz o daily de treinadores.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -1902,7 +1902,10 @@
   // talk key → LUTAR → wait for the result → CONTINUAR. Any input from the player, a timeout or
   // something unexpected stops the loop.
   (() => {
-    const LEVEL_RANGE = 10;
+    // Levels below the main Pokémon; the player can change it in the card.
+    const DEFAULT_RANGE = 10;
+    const MAX_RANGE = 99;
+    const RANGE_STORAGE = 'pokeafk-market-filtros:daily-range';
     const FIGHT_TIMEOUT = 10 * 60 * 1000;
     const KEYS_STORAGE = 'pokeafk.ui.keys';
     const HEAL_BELOW = 0.5;
@@ -1923,7 +1926,13 @@
           <strong title="Arraste para mover; clique duas vezes para voltar ao lugar">Treinadores do dia</strong>
           <button type="button" class="pafk-daily-x" aria-label="Fechar" data-daily-toggle>✕</button>
         </header>
-        <p class="pafk-daily-range" data-daily-range>Faixa: nível do Pokémon principal até 10 abaixo.</p>
+        <label class="pafk-daily-levels">
+          Lutar até
+          <input type="number" min="0" max="${MAX_RANGE}" step="1" value="${DEFAULT_RANGE}" inputmode="numeric" data-daily-levels>
+          níveis abaixo do principal
+          <small>Sugerido: ${DEFAULT_RANGE}.</small>
+        </label>
+        <p class="pafk-daily-range" data-daily-range>Faixa: nível do Pokémon principal até ${DEFAULT_RANGE} abaixo.</p>
         <label class="pafk-daily-avoid">
           <input type="checkbox" data-daily-avoid checked>
           Evitar times com vantagem de tipo
@@ -1948,6 +1957,7 @@
     const progressEl = box.querySelector('[data-daily-progress]');
     const routeEl = box.querySelector('[data-daily-route]');
     const avoidBox = box.querySelector('[data-daily-avoid]');
+    const levelsInput = box.querySelector('[data-daily-levels]');
 
     const style = document.createElement('style');
     style.dataset.pafk = '';
@@ -1976,6 +1986,15 @@
       #pafk-daily .pafk-daily-x { border: 0; background: none; color: #4a5f8f; padding: 2px 4px; }
       #pafk-daily p { margin: 0; }
       #pafk-daily .pafk-daily-range { color: #4a5f8f; font-size: 12px; }
+      #pafk-daily .pafk-daily-levels { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
+      #pafk-daily .pafk-daily-levels input {
+        width: 4.5em; box-sizing: border-box; padding: 3px 6px; font: inherit; font-weight: 700;
+        color: #152964; border: 1px solid #bed0ec; border-radius: 6px; background: #fff;
+        font-variant-numeric: tabular-nums;
+      }
+      #pafk-daily .pafk-daily-levels input:focus-visible { outline: 2px solid #2459aa; outline-offset: 1px; }
+      #pafk-daily .pafk-daily-levels input:disabled { background: #eef2f9; color: #4a5f8f; }
+      #pafk-daily .pafk-daily-levels small { flex-basis: 100%; color: #4a5f8f; font-size: 11px; }
       #pafk-daily .pafk-daily-avoid { display: grid; grid-template-columns: auto 1fr; gap: 0 6px; align-items: center; cursor: pointer; }
       #pafk-daily .pafk-daily-avoid input { margin: 0; }
       #pafk-daily .pafk-daily-avoid small { grid-column: 2; color: #4a5f8f; font-size: 11px; }
@@ -2201,6 +2220,35 @@
       }
     });
 
+    // How many levels below the main Pokémon to fight (whole number, 0–MAX_RANGE).
+    function cleanRange(value) {
+      const number = Math.round(Number(value));
+      return Number.isFinite(number) && String(value).trim() !== ''
+        ? Math.min(MAX_RANGE, Math.max(0, number))
+        : DEFAULT_RANGE;
+    }
+    const levelRange = () => cleanRange(levelsInput.value);
+    try {
+      const saved = localStorage.getItem(RANGE_STORAGE);
+      if (saved !== null) levelsInput.value = String(cleanRange(saved));
+    } catch {
+      // Defaults to the suggested range.
+    }
+    levelsInput.addEventListener('input', () => showRange());
+    // Typing a number must not reach the game's hotkeys.
+    for (const type of ['keydown', 'keyup', 'keypress']) {
+      levelsInput.addEventListener(type, event => event.stopPropagation());
+    }
+    levelsInput.addEventListener('change', () => {
+      levelsInput.value = String(levelRange());
+      showRange();
+      try {
+        localStorage.setItem(RANGE_STORAGE, levelsInput.value);
+      } catch {
+        // The choice lasts only for this page.
+      }
+    });
+
     function foeInPlay() {
       const card = $$('.ah-card').find(element => element.querySelector('.ah-name.red'));
       const icon = card?.querySelector('.ah-mon-ic')?.getAttribute('style') ?? '';
@@ -2353,7 +2401,7 @@
       if (startSort) await sortNpcs(startSort);
       if (startRegion) await chooseRegion(startRegion);
 
-      const inRange = all.filter(npc => npc.level <= level && npc.level >= level - LEVEL_RANGE);
+      const inRange = all.filter(npc => npc.level <= level && npc.level >= level - levelRange());
       const todo = inRange.filter(npc => !npc.beaten && !npc.locked);
       // Lowest level first; within a level, trainers of the same place stay together (the list
       // is by XP, so the first trainer of each place sets that place's turn).
@@ -2485,14 +2533,19 @@
 
     function showRange() {
       const main = mainPokemon();
+      const below = levelRange();
+      const lowest = Math.max(1, main ? main.level - below : 1);
       rangeEl.textContent = main
-        ? `${main.name}, Nv. ${main.level}: treinadores do Nv. ${Math.max(1, main.level - LEVEL_RANGE)} ao ${main.level}.`
+        ? (lowest === main.level
+          ? `${main.name}, Nv. ${main.level}: só treinadores do Nv. ${main.level}.`
+          : `${main.name}, Nv. ${main.level}: treinadores do Nv. ${lowest} ao ${main.level}.`)
         : 'Entre no jogo para ver o Pokémon principal.';
     }
 
     function setRunning(on) {
       goButton.hidden = on;
       stopButton.hidden = !on;
+      levelsInput.disabled = on;
       box.toggleAttribute('data-running', on);
     }
 
