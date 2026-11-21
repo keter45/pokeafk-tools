@@ -1,8 +1,12 @@
 // ==UserScript==
 // @name         PokeAFK — Filtros do Mercado
 // @namespace    pokeafk-market-filtros
-// @version      0.11.0
+// @version      0.11.1
 // @description  Filtra anúncios de Pokémon, mostra tiers no mercado, no mapa e na ficha, recomenda golpes, naturezas e IVs e faz o daily de treinadores.
+// @homepageURL  https://github.com/keter45/pokeafk-tools
+// @supportURL   https://github.com/keter45/pokeafk-tools/issues
+// @updateURL    https://raw.githubusercontent.com/keter45/pokeafk-tools/main/pokeafk-market-filtros.user.js
+// @downloadURL  https://raw.githubusercontent.com/keter45/pokeafk-tools/main/pokeafk-market-filtros.user.js
 // @match        https://pokeafk.io/*
 // @run-at       document-idle
 // @grant        none

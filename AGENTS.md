@@ -41,7 +41,7 @@ node build-tierlist-page.mjs      # regenera tierlist.html
 node --check pokeafk-market-filtros.user.js
 ```
 
-Sempre que mudar `rank-pokemon.mjs` ou os dados: rode `build-userscript.mjs`, `build-tierlist-page.mjs` e `node --check`. Ao mudar o userscript, suba `// @version` no cabeçalho para o Tampermonkey atualizar.
+Sempre que mudar `rank-pokemon.mjs` ou os dados: rode `build-userscript.mjs`, `build-tierlist-page.mjs` e `node --check`. Ao mudar o userscript, suba `// @version` no cabeçalho para o Tampermonkey atualizar. O Tampermonkey busca a versão nova em `@updateURL` (arquivo bruto da branch `main` no GitHub), então a atualização só chega ao usuário depois do push.
 
 ## Regras decididas com o usuário (não mude sem perguntar)
 
