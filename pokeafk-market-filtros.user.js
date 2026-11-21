@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK — Filtros do Mercado
 // @namespace    pokeafk-market-filtros
-// @version      0.13.0
+// @version      0.14.0
 // @description  Filtra anúncios de Pokémon, mostra tiers no mercado, no mapa e na ficha, recomenda golpes, naturezas e IVs e faz o daily de treinadores.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -2379,6 +2379,9 @@
           name: text(element.querySelector('.mx-row-main strong')),
           place: text(element.querySelector('.mx-row-place')),
           level: Number(text(element.querySelector('.mx-row-lv')).match(/\d+/)?.[0] ?? 0),
+          // Overworld sprite sheet (/assets/npcs/{gfx}.png), used to find a wandering trainer.
+          gfx: element.querySelector('.mx-npc-face i')?.style.backgroundImage
+            .match(/\/assets\/npcs\/([^/"')]+)\.png/)?.[1] ?? '',
           beaten: element.classList.contains('beaten') || chapter.startsWith('VENCIDOS'),
           locked: chapter.startsWith('BLOQUEADOS'),
         });
@@ -2458,9 +2461,141 @@
       await pause(200, 400);
     }
 
+    // ---- Finding a trainer on screen ----
+    // Trainers that wander may have left the spot the teleport faces. The world canvas draws
+    // sprites 1:1 from /assets/npcs/{gfx}.png (frame size in npcs.json), so the trainer's frames
+    // are searched in the canvas pixels, nearest to the centre (the player) first. A click on
+    // the trainer makes the game walk up to it and talk.
+    let npcMetaCache;
+    async function npcMeta() {
+      npcMetaCache ??= fetch('/assets/npcs/npcs.json').then(response => response.json()).catch(() => ({}));
+      return npcMetaCache;
+    }
+    const templateCache = new Map();
+    async function npcTemplates(gfx) {
+      if (templateCache.has(gfx)) return templateCache.get(gfx);
+      const meta = (await npcMeta())[gfx];
+      let templates = [];
+      // HD sprites are drawn on another layer and are not searched.
+      if (meta && !meta.hd && meta.w && meta.h) {
+        const image = new Image();
+        image.src = `/assets/npcs/${gfx}.png`;
+        await image.decode().catch(() => {});
+        if (image.naturalWidth) {
+          const canvas = document.createElement('canvas');
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(image, 0, 0);
+          const frames = Math.min(meta.frames || 1, Math.floor(image.naturalWidth / meta.w));
+          for (let frame = 0; frame < frames; frame += 1) {
+            const data = ctx.getImageData(frame * meta.w, 0, meta.w, Math.min(meta.h, image.naturalHeight)).data;
+            for (const flip of [false, true]) {
+              const pixels = [];
+              for (let y = 0; y < meta.h; y += 1) {
+                for (let x = 0; x < meta.w; x += 1) {
+                  const at = (y * meta.w + x) * 4;
+                  if (data[at + 3] < 200) continue;
+                  pixels.push([flip ? meta.w - 1 - x : x, y, data[at], data[at + 1], data[at + 2]]);
+                }
+              }
+              // Too few opaque pixels would match anything.
+              if (pixels.length < 24) continue;
+              const step = Math.max(1, Math.floor(pixels.length / 10));
+              templates.push({ w: meta.w, h: meta.h, pixels, keys: pixels.filter((_, i) => i % step === 0).slice(0, 10) });
+            }
+          }
+        }
+      }
+      templateCache.set(gfx, templates);
+      return templates;
+    }
+
+    function worldCanvas() {
+      return $$('canvas')
+        .filter(canvas => canvas.width && canvas.getBoundingClientRect().width / canvas.width > 1.2
+          && !canvas.closest('[hidden]') && !canvas.classList.contains('title-scene'))
+        .sort((a, b) => b.width * b.height - a.width * a.height)[0];
+    }
+
+    // Where the trainer's sprite is drawn, as the client point of its feet tile, or null.
+    async function locateTrainer(npc) {
+      const templates = await npcTemplates(npc.gfx);
+      const canvas = worldCanvas();
+      if (!templates.length || !canvas) return null;
+      const { width, height } = canvas;
+      let data;
+      try {
+        data = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+      } catch {
+        return null;
+      }
+      // Day/night tints and effects change the colours, so each channel is fitted as
+      // screen = gain × sprite + offset before comparing; a flat area (gain near 0) never fits.
+      const fits = (pixels, left, top, tolerance, share) => {
+        for (let channel = 0; channel < 3; channel += 1) {
+          let sx = 0, sy = 0, sxx = 0, sxy = 0;
+          const n = pixels.length;
+          for (const pixel of pixels) {
+            const a = pixel[2 + channel];
+            const b = data[((top + pixel[1]) * width + left + pixel[0]) * 4 + channel];
+            sx += a; sy += b; sxx += a * a; sxy += a * b;
+          }
+          const spread = n * sxx - sx * sx;
+          const gain = spread > 0 ? (n * sxy - sx * sy) / spread : 1;
+          if (spread > n * n * 100 && (gain < 0.5 || gain > 1.4)) return false;
+          const offset = (sy - gain * sx) / n;
+          let good = 0;
+          for (const pixel of pixels) {
+            const b = data[((top + pixel[1]) * width + left + pixel[0]) * 4 + channel];
+            if (Math.abs(gain * pixel[2 + channel] + offset - b) <= tolerance) good += 1;
+          }
+          if (good < share * n) return false;
+        }
+        return true;
+      };
+      const matches = [];
+      for (const template of templates) {
+        for (let top = 0; top + template.h <= height; top += 1) {
+          for (let left = 0; left + template.w <= width; left += 1) {
+            if (!fits(template.keys, left, top, 24, 1)) continue;
+            if (fits(template.pixels, left, top, 20, 0.85)) {
+              // The sprite stands on its tile: centred horizontally, feet at the bottom.
+              matches.push({ x: left + template.w / 2, y: top + template.h - 8 });
+            }
+          }
+        }
+      }
+      if (!matches.length) return null;
+      const centre = [width / 2, height / 2];
+      const best = matches.sort((a, b) => Math.hypot(a.x - centre[0], a.y - centre[1]) - Math.hypot(b.x - centre[0], b.y - centre[1]))[0];
+      const rect = canvas.getBoundingClientRect();
+      return { canvas, x: rect.left + best.x * rect.width / width, y: rect.top + best.y * rect.height / height };
+    }
+
+    async function walkToTrainer(npc) {
+      for (let attempt = 0; attempt < 3 && !challenge(); attempt += 1) {
+        const spot = await locateTrainer(npc);
+        if (!spot) {
+          await sleep(600);
+          continue;
+        }
+        setStatus(`Procurando ${npc.name} por perto...`);
+        const init = { bubbles: true, cancelable: true, clientX: spot.x, clientY: spot.y, button: 0, buttons: 1, pointerId: 1, pointerType: 'mouse', isPrimary: true };
+        spot.canvas.dispatchEvent(new PointerEvent('pointerdown', init));
+        spot.canvas.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0 }));
+        try {
+          await until(challenge, 6000, 'andar até o treinador');
+        } catch (error) {
+          if (error instanceof Stop) throw error;
+        }
+      }
+      return challenge();
+    }
+
     async function talkAndFight(npc) {
       const key = talkKey();
-      for (let attempt = 0; attempt < 3 && !challenge(); attempt += 1) {
+      for (let attempt = 0; attempt < 2 && !challenge(); attempt += 1) {
         await pause(350, 700);
         dispatchEvent(new KeyboardEvent('keydown', { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true }));
         await sleep(80);
@@ -2471,8 +2606,8 @@
           if (error instanceof Stop) throw error;
         }
       }
-      const dialog = challenge();
-      // Nothing happened after talking: the trainer is out of reach from where we landed.
+      // Nothing happened after talking: the trainer may have wandered off, so look for it.
+      const dialog = challenge() ?? (npc.gfx ? await walkToTrainer(npc) : null);
       if (!dialog) return 'unreachable';
       const foe = text(dialog.querySelector('.b5-ch-name'));
       if (foe && !sameTrainer(npc.name, foe)) {
