@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK — Filtros do Mercado
 // @namespace    pokeafk-market-filtros
-// @version      0.14.0
+// @version      0.15.0
 // @description  Filtra anúncios de Pokémon, mostra tiers no mercado, no mapa e na ficha, recomenda golpes, naturezas e IVs e faz o daily de treinadores.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -676,6 +676,27 @@
   ];
   const STAT_KEYS = new Map(STATS.map(([stat, , label]) => [label, stat]));
   const STAT_LABELS = new Map(STATS.map(([stat, label]) => [stat, label]));
+  // Nature chart: rows are the raised stat, columns the lowered one; the diagonal is neutral.
+  const NATURE_STATS = ['atk', 'def', 'spa', 'spd', 'spe'];
+  const NATURE_CHART = [
+    ['Hardy', 'Lonely', 'Adamant', 'Naughty', 'Brave'],
+    ['Bold', 'Docile', 'Impish', 'Lax', 'Relaxed'],
+    ['Modest', 'Mild', 'Bashful', 'Rash', 'Quiet'],
+    ['Calm', 'Gentle', 'Careful', 'Quirky', 'Sassy'],
+    ['Timid', 'Hasty', 'Jolly', 'Naive', 'Serious'],
+  ];
+  const NATURE_EFFECTS = new Map(NATURE_CHART.flatMap((row, up) =>
+    row.map((nature, down) => [nature, { up: NATURE_STATS[up], down: NATURE_STATS[down] }])));
+  function natureEffect(nature) {
+    const effect = NATURE_EFFECTS.get(nature);
+    if (!effect) return '';
+    if (effect.up === effect.down) return 'neutra';
+    return `+${STAT_LABELS.get(effect.up)} −${STAT_LABELS.get(effect.down)}`;
+  }
+  function natureWithEffect(nature) {
+    const effect = natureEffect(nature);
+    return effect ? `${nature} (${effect})` : nature;
+  }
   const ROLES = {
     physical: 'Físico', special: 'Especial', mixed: 'Misto', support: 'Suporte',
   };
@@ -824,7 +845,9 @@
     const nature = document.createElement('p');
     const [best, ...others] = build.natures ?? [];
     nature.innerHTML = '<span>Natureza</span> <b></b>';
-    nature.querySelector('b').textContent = best ? best + (others.length ? ` · ou ${others.join(', ')}` : '') : '—';
+    nature.querySelector('b').textContent = best
+      ? natureWithEffect(best) + (others.length ? ` · ou ${others.map(natureWithEffect).join(', ')}` : '')
+      : '—';
     const ivs = document.createElement('p');
     ivs.innerHTML = '<span>IVs prioritários</span> <b></b>';
     ivs.querySelector('b').textContent = priorityText(build) || '—';
@@ -994,6 +1017,67 @@
     const summary = form.querySelector('[data-count]');
     summary.textContent = selected
       ? `· ${selected} ${selected === 1 ? 'selecionada' : 'selecionadas'}` : '';
+    for (const head of form.querySelectorAll('[data-nat-row], [data-nat-col]')) {
+      const boxes = natureGroup(form, head);
+      head.setAttribute('aria-pressed', String(boxes.every(box => box.checked)));
+    }
+  }
+
+  // Checkboxes of one chart row (raised stat) or column (lowered stat).
+  function natureGroup(form, head) {
+    const selector = head.dataset.natRow
+      ? `.pafk-nat[data-up="${head.dataset.natRow}"] input`
+      : `.pafk-nat[data-down="${head.dataset.natCol}"] input`;
+    return [...form.querySelectorAll(selector)];
+  }
+
+  // Empty or 0 means "any IV"; anything else is clamped to 0–31.
+  function cleanIV(raw) {
+    if (String(raw).trim() === '') return '';
+    const value = Math.round(Number(raw));
+    if (!Number.isFinite(value)) return '';
+    const clamped = Math.min(31, Math.max(0, value));
+    return clamped ? String(clamped) : '';
+  }
+
+  function syncIVRow(form, stat) {
+    const input = form.elements.namedItem(stat);
+    const range = form.querySelector(`[data-iv-range="${stat}"]`);
+    const value = Number(cleanIV(input.value) || 0);
+    range.value = String(value);
+    input.closest('.pafk-iv').classList.toggle('is-set', value > 0);
+  }
+
+  function syncForm(form) {
+    updateNatureCount(form);
+    for (const [stat] of STATS) syncIVRow(form, stat);
+  }
+
+  function readForm(form) {
+    const data = new FormData(form);
+    return {
+      natures: new Set(data.getAll('nature')),
+      minimums: new Map(STATS.flatMap(([stat]) => {
+        const value = cleanIV(data.get(stat) ?? '');
+        return value ? [[stat, Number(value)]] : [];
+      })),
+    };
+  }
+
+  // Stars the recommended natures and priority IVs in the form (build = null clears them).
+  function markRecommended(form, build) {
+    const natures = new Set(build?.natures ?? []);
+    const priority = new Set(build?.priority ?? []);
+    for (const cell of form.querySelectorAll('.pafk-nat')) {
+      const nature = cell.querySelector('input').value;
+      cell.toggleAttribute('data-rec', natures.has(nature));
+      cell.title = natures.has(nature) ? `${natureWithEffect(nature)} · recomendada` : natureWithEffect(nature);
+    }
+    for (const row of form.querySelectorAll('.pafk-iv')) {
+      const rec = priority.has(row.dataset.iv);
+      row.toggleAttribute('data-rec', rec);
+      row.title = rec ? 'Prioritário na recomendação' : '';
+    }
   }
 
   function priorityText(profile) {
@@ -1003,6 +1087,7 @@
   function updateRecommendation(dex) {
     const section = panel.querySelector('[data-recommendation]');
     section.hidden = !MARKET_GUIDE || !dex;
+    markRecommended(form, null);
     if (section.hidden) return;
 
     const mapped = MARKET_GUIDE.species[Number(dex)];
@@ -1035,15 +1120,16 @@
       if (String(profile.id) !== String(dex)) labels.push(`Referência ${profile.name}`);
       if (build.tier) labels.push(`Tier ${build.tier} · nota ${scoreFormat.format(build.score)}`);
       section.querySelector('[data-build-reference]').textContent = labels.join(' · ');
-      section.querySelector('[data-best-nature]').textContent = recommended ?? '—';
+      section.querySelector('[data-best-nature]').textContent = recommended ? natureWithEffect(recommended) : '—';
       section.querySelector('[data-alt-natures]').textContent = alternatives.length
-        ? ` · Alternativas ${alternatives.join(', ')}` : '';
+        ? ` · Alternativas ${alternatives.map(natureWithEffect).join(', ')}` : '';
       section.querySelector('[data-build-priority]').textContent = priorityText(build) || '—';
       section.querySelector('[data-best-moves]').textContent = build.moves?.join(', ') || '—';
       section.querySelector('[data-base-stats]').textContent = STATS.map(([stat, label]) =>
         `${label} ${profile.stats[stat] ?? '—'}`).join(' · ');
       section.querySelector('[data-build-note]').textContent = build.note ?? '';
       fill.disabled = !recommended;
+      markRecommended(form, build);
     }
 
     select.onchange = () => {
@@ -1056,14 +1142,13 @@
     };
     fill.onclick = () => {
       const build = profile[modeSelect.value] ?? profile.pve;
-      const natureDetails = form.querySelector('details');
       setNatureCheckboxes(form, new Set(build.natures));
       const priority = new Set(build.priority);
       for (const [stat] of STATS) {
         form.elements.namedItem(stat).value = priority.has(stat) ? PRIORITY_IV : '';
       }
-      natureDetails.open = true;
-      natureDetails.querySelector('summary').focus();
+      syncForm(form);
+      form.requestSubmit();
     };
     renderProfile();
   }
@@ -1251,26 +1336,40 @@
         <span role="status" data-tier-sort-status></span>
       </div>
       <p data-grouped-hint hidden>Abra uma espécie para configurar seus filtros de natureza e IV.</p>
-      <form>
-        <fieldset>
-          <legend>IV mínimo <span>(0–31)</span></legend>
-          <div class="pafk-ivs">${STATS.map(([stat, label]) => `
-            <label>${label}<input type="number" name="${stat}" min="0" max="31" step="1"
-              inputmode="numeric" placeholder="—" aria-label="IV mínimo de ${label}"></label>
-          `).join('')}</div>
-        </fieldset>
-        <details>
-          <summary>Naturezas <span data-count></span></summary>
-          <fieldset>
-            <legend class="pafk-sr-only">Naturezas aceitas</legend>
-            <div class="pafk-natures">${NATURES.map(nature => `
-              <label><input type="checkbox" name="nature" value="${nature}">${nature}</label>
-            `).join('')}</div>
+      <form novalidate>
+        <div class="pafk-form-grid">
+          <fieldset class="pafk-iv-box">
+            <legend>IV mínimo <span>(0–31)</span></legend>
+            <div class="pafk-ivs">${STATS.map(([stat, label]) => `
+              <div class="pafk-iv" data-iv="${stat}">
+                <label for="pafk-iv-${stat}">${label}</label>
+                <input id="pafk-iv-${stat}" type="number" name="${stat}" min="0" max="31" step="1"
+                  inputmode="numeric" placeholder="—" autocomplete="off" aria-label="IV mínimo de ${label}">
+                <input type="range" data-iv-range="${stat}" min="0" max="31" step="1" value="0"
+                  aria-label="IV mínimo de ${label} (controle deslizante)">
+              </div>`).join('')}
+            </div>
           </fieldset>
-        </details>
+          <fieldset class="pafk-nat-box">
+            <legend>Naturezas <span data-count></span></legend>
+            <div class="pafk-nat-chart">
+              <span class="pafk-nat-corner" aria-hidden="true">sobe ↓<br>cai →</span>
+              ${NATURE_STATS.map(stat => `<button type="button" class="pafk-nat-head" data-nat-col="${stat}"
+                aria-pressed="false" aria-label="Marcar naturezas que reduzem ${STAT_LABELS.get(stat)}">−${STAT_LABELS.get(stat)}</button>`).join('')}
+              ${NATURE_CHART.map((row, up) => `
+                <button type="button" class="pafk-nat-head" data-nat-row="${NATURE_STATS[up]}" aria-pressed="false"
+                  aria-label="Marcar naturezas que aumentam ${STAT_LABELS.get(NATURE_STATS[up])}">+${STAT_LABELS.get(NATURE_STATS[up])}</button>
+                ${row.map((nature, down) => `
+                  <label class="pafk-nat${up === down ? ' is-neutral' : ''}" data-up="${NATURE_STATS[up]}" data-down="${NATURE_STATS[down]}">
+                    <input type="checkbox" name="nature" value="${nature}" aria-label="${nature}: ${natureEffect(nature)}">
+                    <span>${nature}</span><small aria-hidden="true">${natureEffect(nature)}</small>
+                  </label>`).join('')}`).join('')}
+            </div>
+          </fieldset>
+        </div>
         <div class="pafk-actions">
-          <button type="submit">Aplicar filtros</button>
-          <button type="button" data-clear>Limpar</button>
+          <p class="pafk-form-hint">Os filtros valem na hora. Vazio ou 0 aceita qualquer IV.<span class="pafk-head-hint"> Clique em +Atq, −Vel… para marcar a linha ou coluna inteira.</span></p>
+          <button type="button" data-clear>Limpar filtros</button>
         </div>
       </form>
       <p role="status" data-status hidden></p>
@@ -1299,23 +1398,58 @@
       </section>`;
 
     const form = panel.querySelector('form');
+    // Filters apply as soon as a field changes; typed IVs wait for a short pause.
+    let typingTimer = 0;
+    const apply = () => {
+      clearTimeout(typingTimer);
+      update(readForm(form));
+    };
     form.addEventListener('submit', event => {
       event.preventDefault();
-      const data = new FormData(form);
-      update({
-        natures: new Set(data.getAll('nature')),
-        minimums: new Map(STATS.flatMap(([stat]) => {
-          const value = data.get(stat);
-          return value !== '' && validIV(Number(value)) ? [[stat, Number(value)]] : [];
-        })),
-      });
+      for (const [stat] of STATS) {
+        const input = form.elements.namedItem(stat);
+        input.value = cleanIV(input.value);
+      }
+      syncForm(form);
+      apply();
+    });
+    form.addEventListener('input', event => {
+      const target = event.target;
+      if (target.dataset.ivRange) {
+        const input = form.elements.namedItem(target.dataset.ivRange);
+        input.value = target.value === '0' ? '' : target.value;
+        syncIVRow(form, target.dataset.ivRange);
+        apply();
+      } else if (target.type === 'number') {
+        syncIVRow(form, target.name);
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(apply, 250);
+      }
     });
     form.addEventListener('change', event => {
-      if (event.target.name === 'nature') updateNatureCount(form);
+      const target = event.target;
+      if (target.name === 'nature') {
+        updateNatureCount(form);
+        apply();
+      } else if (target.type === 'number') {
+        target.value = cleanIV(target.value);
+        syncIVRow(form, target.name);
+        apply();
+      }
+    });
+    form.addEventListener('click', event => {
+      const head = event.target.closest('.pafk-nat-head');
+      if (!head) return;
+      const boxes = natureGroup(form, head);
+      const check = !boxes.every(box => box.checked);
+      for (const box of boxes) box.checked = check;
+      updateNatureCount(form);
+      apply();
     });
     panel.querySelector('[data-clear]').addEventListener('click', () => {
+      clearTimeout(typingTimer);
       form.reset();
-      updateNatureCount(form);
+      syncForm(form);
       update(emptyFilters());
     });
     const tierTrigger = panel.querySelector('[data-open-tier]');
@@ -1328,11 +1462,11 @@
   }
 
   function loadForm(form, { natures, minimums }) {
-    form.querySelector('details').open = false;
     setNatureCheckboxes(form, natures);
     for (const [stat] of STATS) {
-      form.elements.namedItem(stat).value = minimums.get(stat) ?? '';
+      form.elements.namedItem(stat).value = cleanIV(minimums.get(stat) ?? '');
     }
+    syncForm(form);
   }
 
   function installStyles() {
@@ -1387,23 +1521,116 @@
         clip-path: inset(50%);
         white-space: nowrap;
       }
-      #pafk-market-filters .pafk-natures,
-      #pafk-market-filters .pafk-ivs { display: grid; gap: 4px 12px; }
-      #pafk-market-filters .pafk-natures {
-        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-        max-height: 145px;
-        overflow: auto;
+      #pafk-market-filters { container: pafk-filters / inline-size; }
+      #pafk-market-filters .pafk-form-grid { display: grid; gap: 14px 20px; align-items: start; }
+      @container pafk-filters (min-width: 760px) {
+        #pafk-market-filters .pafk-form-grid { grid-template-columns: minmax(250px, 1fr) minmax(0, 2.3fr); }
       }
-      #pafk-market-filters .pafk-natures label {
-        display: flex;
+      /* IV rows: label | typed value | slider. */
+      #pafk-market-filters .pafk-ivs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 2px 20px;
+      }
+      #pafk-market-filters .pafk-iv {
+        display: grid;
+        grid-template-columns: 76px 52px minmax(0, 1fr);
         align-items: center;
-        gap: 5px;
-        min-height: 40px;
+        gap: 8px;
+        min-height: 44px;
+      }
+      #pafk-market-filters .pafk-iv label { color: #465982; white-space: nowrap; }
+      #pafk-market-filters .pafk-iv[data-rec] label::after { content: " ★"; color: #c46a00; }
+      #pafk-market-filters .pafk-iv.is-set label { color: #152964; font-weight: 700; }
+      #pafk-market-filters .pafk-iv input[type="number"] {
+        min-height: 34px;
+        padding: 2px 4px;
+        text-align: center;
+        font-weight: 700;
+        appearance: textfield;
+        -moz-appearance: textfield;
+      }
+      #pafk-market-filters .pafk-iv input[type="number"]::-webkit-inner-spin-button,
+      #pafk-market-filters .pafk-iv input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: 0; }
+      #pafk-market-filters .pafk-iv.is-set input[type="number"] { border-color: #1958b8; background: #eef4ff; }
+      #pafk-market-filters .pafk-iv input[type="range"] {
+        width: 100%;
+        min-width: 0;
+        height: 28px;
+        margin: 0;
+        accent-color: #1958b8;
         cursor: pointer;
       }
-      #pafk-market-filters input[type="checkbox"] { accent-color: #2362c5; }
-      #pafk-market-filters .pafk-ivs { grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); }
-      #pafk-market-filters .pafk-ivs label { display: grid; gap: 4px; }
+      /* Nature chart: rows raise a stat, columns lower one, the diagonal is neutral. */
+      #pafk-market-filters .pafk-nat-chart {
+        display: grid;
+        grid-template-columns: auto repeat(5, minmax(0, 1fr));
+        gap: 4px;
+      }
+      #pafk-market-filters .pafk-nat-corner {
+        align-self: center;
+        color: #5b6b8c;
+        font-size: 11px;
+        line-height: 1.25;
+      }
+      #pafk-market-filters .pafk-nat-chart button.pafk-nat-head {
+        min-height: 28px;
+        padding: 2px 8px;
+        border-color: #d8e4f5;
+        border-radius: 6px;
+        background: #f3f7fe;
+        color: #2a3f73;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      #pafk-market-filters .pafk-nat-chart button.pafk-nat-head:hover { border-color: #8fb0e0; }
+      #pafk-market-filters .pafk-nat-chart button.pafk-nat-head[aria-pressed="true"] { border-color: #1958b8; background: #dbe7fb; color: #12408a; }
+      #pafk-market-filters .pafk-nat {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0;
+        min-height: 40px;
+        padding: 3px 8px;
+        border: 1px solid #d3e0f3;
+        border-radius: 6px;
+        background: #fff;
+        line-height: 1.2;
+        cursor: pointer;
+        user-select: none;
+      }
+      #pafk-market-filters .pafk-nat:hover { border-color: #8fb0e0; background: #f6f9ff; }
+      #pafk-market-filters .pafk-nat input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #pafk-market-filters .pafk-nat span { font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
+      #pafk-market-filters .pafk-nat small { color: #5b6b8c; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #pafk-market-filters .pafk-nat.is-neutral { border-style: dashed; background: #f8f9fc; }
+      #pafk-market-filters .pafk-nat.is-neutral span { color: #5b6b8c; font-weight: 600; }
+      #pafk-market-filters .pafk-nat:has(:checked) { border-color: #1958b8; background: #1958b8; }
+      #pafk-market-filters .pafk-nat:has(:checked) :is(span, small) { color: #fff; }
+      #pafk-market-filters .pafk-nat:has(:checked) small { opacity: .85; }
+      #pafk-market-filters .pafk-nat:has(:focus-visible) { outline: 2px solid #1958b8; outline-offset: 2px; }
+      #pafk-market-filters .pafk-nat[data-rec]::after {
+        content: "★";
+        position: absolute;
+        top: 2px;
+        right: 5px;
+        color: #c46a00;
+        font-size: 11px;
+      }
+      #pafk-market-filters .pafk-nat[data-rec]:has(:checked)::after { color: #ffd36b; }
+      @container pafk-filters (max-width: 519px) {
+        #pafk-market-filters .pafk-nat-chart { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+        #pafk-market-filters :is(.pafk-nat-head, .pafk-nat-corner, .pafk-head-hint) { display: none; }
+        #pafk-market-filters .pafk-iv { grid-template-columns: 70px 48px minmax(0, 1fr); }
+      }
       #pafk-market-filters input[type="number"],
       :is(#pafk-market-filters, #pafk-tier-dialog) :is(button, select, input[type="search"]) {
         box-sizing: border-box;
@@ -1418,9 +1645,16 @@
       #pafk-market-filters input[type="number"] { width: 100%; font-variant-numeric: tabular-nums; }
       :is(#pafk-market-filters, #pafk-tier-dialog) button { cursor: pointer; font-weight: 700; padding-inline: 12px; }
       :is(#pafk-market-filters, #pafk-tier-dialog) button:disabled { cursor: default; opacity: .55; }
-      #pafk-market-filters button[type="submit"] { background: #1958b8; color: #fff; border-color: #1958b8; }
       :is(#pafk-market-filters, #pafk-tier-dialog) :focus-visible { outline: 2px solid #1958b8; outline-offset: 2px; }
-      #pafk-market-filters .pafk-actions { display: flex; gap: 8px; }
+      #pafk-market-filters .pafk-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px 16px;
+        padding-top: 6px;
+      }
+      #pafk-market-filters .pafk-actions .pafk-form-hint { padding: 0; color: #5b6b8c; font-size: 12px; flex: 1 1 260px; }
       #pafk-market-filters p { margin: 0; padding: 0 12px 10px; }
       #pafk-market-filters .pafk-recommendation {
         border-top: 1px solid #d8e4f5;
