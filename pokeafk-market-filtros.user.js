@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK — Filtros do Mercado
 // @namespace    pokeafk-market-filtros
-// @version      0.12.0
+// @version      0.13.0
 // @description  Filtra anúncios de Pokémon, mostra tiers no mercado, no mapa e na ficha, recomenda golpes, naturezas e IVs e faz o daily de treinadores.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -1909,6 +1909,8 @@
     const FIGHT_TIMEOUT = 10 * 60 * 1000;
     const KEYS_STORAGE = 'pokeafk.ui.keys';
     const HEAL_BELOW = 0.5;
+    // Trainers in a row where the game did not react before the daily gives up.
+    const MAX_UNREACHABLE_STREAK = 4;
 
     class Stop extends Error {}
     let run = null;
@@ -1998,7 +2000,7 @@
       #pafk-daily .pafk-daily-avoid { display: grid; grid-template-columns: auto 1fr; gap: 0 6px; align-items: center; cursor: pointer; }
       #pafk-daily .pafk-daily-avoid input { margin: 0; }
       #pafk-daily .pafk-daily-avoid small { grid-column: 2; color: #4a5f8f; font-size: 11px; }
-      #pafk-daily .pafk-daily-route li[data-state="avoided"] { opacity: .6; }
+      #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="unreachable"], [data-state="closed"]) { opacity: .6; }
       #pafk-daily .pafk-daily-route li[data-state="avoided"] b { color: #b35c00; }
       #pafk-daily .pafk-daily-count { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
       #pafk-daily .pafk-daily-count span { color: #4a5f8f; }
@@ -2437,6 +2439,8 @@
       const cardText = text(card);
       if (/Vencido hoje/i.test(cardText)) return 'won';
       if (/Bloquead/i.test(cardText)) return 'locked';
+      // The card warns when the place is closed to the player (e.g. a Gym that needs badges).
+      if (/abre quando|ins[ií]gnia/i.test(text(card.closest('.mx-card') ?? card))) return 'closed';
       const tp = await until(() => {
         const button = mapWindow()?.querySelector('.mx-card:has(> .mx-card-in.npc) [data-act="tp"]');
         return button && !button.disabled ? button : null;
@@ -2445,6 +2449,13 @@
       tp.click();
       await until(() => !mapWindow(), 10000, 'teleportar');
       return 'there';
+    }
+
+    // After a step that went nowhere: decline an open challenge and close the MAPA.
+    async function recoverScreen() {
+      challenge()?.querySelector('[data-nofight]')?.click();
+      await closeMap().catch(() => {});
+      await pause(200, 400);
     }
 
     async function talkAndFight(npc) {
@@ -2461,7 +2472,8 @@
         }
       }
       const dialog = challenge();
-      if (!dialog) return 'skipped';
+      // Nothing happened after talking: the trainer is out of reach from where we landed.
+      if (!dialog) return 'unreachable';
       const foe = text(dialog.querySelector('.b5-ch-name'));
       if (foe && !sameTrainer(npc.name, foe)) {
         dialog.querySelector('[data-nofight]')?.click();
@@ -2506,7 +2518,8 @@
 
     // ---- Panel ----
     const LABELS = {
-      won: 'Vencido', lost: 'Derrota', skipped: 'Pulado', locked: 'Bloqueado', avoided: 'Evitado', current: 'Agora', todo: '',
+      won: 'Vencido', lost: 'Derrota', skipped: 'Pulado', locked: 'Bloqueado',
+      unreachable: 'Inacessível', closed: 'Inacessível', avoided: 'Evitado', current: 'Agora', todo: '',
     };
     function renderProgress() {
       const { route, done, total } = run;
@@ -2593,14 +2606,30 @@
             : 'Nada a fazer: todos os treinadores da faixa já foram vencidos hoje.');
           return;
         }
+        let unreachableStreak = 0;
         for (const npc of run.route) {
           if (npc.state !== 'todo') continue;
           npc.state = 'current';
           renderProgress();
           if ((hpRatio() ?? 1) < HEAL_BELOW) await heal();
           setStatus(`Indo até ${npc.name} (${npc.place})...`);
-          const arrival = await teleportTo(npc);
-          let outcome = arrival === 'there' ? await talkAndFight(npc) : arrival;
+          let outcome;
+          try {
+            const arrival = await teleportTo(npc);
+            outcome = arrival === 'there' ? await talkAndFight(npc) : arrival;
+          } catch (error) {
+            // The game did not react (teleport or talk went nowhere): skip this trainer, unless
+            // a battle is on screen, where moving on would be unsafe.
+            if (error instanceof Stop || inArena() || resultWindow()) throw error;
+            await recoverScreen();
+            outcome = 'unreachable';
+          }
+          unreachableStreak = outcome === 'unreachable' ? unreachableStreak + 1 : 0;
+          if (unreachableStreak >= MAX_UNREACHABLE_STREAK) {
+            npc.state = outcome;
+            renderProgress();
+            throw new Error(`${MAX_UNREACHABLE_STREAK} treinadores seguidos sem resposta do jogo`);
+          }
           if (outcome === 'lost') await heal();
           if (outcome === 'lost-healed') outcome = 'lost';
           npc.state = outcome;
@@ -2611,7 +2640,9 @@
         await closeMap().catch(() => {});
         const lost = run.route.filter(npc => npc.state === 'lost').length;
         const skipped = run.route.filter(npc => npc.state === 'skipped' || npc.state === 'locked').length;
+        const unreachable = run.route.filter(npc => npc.state === 'unreachable' || npc.state === 'closed').length;
         setStatus(['Daily concluído.', lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
+          unreachable && `${unreachable} inacessível(is).`,
           avoided && `${avoided} evitado(s) por vantagem de tipo.`]
           .filter(Boolean).join(' '));
       } catch (error) {

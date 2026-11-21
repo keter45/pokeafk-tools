@@ -37,6 +37,7 @@ O botão **⚔ Daily** fica no HUD, abaixo de "Poke Market". Ele luta com os tre
 - **Cura e caça:** cura no Centro Pokémon quando a vida está abaixo de 50% ou depois de uma derrota, e para a caça antes de começar.
 - **Progresso:** mostra quantos faltam e a rota com o resultado de cada luta.
 - **Card:** pode ser arrastado; um duplo clique no título volta ele ao lugar.
+- **Treinadores inacessíveis:** pula, sem parar o daily, os treinadores de lugares fechados (como um Ginásio que pede insígnias) e os que não respondem depois do teleporte. Se quatro seguidos não respondem, o daily para.
 - **Parar:** qualquer clique ou tecla sua fora do card para o daily, assim como o botão **Parar**.
 
 ## Tier list
