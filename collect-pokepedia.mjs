@@ -156,7 +156,29 @@ function normalizeMove(move, runtime, powerRule) {
   };
 }
 
-export function collectCatalog(catalog, assetUrl) {
+// Capture rules and hunts live in the game config module (imported by the catalog).
+// Capture price = level price (curve, at the level the Pokémon arrives) × capture tier factor.
+function collectConfig(config) {
+  if (!config) return {};
+  const { root: capture } = readTable(config, /\bcapture\s*:\s*(?=\{\s*curve\s*:)/, 'captura');
+  const { root: caughtLevel } = readTable(config, /\bcaughtLevel\s*:\s*(?=\[)/, 'nível capturado');
+  const caughtMaxLevel = Number(config.match(/\bcaughtMaxLevel\s*:\s*(\d+)/)?.[1]);
+  const huntsSource = config.match(/JSON\.parse\(`(\[\{"id":"[a-z]+-[^`]*)`\)/)?.[1];
+  if (!huntsSource || !caughtMaxLevel) throw new Error('Hunts ou nível de captura não encontrados na configuração do jogo.');
+  const hunts = JSON.parse(huntsSource).map(hunt => ({
+    id: hunt.id, region: hunt.region, name: hunt.name, main: hunt.main, recLv: hunt.recLv,
+    levels: hunt.levels, badge: hunt.badge ?? 0, ...(hunt.rod ? { rod: hunt.rod } : {}),
+    slots: hunt.slots.map(slot => ({ dex: slot.dex, lv: slot.lv, w: slot.w, on: slot.on })),
+  }));
+  return {
+    capture: { curve: capture.curve, first: capture.first, groups: capture.groups, caughtLevel, caughtMaxLevel },
+    hunts,
+  };
+}
+
+export function collectCatalog(catalog, assetUrl, config) {
+  const { root: catchTiers } = readTable(catalog, /\b[\w$]+\s*=\s*(?=\{\s*0\s*:\s*\[\s*144\s*,\s*145\s*,)/, 'tiers de captura');
+  const catchTierOf = new Map(Object.entries(catchTiers).flatMap(([tier, dexes]) => dexes.map(dex => [dex, Number(tier)])));
   const { root: speciesTable } = readTable(catalog, /\b[\w$]+\s*=\s*(?=\{\s*1\s*:\s*\{\s*id\s*:\s*1\s*,\s*key\s*:\s*"bulbasaur")/, 'espécies');
   const { root: moves } = readTable(catalog, /\b[\w$]+\s*=\s*(?=\{\s*1\s*:\s*\{\s*id\s*:\s*1\s*,\s*key\s*:\s*"POUND")/, 'golpes');
   const { root: runtime } = readTable(catalog, /\b[\w$]+\s*=\s*(?=\{\s*1\s*:\s*\{\s*key\s*:\s*"POUND"\s*,\s*shape\s*:)/, 'combate');
@@ -176,6 +198,7 @@ export function collectCatalog(catalog, assetUrl) {
       types: entry.types,
       stats: normalizeStats(entry.base, entry.name),
       evolutions: [...new Set(entry.evolutions.map(evolution => evolution.into))],
+      ...(catchTierOf.has(entry.id) ? { catchTier: catchTierOf.get(entry.id) } : {}),
       moves: [...levels].map(([moveId, level]) => {
         const move = moves[moveId];
         if (!move) throw new Error('Golpe #' + moveId + ' ausente em ' + entry.name + '.');
@@ -224,14 +247,17 @@ export function collectCatalog(catalog, assetUrl) {
   const tms = machines('tm');
   if (!hms.length || !tms.length) throw new Error('Tabelas de TM e HM não encontradas no catálogo.');
 
+  const { capture, hunts } = collectConfig(config);
   return {
     sourceUrl: WIKI,
     assets: [assetUrl],
     sha256: createHash('sha256').update(catalog).digest('hex'),
+    ...(capture ? { capture } : {}),
     species,
     megaForms,
     hms,
     tms,
+    ...(hunts ? { hunts } : {}),
   };
 }
 
@@ -252,16 +278,20 @@ async function fetchCatalog() {
   const catalog = pages.match(/from"\.\/(selectStyle-[\w-]+\.js)"/)?.[1];
   if (!catalog) throw new Error('Módulo do catálogo da Poképédia não encontrado.');
   const assetUrl = new URL(catalog, ASSET_PREFIX).href;
-  return { catalog: await fetchText(assetUrl), assetUrl };
+  const source = await fetchText(assetUrl);
+  const configModule = source.match(/from"\.\/(socialLinks-[\w-]+\.js)"/)?.[1];
+  if (!configModule) throw new Error('Módulo de configuração do jogo não encontrado.');
+  return { catalog: source, assetUrl, config: await fetchText(new URL(configModule, ASSET_PREFIX)) };
 }
 
-function serializeDataset({ species, megaForms, hms, tms, ...metadata }) {
+function serializeDataset({ species, megaForms, hms, tms, hunts, ...metadata }) {
   const rows = entries => entries.map(entry => '    ' + JSON.stringify(entry)).join(',\n');
   return JSON.stringify(metadata, null, 2).slice(0, -2)
     + ',\n  "species": [\n' + rows(species)
     + '\n  ],\n  "megaForms": [\n' + rows(megaForms)
     + '\n  ],\n  "hms": [\n' + rows(hms)
-    + '\n  ],\n  "tms": [\n' + rows(tms) + '\n  ]\n}\n';
+    + '\n  ],\n  "tms": [\n' + rows(tms)
+    + (hunts ? '\n  ],\n  "hunts": [\n' + rows(hunts) : '') + '\n  ]\n}\n';
 }
 
 const [, , mode, localFile, localUrl] = process.argv;
@@ -269,12 +299,13 @@ try {
   if (mode && (mode !== '--asset' || !localFile || !localUrl?.startsWith(ASSET_PREFIX.href))) {
     throw new Error('Uso: node collect-pokepedia.mjs [--asset arquivo URL-do-catálogo]');
   }
-  const { catalog, assetUrl } = mode
+  const { catalog, assetUrl, config } = mode
     ? { catalog: await readFile(localFile, 'utf8'), assetUrl: localUrl }
     : await fetchCatalog();
-  const result = collectCatalog(catalog, assetUrl);
+  const result = collectCatalog(catalog, assetUrl, config);
   await writeFile(OUTPUT, serializeDataset(result));
-  console.log(result.species.length + ' espécies e ' + result.megaForms.length + ' formas Mega.');
+  console.log(result.species.length + ' espécies, ' + result.megaForms.length + ' formas Mega e '
+    + (result.hunts?.length ?? 0) + ' hunts.');
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

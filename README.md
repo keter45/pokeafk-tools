@@ -49,6 +49,13 @@ São duas listas:
 
 As tiers vão por percentil das espécies normais: S são os 8% melhores, A até 25%, B até 50%, C até 80% e D o resto. Lendários, míticos e Megas ficam numa categoria separada.
 
+A aba **Farms early game** lista as hunts de Kanto onde aparece um Pokémon de primeiro estágio cuja evolução final é tier S ou A. Esses Pokémon são os mais baratos de capturar. Cada card mostra:
+- o lugar e o nível dos selvagens;
+- as insígnias necessárias;
+- o nível em que o Pokémon chega;
+- o preço de captura estimado pela regra do guia "Captura" do jogo;
+- as tiers das evoluções.
+
 Os golpes considerados são os aprendidos por nível na linha evolutiva e as 7 HMs vendidas na Loja de Celadon. TMs ficam de fora, porque só saem ao acaso da TM Box. Uma HM só entra no moveset quando melhora o resultado em mais de 3%.
 
 ## Para desenvolver
@@ -69,6 +76,7 @@ node --check pokeafk-market-filtros.user.js
 | `rank-pokemon.mjs` | Motor do ranking: simula caça e duelos e escolhe golpes, natureza e IVs. |
 | `collect-pokepedia.mjs`, `collect-competitive.mjs` | Coletores de dados. |
 | `build-userscript.mjs`, `build-tierlist-page.mjs` | Geram o bloco de dados do script e a página da tier list. |
+| `farms.mjs` | Monta a lista de farms do early game (hunts, evoluções e preço de captura). |
 | `tierlist.html`, `index.html` | Página publicada no GitHub Pages. |
 
 Ao mudar o userscript, suba o `@version` no cabeçalho; o Tampermonkey só atualiza quando o número aumenta. Os detalhes do modelo e dos seletores do jogo estão em [AGENTS.md](AGENTS.md).
