@@ -29,7 +29,7 @@ O usuário escreve em português do Brasil. Todo texto de interface fica em pt-B
 | `build-tierlist-page.mjs` | Gera `tierlist.html` (página autônoma com dados embutidos, imagens do jogo e links para a Poképédia). |
 | `pokepedia-data.json`, `competitive-data.json` | Dados coletados (gerados; não edite à mão). |
 
-O projeto é um repositório git local (branch `main`, sem remoto). `tierlist.html` fica fora do repositório (`.gitignore`), porque é pessoal e regenerável. Faça commit só quando o usuário pedir.
+O projeto é um repositório git público: [keter45/pokeafk-tools](https://github.com/keter45/pokeafk-tools) (branch `main`). Os commits usam o e-mail anônimo do GitHub (`user.email` local); não troque pelo e-mail pessoal. `tierlist.html` fica fora do repositório (`.gitignore`), porque é pessoal e regenerável. Faça commit só quando o usuário pedir.
 
 ## Comandos
 
