@@ -13,7 +13,7 @@ Um userscript do **Tampermonkey** para o jogo [pokeAFK](https://pokeafk.io/) (Ch
 - ordena a lista agrupada do mercado por tier (percorre as páginas do servidor);
 - botão **Daily** (abaixo de "Poke Market", no HUD): luta com os treinadores do dia do nível do Pokémon principal até 10 abaixo, com progresso "Faltam N" e botão Parar.
 
-Há também uma página pessoal, `tierlist.html`, gerada a partir dos mesmos dados. Ela não deve ser publicada.
+Há também uma página, `tierlist.html`, gerada a partir dos mesmos dados e publicada no GitHub Pages: https://keter45.github.io/pokeafk-tools/ (o `index.html` redireciona para ela).
 
 O usuário escreve em português do Brasil. Todo texto de interface fica em pt-BR.
 
@@ -29,7 +29,7 @@ O usuário escreve em português do Brasil. Todo texto de interface fica em pt-B
 | `build-tierlist-page.mjs` | Gera `tierlist.html` (página autônoma com dados embutidos, imagens do jogo e links para a Poképédia). |
 | `pokepedia-data.json`, `competitive-data.json` | Dados coletados (gerados; não edite à mão). |
 
-O projeto é um repositório git público: [keter45/pokeafk-tools](https://github.com/keter45/pokeafk-tools) (branch `main`). Os commits usam o e-mail anônimo do GitHub (`user.email` local); não troque pelo e-mail pessoal. `tierlist.html` fica fora do repositório (`.gitignore`), porque é pessoal e regenerável. Faça commit só quando o usuário pedir.
+O projeto é um repositório git público: [keter45/pokeafk-tools](https://github.com/keter45/pokeafk-tools) (branch `main`). Os commits usam o e-mail anônimo do GitHub (`user.email` local); não troque pelo e-mail pessoal. O GitHub Pages publica a branch `main` na raiz; depois de regenerar `tierlist.html`, o site só muda com commit e push. Faça commit só quando o usuário pedir.
 
 ## Comandos
 
