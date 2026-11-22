@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.6.1
+// @version      1.7.0
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -3503,6 +3503,10 @@
                 <input type="checkbox" aria-describedby="pafk-daily-avoid-help" data-daily-avoid checked>
                 <span><strong>Evitar vantagem de tipo</strong><small id="pafk-daily-avoid-help">O Daily aprende o time de cada treinador na primeira luta.</small></span>
               </label>
+              <label class="pafk-daily-avoid">
+                <input type="checkbox" aria-describedby="pafk-daily-swim-help" data-daily-swimmers checked>
+                <span><strong>Pular nadadores</strong><small id="pafk-daily-swim-help">Ficam na água, longe do ponto do teleporte.</small></span>
+              </label>
             </div>
           </div>
           <div class="pafk-daily-actions">
@@ -3521,6 +3525,7 @@
       const progressEl = box.querySelector('[data-daily-progress]');
       const routeEl = box.querySelector('[data-daily-route]');
       const avoidBox = box.querySelector('[data-daily-avoid]');
+      const swimmersBox = box.querySelector('[data-daily-swimmers]');
 
       const style = document.createElement('style');
       style.dataset.pafk = '';
@@ -3583,6 +3588,7 @@
         #pafk-daily .pafk-daily-options label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
         #pafk-daily .pafk-daily-options small { display: block; margin-top: 2px; }
         #pafk-daily .pafk-daily-avoid { cursor: pointer; }
+        #pafk-daily .pafk-daily-avoid + .pafk-daily-avoid { border-top: 1px solid var(--daily-line); }
         #pafk-daily .pafk-daily-avoid:has(input:disabled) { cursor: default; }
         #pafk-daily .pafk-daily-avoid input { width: 17px; height: 17px; flex: none; margin: 0; accent-color: var(--daily-blue); }
         #pafk-daily .pafk-daily-count { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; }
@@ -3616,7 +3622,7 @@
         #pafk-daily .pafk-daily-route li[data-state="current"] b { color: #174683; background: #dceaff; }
         #pafk-daily .pafk-daily-route li[data-state="won"] b { color: #17603d; background: #e0f3e8; }
         #pafk-daily .pafk-daily-route li[data-state="lost"] b { color: #a02735; background: #fbe7ea; }
-        #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="unreachable"]) b { color: #713a05; background: #fff0da; }
+        #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="swimmer"], [data-state="unreachable"]) b { color: #713a05; background: #fff0da; }
         #pafk-daily .pafk-daily-actions {
           display: flex; flex: none; padding: 10px 12px 12px; border-top: 1px solid var(--daily-line); background: #f6f9ff;
         }
@@ -3860,6 +3866,23 @@
       avoidBox.addEventListener('change', () => {
         try {
           localStorage.setItem(AVOID_STORAGE, avoidBox.checked ? 'on' : 'off');
+        } catch {
+          // The choice lasts only for this page.
+        }
+      });
+
+      // Swimmers (NADADOR/NADADORA) stand in the water, far from where the teleport leaves the
+      // player, so talking from the shore fails and costs time (user's call: skip them by default).
+      const SWIMMERS_STORAGE = 'pokeafk-market-filtros:daily-skip-swimmers';
+      const isSwimmer = npc => /^NADADORA?\b/.test(fold(npc.name)) || /swimmer/i.test(npc.gfx);
+      try {
+        swimmersBox.checked = localStorage.getItem(SWIMMERS_STORAGE) !== 'off';
+      } catch {
+        // Defaults to on.
+      }
+      swimmersBox.addEventListener('change', () => {
+        try {
+          localStorage.setItem(SWIMMERS_STORAGE, swimmersBox.checked ? 'on' : 'off');
         } catch {
           // The choice lasts only for this page.
         }
@@ -4428,7 +4451,7 @@
       // ---- Panel ----
       const LABELS = {
         won: 'Vencido', lost: 'Derrota', skipped: 'Pulado', locked: 'Bloqueado',
-        unreachable: 'Inacessível', closed: 'Inacessível', avoided: 'Evitado', current: 'Agora', todo: '',
+        unreachable: 'Inacessível', closed: 'Inacessível', avoided: 'Evitado', swimmer: 'Pulado', current: 'Agora', todo: '',
       };
       function renderProgress() {
         const { route, done, total } = run;
@@ -4448,7 +4471,8 @@
           if (npc.state === 'current') item.setAttribute('aria-current', 'step');
           item.innerHTML = '<div><strong></strong><small></small></div><b></b>';
           item.querySelector('strong').textContent = `${npc.name} · Nv. ${npc.level}`;
-          const edge = npc.edge ? `time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : '';
+          const edge = npc.edge ? `time com ${TYPE_NAMES[npc.edge] ?? npc.edge}`
+            : npc.state === 'swimmer' ? 'nadador, na água' : '';
           // XP measured in this run, or the one saved from an earlier win.
           const xp = npc.gain ? `+${formatXp(npc.gain)} XP` : npc.knownXp ? `~${formatXp(npc.knownXp)} XP` : '';
           item.querySelector('small').textContent = [npc.place, xp, edge, npc.failure].filter(Boolean).join(' · ');
@@ -4479,6 +4503,7 @@
         goButton.hidden = on;
         stopButton.hidden = !on;
         avoidBox.disabled = on;
+        swimmersBox.disabled = on;
         box.toggleAttribute('data-running', on);
         if (restoreFocus) (on ? stopButton : goButton).focus({ preventScroll: true });
       }
@@ -4509,17 +4534,23 @@
           const { route, beaten, locked } = await buildRoute();
           const known = readTeams();
           run.route = route.map(npc => {
-            const edge = avoidBox.checked ? typeEdge(npc, main.dex) : null;
-            return { ...npc, edge, knownXp: known[npc.id]?.xp, state: edge ? 'avoided' : 'todo' };
+            const swimmer = swimmersBox.checked && isSwimmer(npc);
+            const edge = !swimmer && avoidBox.checked ? typeEdge(npc, main.dex) : null;
+            const state = swimmer ? 'swimmer' : edge ? 'avoided' : 'todo';
+            return { ...npc, edge, knownXp: known[npc.id]?.xp, state };
           });
           const avoided = run.route.filter(npc => npc.state === 'avoided').length;
-          run.total = route.length - avoided + beaten;
+          const swimmers = run.route.filter(npc => npc.state === 'swimmer').length;
+          const leftOut = [avoided && `${avoided} evitado(s) por vantagem de tipo`,
+            swimmers && `${swimmers} nadador(es) pulado(s)`].filter(Boolean).join(' e ');
+          // Trainers left out on purpose do not count in "Faltam N".
+          run.total = route.length - avoided - swimmers + beaten;
           run.done = beaten;
           renderProgress();
           if (!run.route.some(npc => npc.state === 'todo')) {
-            if (avoided) {
+            if (leftOut) {
               await closeMap();
-              setStatus(`Nada a fazer: ${avoided} treinador(es) evitado(s) por vantagem de tipo.`);
+              setStatus(`Nada a fazer: ${leftOut}.`);
               return;
             }
             await closeMap();
@@ -4573,7 +4604,7 @@
             lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
             unreachable && `${unreachable} sem resposta do jogo.`,
             closed && `${closed} em lugar fechado (falta insígnia).`,
-            avoided && `${avoided} evitado(s) por vantagem de tipo.`]
+            leftOut && `${leftOut[0].toUpperCase()}${leftOut.slice(1)}.`]
             .filter(Boolean).join(' '), 'done');
         } catch (error) {
           const current = run.route.find(npc => npc.state === 'current');
