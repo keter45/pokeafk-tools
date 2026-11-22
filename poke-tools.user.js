@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.3.1
+// @version      1.3.2
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -3968,6 +3968,10 @@
       }
 
       // ---- One fight ----
+      const mapTeleportError = () => mapWindow()?.querySelector('.mx-card > .mx-msg.bad[role="alert"]');
+      const teleportPending = () => $('.zone-fade.on, .zone-loading:not([hidden])');
+      const cancelFailedTeleport = () => $('.zone-loading:not([hidden]) .zl-fail [data-zone="back"]');
+
       async function teleportTo(npc) {
         await openNpcList();
         await chooseRegion(npc.region);
@@ -3983,22 +3987,42 @@
         const cardText = text(card);
         if (/Vencido hoje/i.test(cardText)) return 'won';
         if (/Bloquead/i.test(cardText)) return 'locked';
-        // The card warns when the place is closed to the player (e.g. a Gym that needs badges).
-        if (/abre quando|ins[ií]gnia/i.test(text(card.closest('.mx-card') ?? card))) return 'closed';
+        // The selected card may report an access requirement outside the shared error alert.
+        const restriction = card.parentElement.querySelector(':scope > .mx-msg:not(.bad)');
+        if (/abre quando|ins[ií]gnia/i.test(text(restriction))) return 'closed';
+
+        await pause(150, 400);
         const tp = await until(() => {
           const button = mapWindow()?.querySelector('.mx-card:has(> .mx-card-in.npc) [data-act="tp"]');
           return button && !button.disabled ? button : null;
         }, 15000, 'liberar o teleporte');
-        await pause(150, 400);
+        const previousError = mapTeleportError();
+        const previousMessage = text(previousError);
         tp.click();
-        await until(() => !mapWindow(), 10000, 'teleportar');
-        return 'there';
+
+        // The MAPA closes when the transition starts. A refusal finishes the transition and
+        // reopens the MAPA, where the old alert can persist across NPC selections.
+        let started = false;
+        const arrival = await until(() => {
+          if (cancelFailedTeleport()) return 'unreachable';
+          if (teleportPending()) {
+            started = true;
+            return null;
+          }
+          if (!mapWindow()) return 'there';
+          const error = mapTeleportError();
+          if (started || (error && (error !== previousError || text(error) !== previousMessage))) return 'closed';
+          return null;
+        }, 15000, 'teleportar');
+        if (arrival === 'unreachable') cancelFailedTeleport()?.click();
+        return arrival;
       }
 
       // After a step that went nowhere: decline an open challenge and close the MAPA.
       async function recoverScreen() {
+        if (teleportPending()) throw new Stop('Parado. O teleporte ainda está em andamento.');
         challenge()?.querySelector('[data-nofight]')?.click();
-        await closeMap().catch(() => {});
+        await closeMap();
         await pause(200, 400);
       }
 
@@ -4361,6 +4385,7 @@
             let outcome;
             try {
               const arrival = await teleportTo(npc);
+              if (arrival !== 'there') await closeMap();
               outcome = arrival === 'there' ? await talkAndFight(npc) : arrival;
             } catch (error) {
               // The game did not react (teleport or talk went nowhere): skip this trainer, unless
