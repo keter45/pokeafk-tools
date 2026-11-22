@@ -314,9 +314,13 @@ function installStyles() {
     }
     #pafk-tier-sorted .pafk-sort-group .${TIER_BADGE} { margin: 0; font-size: 14px; }
     #pafk-tier-sorted .pafk-sort-group small { margin-inline-start: auto; color: #465982; font-weight: 600; }
-    :is(.mx-row-main, .mx-card-txt) > .${TIER_BADGE} { align-self: flex-start; margin: 2px 0 0; font-size: 10px; line-height: 1.3; }
-    :is(.mx-row-main, .mx-card-txt) > .${TIER_BADGE} .pafk-tier-seg { padding: 0 4px; }
-    :is(.mx-row-main, .mx-card-txt) > .${TIER_BADGE} .pafk-tier-seg small { font-size: 9px; }
+    .pafk-map-line { display: inline-flex; align-self: flex-start; align-items: stretch; gap: 3px; margin: 2px 0 0; font-size: 10px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+    .pafk-map-line > .${TIER_BADGE} { margin: 0; font-size: inherit; line-height: inherit; }
+    .pafk-map-line .pafk-tier-seg { padding: 0 4px; }
+    .pafk-map-line .pafk-tier-seg small { font-size: 9px; }
+    /* Capture cost: neutral, so it does not read as another tier. */
+    .pafk-catch-seg { align-items: center; --pafk-tier-bg: #f2f5fa; --pafk-tier-fg: #22324f; --pafk-tier-edge: #c9d3e2; font-variant-numeric: tabular-nums; }
+    .pafk-catch-seg img { width: 11px; height: 11px; image-rendering: pixelated; }
     .lab-tags .${TIER_BADGE} { margin-inline-start: 2px; align-self: center; }
     .lab-panel.pafk-sheet { grid-column: 1 / -1; --section-color: #1958b8; --section-bg: #eef4ff; }
     .pafk-sheet .pafk-sheet-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; }

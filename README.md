@@ -32,6 +32,7 @@ O Tampermonkey busca as versões novas no mesmo link. Para atualizar na hora, us
 
 ### MAPA e ficha do Pokémon
 - Selo de tier na lista de hunts e no cartão da hunt selecionada.
+- Ao lado, o gasto médio para capturar o Pokémon principal daquela hunt (ícone da Poké Ball). Passe o mouse para ver o nível em que ele chega, o gasto médio e o garantido em Ultra Balls e a chance da 1ª Poké Ball. O cálculo segue o guia "Captura" do jogo: cada bola fica mais provável a cada ₽ gasto na espécie, a captura é certa em 3× o preço e, em média, custa o preço ÷ (1 + margem do jogo, hoje 5%). Não conta a sua sorte acumulada nem bônus.
 - Selo de tier na ficha do Pokémon e uma seção **Moveset recomendado**.
 
 ### Daily de treinadores
@@ -94,8 +95,8 @@ Com ele ligado, durante a caça, quando o aviso vermelho de um golpe em área in
 ## Tier list
 
 São duas listas:
-- **PvE:** dano por segundo na caça.
-- **Competitivo:** desempenho em duelos longos, como a Ranqueada automática, combinado com a referência da Gen 3 (Smogon e Pokémon Showdown).
+- **PvE:** dano por segundo na caça, com os golpes em área valendo mais quanto mais do bando eles alcançam.
+- **Competitivo:** desempenho em duelos longos com desvio, combinado com a referência da Gen 3 (Smogon e Pokémon Showdown). Golpes com tempo de preparo longo erram mais; corpo a corpo e golpes que seguem o alvo sempre acertam; Velocidade e Agility contam pelo intervalo entre golpes.
 
 As tiers vão por percentil das espécies normais: S são os 8% melhores, A até 25%, B até 50%, C até 80% e D o resto. Lendários, míticos e Megas ficam numa categoria separada.
 
@@ -130,6 +131,7 @@ node --check poke-tools.user.js
 | `collect-pokepedia.mjs`, `collect-competitive.mjs` | Coletores de dados. |
 | `build-data.mjs`, `build-userscript.mjs`, `build-tierlist-page.mjs` | Geram os dados do script, o userscript e a página da tier list. |
 | `farms.mjs` | Monta a lista de farms do early game (hunts, evoluções e preço de captura). |
+| `capture.mjs` | Preço de captura e nível em que o Pokémon chega, como o jogo calcula. |
 | `tierlist.html`, `index.html` | Página publicada no GitHub Pages. |
 
 Ao mudar o userscript, edite `src/`, suba o `@version` em `src/meta.js` e rode `node build-userscript.mjs`; o Tampermonkey só atualiza quando o número aumenta. Os detalhes do modelo e dos seletores do jogo estão em [AGENTS.md](AGENTS.md).

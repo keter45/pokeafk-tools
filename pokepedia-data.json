@@ -1,9 +1,9 @@
 {
   "sourceUrl": "https://pokeafk.io/pokepedia/",
   "assets": [
-    "https://pokeafk.io/assets/selectStyle-I43mgz1Z.js"
+    "https://pokeafk.io/assets/selectStyle-TNPRr6lM.js"
   ],
-  "sha256": "1e85a96db26a11d9af33d2bacc519eb4f1cf2d9ec2fe880645f8d81b8fc79bd2",
+  "sha256": "6527c5466103c313722e271ffd6250c2b09731cbed1f1a56f807fb1c0cd95ad4",
   "capture": {
     "curve": [
       [
@@ -62,7 +62,130 @@
       0.7,
       0.8
     ],
-    "caughtMaxLevel": 50
+    "caughtMaxLevel": 50,
+    "caughtRegionLevel": {
+      "johto": 65,
+      "hoenn": 75,
+      "outland": 90,
+      "orre": 90,
+      "nightmare": 90
+    },
+    "caughtStageLevel": {
+      "johto": {
+        "2": [
+          30,
+          65
+        ],
+        "3": [
+          15,
+          30,
+          65
+        ]
+      },
+      "hoenn": {
+        "2": [
+          30,
+          75
+        ],
+        "3": [
+          15,
+          30,
+          75
+        ]
+      }
+    },
+    "maxLevel": 100,
+    "regionFloor": [
+      {
+        "dex": [
+          152,
+          251
+        ],
+        "min": 45000,
+        "strong": 70000,
+        "lines": [
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          158,
+          159,
+          160,
+          246,
+          247,
+          248
+        ]
+      },
+      {
+        "dex": [
+          252,
+          386
+        ],
+        "min": 90000,
+        "strong": 135000,
+        "lines": [
+          252,
+          253,
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          280,
+          281,
+          282,
+          287,
+          288,
+          289,
+          328,
+          329,
+          330,
+          371,
+          372,
+          373,
+          374,
+          375,
+          376
+        ]
+      }
+    ],
+    "speciesCatch": {
+      "137": 20592000,
+      "142": 391000000
+    },
+    "certainAt": 3,
+    "profitSchedule": {
+      "start": "2026-11-20",
+      "from": 0.1,
+      "stepPerDay": -0.025,
+      "to": 0.05
+    },
+    "shiny": 5,
+    "shinyCatch": {
+      "0": 130000,
+      "1": 130000,
+      "2": 108000,
+      "3": 87000,
+      "4": 65000,
+      "5": 65000,
+      "first": 65000
+    },
+    "ivCatch": {
+      "iv1": 42200,
+      "iv100": {
+        "0": 25900,
+        "1": 25900,
+        "2": 21600,
+        "3": 17300,
+        "4": 12900,
+        "5": 12900,
+        "first": 12900
+      }
+    }
   },
   "species": [
     {"id":1,"key":"bulbasaur","name":"Bulbasaur","types":["grass","poison"],"stats":{"hp":45,"atk":49,"def":49,"spa":65,"spd":65,"spe":45},"evolutions":[2],"catchTier":3,"moves":[{"id":33,"key":"TACKLE","name":"Tackle","type":"normal","category":"physical","power":35,"powerMode":"standard","accuracy":95,"cooldown":1.1,"target":"melee","range":1,"effect":"EFFECT_HIT","implemented":true,"level":1},{"id":45,"key":"GROWL","name":"Growl","type":"normal","category":"status","power":null,"powerMode":"status","accuracy":100,"cooldown":3,"target":"cone","range":3,"radius":3,"cast":0.3,"effect":"EFFECT_ATTACK_DOWN","effects":[{"kind":"stage","on":"foe","chance":100,"ms":10000,"stages":{"atk":-1}}],"implemented":true,"level":4},{"id":73,"key":"LEECH_SEED","name":"Leech Seed","type":"grass","category":"status","power":null,"powerMode":"status","accuracy":90,"cooldown":12,"target":"projectile","range":5,"cast":0.2,"effect":"EFFECT_LEECH_SEED","effects":[{"kind":"seed","on":"foe","chance":100,"ms":10000}],"implemented":true,"level":7},{"id":22,"key":"VINE_WHIP","name":"Vine Whip","type":"grass","category":"physical","power":45,"powerMode":"standard","accuracy":100,"cooldown":3,"target":"melee","range":1,"effect":"EFFECT_HIT","implemented":true,"level":10},{"id":77,"key":"POISON_POWDER","name":"PoisonPowder","type":"poison","category":"status","power":null,"powerMode":"status","accuracy":75,"cooldown":3.4,"target":"cone","range":2,"radius":2,"cast":0.3,"effect":"EFFECT_POISON","effects":[{"kind":"psn","on":"foe","chance":100,"ms":10000}],"implemented":true,"level":15},{"id":79,"key":"SLEEP_POWDER","name":"Sleep Powder","type":"grass","category":"status","power":null,"powerMode":"status","accuracy":75,"cooldown":10,"target":"cone","range":2,"radius":2,"cast":0.3,"effect":"EFFECT_SLEEP","effects":[{"kind":"slp","on":"foe","chance":100,"ms":2500}],"implemented":true,"level":15},{"id":75,"key":"RAZOR_LEAF","name":"Razor Leaf","type":"grass","category":"physical","power":55,"powerMode":"standard","accuracy":95,"cooldown":2.4,"target":"cone","range":3,"radius":3,"cast":0.3,"effect":"EFFECT_HIGH_CRITICAL","implemented":true,"level":20},{"id":230,"key":"SWEET_SCENT","name":"Sweet Scent","type":"normal","category":"status","power":null,"powerMode":"status","accuracy":100,"cooldown":6,"target":"circle","range":null,"radius":3,"cast":0.4,"effect":"EFFECT_EVASION_DOWN","effects":[{"kind":"stage","on":"foe","chance":100,"ms":10000,"stages":{"eva":-1}}],"implemented":true,"level":25},{"id":74,"key":"GROWTH","name":"Growth","type":"normal","category":"status","power":null,"powerMode":"status","accuracy":100,"alwaysHits":true,"cooldown":3,"target":"self","range":null,"effect":"EFFECT_SPECIAL_ATTACK_UP","effects":[{"kind":"stage","on":"self","chance":100,"ms":10000,"stages":{"atk":1,"spa":1}}],"implemented":true,"level":32},{"id":235,"key":"SYNTHESIS","name":"Synthesis","type":"grass","category":"status","power":null,"powerMode":"status","accuracy":100,"alwaysHits":true,"cooldown":20,"target":"self","range":null,"effect":"EFFECT_SYNTHESIS","implemented":true,"level":39},{"id":76,"key":"SOLAR_BEAM","name":"SolarBeam","type":"grass","category":"special","power":120,"powerMode":"standard","accuracy":100,"cooldown":6,"target":"beam","range":8,"cast":1.5,"effect":"EFFECT_SOLAR_BEAM","implemented":true,"level":46}]},
@@ -1041,6 +1164,9 @@
     {"id":"nightmare-tyranitar","region":"nightmare","name":"Shiny Tyranitar · Fenda do Nightmare","main":248,"recLv":1165,"levels":[1130,1200],"badge":0,"slots":[{"dex":248,"lv":[1130,1200],"w":100,"on":"land"}]},
     {"id":"nightmare-steelix","region":"nightmare","name":"Shiny Steelix · Fenda do Nightmare","main":208,"recLv":1165,"levels":[1130,1200],"badge":0,"slots":[{"dex":208,"lv":[1130,1200],"w":100,"on":"land"}]},
     {"id":"nightmare-aerodactyl","region":"nightmare","name":"Shiny Aerodactyl · Fenda do Nightmare","main":142,"recLv":1165,"levels":[1130,1200],"badge":0,"slots":[{"dex":142,"lv":[1130,1200],"w":100,"on":"land"}]},
-    {"id":"nightmare-metagross","region":"nightmare","name":"Shiny Metagross · Fenda do Nightmare","main":376,"recLv":1165,"levels":[1130,1200],"badge":0,"slots":[{"dex":376,"lv":[1130,1200],"w":100,"on":"land"}]}
+    {"id":"nightmare-metagross","region":"nightmare","name":"Shiny Metagross · Fenda do Nightmare","main":376,"recLv":1165,"levels":[1130,1200],"badge":0,"slots":[{"dex":376,"lv":[1130,1200],"w":100,"on":"land"}]},
+    {"id":"castelo-viridian","region":"castelo","name":"Caça do Castelo de Viridian","main":137,"recLv":100,"levels":[100,100],"badge":0,"slots":[{"dex":137,"lv":[100,100],"w":100,"on":"land"}]},
+    {"id":"castelo-cerulean","region":"castelo","name":"Caça do Castelo de Cerulean","main":137,"recLv":100,"levels":[100,100],"badge":0,"slots":[{"dex":137,"lv":[100,100],"w":100,"on":"land"}]},
+    {"id":"castelo-pewter","region":"castelo","name":"Caça do Castelo de Pewter","main":137,"recLv":100,"levels":[100,100],"badge":0,"slots":[{"dex":137,"lv":[100,100],"w":100,"on":"land"}]}
   ]
 }

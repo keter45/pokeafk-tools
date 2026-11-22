@@ -1,9 +1,11 @@
 import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { buildGuide } from './rank-pokemon.mjs';
+import { captureRules } from './capture.mjs';
 
 const dataFile = new URL('./pokepedia-data.json', import.meta.url);
 const guideFile = new URL('./src/data/guide.js', import.meta.url);
 const dexFile = new URL('./src/data/dex.js', import.meta.url);
+const captureFile = new URL('./src/data/capture.js', import.meta.url);
 const start = '/* GUIDE_DATA_START */';
 const end = '/* GUIDE_DATA_END */';
 
@@ -60,12 +62,31 @@ const dex = [''];
 for (const row of rows) dex[row.id] = `${row.name}:${row.types[0]}`;
 const dexPayload = JSON.stringify([...dex].map(entry => entry ?? ''));
 
+// Capture price of each hunt's main Pokémon, for the badge next to its name in the MAPA:
+// {huntId: [dex, level on capture, price]}, plus what the userscript needs to turn the price into
+// the average and guaranteed spend (see capture.mjs and the game's "Captura" guide).
+const rules = captureRules(snapshot);
+const captureHunts = {};
+for (const hunt of snapshot.hunts ?? []) {
+  const entry = rules?.inHunt(hunt, hunt.main);
+  if (entry) captureHunts[hunt.id] = [entry.dex, entry.level, entry.price];
+}
+const capturePayload = JSON.stringify({
+  certainAt: snapshot.capture?.certainAt ?? 3,
+  profitSchedule: snapshot.capture?.profitSchedule ?? null,
+  // Ball prices in the Poké Mart (the chance of a ball is worth price / Poké Ball price Poké Balls).
+  balls: { 'poke-ball': 200, 'ultra-ball': 1200 },
+  hunts: captureHunts,
+});
+
 // The tables were laid out for a nested scope; the source files sit at the top level.
 const guideText = `const MARKET_GUIDE = ${start} ${payload} ${end};`.replace(/\n {2}/g, '\n');
 await writeAtomic(guideFile, '// Gerado por build-data.mjs a partir de pokepedia-data.json e competitive-data.json. Não edite à mão.\n'
   + `${guideText}\n`);
 await writeAtomic(dexFile, '// Gerado por build-data.mjs: espécies por número da Pokédex, "Nome:tipo". Não edite à mão.\n'
   + `const DEX = /* DEX_DATA_START */ ${dexPayload} /* DEX_DATA_END */;\n`);
+await writeAtomic(captureFile, '// Gerado por build-data.mjs: preço de captura do Pokémon principal de cada hunt. Não edite à mão.\n'
+  + `const CAPTURE = /* CAPTURE_DATA_START */ ${capturePayload} /* CAPTURE_DATA_END */;\n`);
 
 async function writeAtomic(file, text) {
   const original = await readFile(file, 'utf8').catch(() => null);

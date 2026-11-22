@@ -23,8 +23,24 @@ const LEVEL = 100;
 const GCD = { base: 1.2, min: 0.7, max: 2.0 };
 const STAGE_SECONDS = 10;
 const RECHARGE_SECONDS = 1.5;
+// With 2 or more targets, each one takes 75% of the damage (combat.areaFactor); alone, 100%.
 const AREA_FACTOR = 0.75;
-const PACK_TARGETS = 2; // Hunts spawn packs of 2–3; an area hit usually reaches two of them.
+// Hunts are fought in areas: packs of 2–3 wild Pokémon (combat.packSpawn) stand around the one being
+// hit. An area move reaches more of them the more tiles it covers; a pack spreads over about
+// PACK_SPREAD_TILES tiles, so a radius-2 circle or a 4-tile cone hits the whole pack.
+const PACK_SIZE = 3;
+const PACK_SPREAD_TILES = 12;
+// PvP (decided with the user): wild Pokémon do not dodge, players do. Moves that mark the ground
+// before landing can be dodged; melee and target-following moves always land. A cast under ~0.25 s
+// arrives before anyone can react (measured with the dodge script, 2026-11-22); from there the
+// chance grows with the cast time, up to DODGE_MAX.
+const TELEGRAPH_SHAPES = new Set(['projectile', 'beam', 'dash', 'cone', 'circle', 'area', 'leap']);
+const DODGE_MIN_CAST = 0.25;
+const DODGE_PER_SECOND = 1.4;
+const DODGE_MAX = 0.7;
+// The reference opponents also throw dodgeable moves: this share of their hits is dodged, except
+// while our Pokémon is casting (it cannot move) or asleep. Long casts are doubly bad in PvP.
+const INCOMING_DODGE = 0.25;
 const BATTLE_COOLDOWN = {
   RECOVER: 30, SOFT_BOILED: 30, MILK_DRINK: 30, SLACK_OFF: 30, MOONLIGHT: 30, MORNING_SUN: 30,
   SYNTHESIS: 30, REST: 45, HYPNOSIS: 20, SLEEP_POWDER: 20, SPORE: 20, SING: 20, LOVELY_KISS: 20, GRASS_WHISTLE: 20,
@@ -40,7 +56,33 @@ const PVE_SECONDS = 60;
 // AUTO (hunting and Ranked duels) casts a boost or a foe debuff once and only casts it again after it
 // wears off, so stages never stack past what a single use gives (Swords Dance +2, Howl +1).
 const HEAL_EFFECTS = new Set(['EFFECT_RESTORE_HP', 'EFFECT_SOFTBOILED', 'EFFECT_MORNING_SUN', 'EFFECT_SYNTHESIS', 'EFFECT_MOONLIGHT', 'EFFECT_WISH']);
-const AREA_SHAPES = new Set(['area', 'beam', 'circle', 'cone', 'field', 'leap']);
+// Tiles of a disc of this radius (the game's circles, fields, areas and leaps).
+function discTiles(radius) {
+  let tiles = 0;
+  for (let dx = -radius; dx <= radius; dx++) for (let dy = -radius; dy <= radius; dy++) if (dx * dx + dy * dy <= radius * radius) tiles++;
+  return tiles;
+}
+// Expected wild Pokémon hit by one use during a hunt, from the move's shape and size.
+function huntTargets(move) {
+  const radius = Math.max(1, Math.round(move.radius ?? 1));
+  let extraTiles;
+  switch (move.target) {
+    case 'cone': extraTiles = Math.round(Math.PI * radius * radius / 4); break;   // a quarter disc in front
+    case 'circle': case 'field': extraTiles = discTiles(radius) - 2; break;       // around the user, minus its tile and the target's
+    case 'area': case 'leap': extraTiles = discTiles(radius) - 1; break;          // around the aimed tile
+    case 'beam': extraTiles = (move.range ?? 6) - 1; break;                       // everyone in the line
+    default: return 1;                                                            // melee, homing, projectile, dash, rampage
+  }
+  return 1 + (PACK_SIZE - 1) * clamp(0, 1, extraTiles / PACK_SPREAD_TILES);
+}
+// Damage multiplier for that many targets: up to 2 targets it grows from 100% (alone) to 2 × 75%.
+function areaMultiplier(targets) {
+  return targets <= 2 ? 1 + (targets - 1) * (2 * AREA_FACTOR - 1) : targets * AREA_FACTOR;
+}
+function dodgeChance(move) {
+  if (!TELEGRAPH_SHAPES.has(move.target)) return 0;
+  return clamp(0, DODGE_MAX, ((move.cast ?? 0) - DODGE_MIN_CAST) * DODGE_PER_SECOND);
+}
 const MAJOR = new Set(['slp', 'par', 'frz', 'brn', 'psn', 'tox']);
 const FIXED_DAMAGE = { EFFECT_LEVEL_DAMAGE: () => LEVEL, EFFECT_DRAGON_RAGE: () => 40, EFFECT_SONICBOOM: () => 20 };
 const EXCLUDED_EFFECTS = new Set([
@@ -164,6 +206,7 @@ function classify(move, types) {
     cooldown: Math.max(0.1, move.cooldown ?? 0), battleCooldown: BATTLE_COOLDOWN[key] ?? Math.max(0.1, move.cooldown ?? 0),
     offGcd: Boolean(move.offGcd), machine: Boolean(move.machine), cast: (move.cast ?? 0) + (move.hitSpan ?? 0),
     effects: (move.effects ?? []).filter(effect => effect && effect.kind),
+    dodge: dodgeChance(move),
   };
   if (move.category === 'physical' || move.category === 'special') {
     const fixed = FIXED_DAMAGE[move.effect];
@@ -177,7 +220,8 @@ function classify(move, types) {
       ...base, kind: 'damage', power: power ?? 0, hits,
       fixed: fixed ? fixed() : null, superFang,
       stab: types.has(base.type) ? 1.5 : 1,
-      area: move.radius > 0 || AREA_SHAPES.has(move.target),
+      targets: huntTargets(move),
+      pveMult: areaMultiplier(huntTargets(move)),
       lock: move.effect === 'EFFECT_RECHARGE' ? RECHARGE_SECONDS : 0,
       recoil: move.effect === 'EFFECT_DOUBLE_EDGE' ? 1 / 3 : move.effect === 'EFFECT_RECOIL' ? 1 / 4 : 0,
       drain: move.effect === 'EFFECT_ABSORB' ? 0.5 : move.effect === 'EFFECT_DREAM_EATER' ? 0.5 : 0,
@@ -351,8 +395,7 @@ function huntRun(stats, moves, types, random) {
     uses[pick]++;
     user.ready[pick] = now + Math.max(gcd, move.cooldown);
     if (move.kind === 'damage') {
-      const area = move.area ? PACK_TARGETS * AREA_FACTOR : 1;
-      const damage = hitDamage(move, user, dummy, now) * move.accuracy * area;
+      const damage = hitDamage(move, user, dummy, now) * move.accuracy * move.pveMult;
       total += damage;
       byCategory[move.category] += damage;
       for (const effect of move.effects) if (effect.on === 'self') applyEffect(effect, user, dummy, now, random, 'pve');
@@ -389,6 +432,7 @@ function duel(stats, moves, types, opponent, seed) {
   const coverage = coverageFactor(moves);
   const incoming = defenseFactor(types);
   let userNext = 0;
+  let castUntil = 0;
   let foeNext = 0.5;
   let nextTick = TICK_SECONDS;
   let now = 0;
@@ -432,7 +476,7 @@ function duel(stats, moves, types, opponent, seed) {
       if (move.kind === 'heal') return user.hp < user.maxHp * 0.5 && user.heals < BATTLE_HEALS ? 100 : -1;
       if (move.kind === 'damage') {
         if (move.needsSleep && !sleeping(foe, now)) return -1;
-        return 10 + hitDamage(move, user, foe, now, coverage) * move.accuracy / foe.maxHp;
+        return 10 + hitDamage(move, user, foe, now, coverage) * move.accuracy * (1 - move.dodge) / foe.maxHp;
       }
       if (move.hpCost && user.hp <= user.maxHp * move.hpCost) return -1;
       let score = -1;
@@ -480,6 +524,8 @@ function duel(stats, moves, types, opponent, seed) {
     uses[pick]++;
     user.ready[pick] = now + Math.max(gcd, move.battleCooldown);
     userNext = now + (move.offGcd ? 0 : Math.max(gcd, move.cast)) + (move.lock ?? 0);
+    // While casting (and during a recharge) the Pokémon stands still and cannot dodge.
+    castUntil = now + (move.offGcd ? 0 : move.cast) + (move.lock ?? 0);
     if (move.offGcd) userNext = now + 0.05;
     if (move.kind === 'heal') {
       user.heals++;
@@ -494,7 +540,7 @@ function duel(stats, moves, types, opponent, seed) {
       user.hp -= hitDamage({ ...move, category: 'physical', power: 40, stab: 1, hits: 1, fixed: null, superFang: false, type: '' }, user, user, now);
       return;
     }
-    const hits = random() < move.accuracy * accuracyMult(stage(user, 'acc', now) - stage(foe, 'eva', now));
+    const hits = random() < move.accuracy * accuracyMult(stage(user, 'acc', now) - stage(foe, 'eva', now)) * (1 - move.dodge);
     if (!hits) return;
     if (move.kind === 'damage') {
       const damage = foe.shield > now ? 0 : hitDamage(move, user, foe, now, coverage);
@@ -526,6 +572,7 @@ function duel(stats, moves, types, opponent, seed) {
       return;
     }
     if (random() >= accuracyMult(stage(foe, 'acc', now) - stage(user, 'eva', now))) return;
+    if (now >= castUntil && !sleeping(user, now) && random() < INCOMING_DODGE) return;
     if (user.shield > now) return;
     user.hp -= hitDamage(move, foe, user, now, incoming);
   }
@@ -586,7 +633,7 @@ function bestLoadout(mode, stats, pool, types) {
   const damage = pool.filter(move => move.kind === 'damage' && (mode === 'pvp' || (!move.fixed && !move.superFang && !move.needsSleep)));
   const gcd = gcdFor(stats.spe);
   const standalone = move => (move.fixed ?? move.power) * move.stab * move.accuracy * move.hits
-    * (mode === 'pve' && move.area ? PACK_TARGETS * AREA_FACTOR : 1)
+    * (mode === 'pve' ? move.pveMult : 1 - move.dodge)
     * (move.fixed ? 1 : stats[move.category === 'physical' ? 'atk' : 'spa'] / 100)
     / Math.max(gcd, move.cast, mode === 'pve' ? move.cooldown : move.battleCooldown);
   const ranked = [...damage].sort((a, b) => standalone(b) - standalone(a));

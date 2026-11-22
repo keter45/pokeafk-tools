@@ -147,8 +147,8 @@ const TYPE_NAMES = { normal: 'Normal', fighting: 'Lutador', flying: 'Voador', po
 const ROLES = { physical: 'Físico', special: 'Especial', mixed: 'Misto', support: 'Suporte' };
 const STATS = { hp: 'HP', atk: 'Atq', def: 'Def', spa: 'Atq. Esp.', spd: 'Def. Esp.', spe: 'Vel' };
 const HELP = {
-  pve: 'Dano por segundo numa caça de 60 s, como o AUTO joga: golpe pronto mais forte, área em bandos e reforços renovados quando acabam. Nota 100 = espécie normal com mais dano.',
-  pvp: 'Duelos de até 180 s contra atacantes físico e especial de referência (70%) mais a referência competitiva da Gen 3 ajustada ao que a espécie aprende (30%).',
+  pve: 'Dano por segundo numa caça de 60 s, como o AUTO joga: golpe pronto mais forte, área pelo tamanho (quantos do bando de 3 cada forma alcança, 75% em cada) e reforços renovados quando acabam. Nota 100 = espécie normal com mais dano.',
+  pvp: 'Duelos de até 180 s com desvio, contra atacantes físico e especial de referência (70%): golpes com tempo de preparo maior erram mais, corpo a corpo e golpes que seguem o alvo sempre acertam, e quem prepara um golpe não desvia. Somada a isso, a referência competitiva da Gen 3 ajustada ao que a espécie aprende (30%).',
   farm: 'Hunts de Kanto onde aparece um Pokémon de primeiro estágio cuja evolução final é tier S ou A (PvE ou Competitivo). A fileira mostra a melhor tier entre as evoluções. Captura = preço do nível em que ele chega (70% a 80% do nível do selvagem) × fator do Tier de captura da espécie, como no guia Captura do jogo; os de primeiro estágio têm o fator mais baixo. Ordem: menos insígnias, nível recomendado e preço.',
 };
 const PVP_NAME = { pve: 'PvE', pvp: 'Comp' };

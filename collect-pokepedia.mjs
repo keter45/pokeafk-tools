@@ -163,6 +163,10 @@ function collectConfig(config) {
   const { root: capture } = readTable(config, /\bcapture\s*:\s*(?=\{\s*curve\s*:)/, 'captura');
   const { root: caughtLevel } = readTable(config, /\bcaughtLevel\s*:\s*(?=\[)/, 'nível capturado');
   const caughtMaxLevel = Number(config.match(/\bcaughtMaxLevel\s*:\s*(\d+)/)?.[1]);
+  // Johto/Hoenn: level by evolution stage ({3: [15, 30, 65], 2: [30, 65]}); other regions: one level.
+  const { root: caughtRegionLevel } = readTable(config, /\bcaughtRegionLevel\s*:\s*(?=\{)/, 'nível capturado por região');
+  const { root: caughtStageLevel } = readTable(config, /\bcaughtStageLevel\s*:\s*(?=\{)/, 'nível capturado por estágio');
+  const maxLevel = Number(config.match(/\bmaxLevel\s*:\s*(\d+)/)?.[1]);
   const huntsSource = config.match(/JSON\.parse\(`(\[\{"id":"[a-z]+-[^`]*)`\)/)?.[1];
   if (!huntsSource || !caughtMaxLevel) throw new Error('Hunts ou nível de captura não encontrados na configuração do jogo.');
   const hunts = JSON.parse(huntsSource).map(hunt => ({
@@ -171,7 +175,14 @@ function collectConfig(config) {
     slots: hunt.slots.map(slot => ({ dex: slot.dex, lv: slot.lv, w: slot.w, on: slot.on })),
   }));
   return {
-    capture: { curve: capture.curve, first: capture.first, groups: capture.groups, caughtLevel, caughtMaxLevel },
+    // The ball chance also needs the regional floors (regionFloor), fixed prices (speciesCatch), the
+    // guaranteed multiple (certainAt) and the margin schedule (profitSchedule); see the "Captura" guide.
+    capture: {
+      curve: capture.curve, first: capture.first, groups: capture.groups, caughtLevel, caughtMaxLevel,
+      caughtRegionLevel, caughtStageLevel, maxLevel,
+      regionFloor: capture.regionFloor, speciesCatch: capture.speciesCatch, certainAt: capture.certainAt,
+      profitSchedule: capture.profitSchedule, shiny: capture.shiny, shinyCatch: capture.shinyCatch, ivCatch: capture.ivCatch,
+    },
     hunts,
   };
 }

@@ -6,20 +6,7 @@ const TIER_RANK = { S: 0, A: 1, B: 2, C: 3, D: 4 };
 const GOOD = new Set(['S', 'A']);
 const LEGENDARY = new Set([144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386]);
 
-// The game's level price: log-log interpolation between the curve points.
-export function levelPrice(curve, level) {
-  if (!(level > curve[0][0])) return curve[0][1];
-  let index = curve.findIndex(([at]) => at >= level);
-  if (index < 0) index = curve.length - 1;
-  const [[x0, y0], [x1, y1]] = [curve[index - 1], curve[index]];
-  return y0 * Math.pow(y1 / y0, Math.log(level / x0) / Math.log(x1 / x0));
-}
-
-// Rounded like the game: to 5 below 100, 10 below 1000, 100 below 10000, then 1000.
-const roundPrice = value => {
-  const step = value < 100 ? 5 : value < 1000 ? 10 : value < 10000 ? 100 : 1000;
-  return Math.max(step, Math.round(value / step) * step);
-};
+import { levelPrice, roundPrice } from './capture.mjs';
 
 export function buildFarms(snapshot, guide, { regions = ['kanto'] } = {}) {
   const { capture, hunts = [] } = snapshot;
