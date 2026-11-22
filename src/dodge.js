@@ -285,8 +285,10 @@
 
   function press(dir) {
     const init = { key: KEYS[dir], code: KEYS[dir], bubbles: true, cancelable: true };
-    dispatchEvent(new KeyboardEvent('keydown', init));
-    dispatchEvent(new KeyboardEvent('keyup', init));
+    // Tampermonkey's sandbox has no bare dispatchEvent; send to the page's window.
+    const target = document.defaultView ?? window;
+    target.dispatchEvent(new KeyboardEvent('keydown', init));
+    target.dispatchEvent(new KeyboardEvent('keyup', init));
   }
 
   async function waitFor(test, timeout) {

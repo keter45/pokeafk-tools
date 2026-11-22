@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.3.3
+// @version      1.3.4
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -3387,6 +3387,12 @@
       const MAX_UNREACHABLE_STREAK = 4;
 
       class Stop extends Error {}
+      // The game did not react in time. Only this kind of failure skips a trainer; any other error
+      // is a bug and stops the daily, instead of passing for an unreachable trainer.
+      class NoResponse extends Error {}
+      // Tampermonkey's sandbox has no bare window globals such as dispatchEvent (Firefox reports
+      // "(intermediate value).dispatchEvent is not a function"), so events go to the page's window.
+      const pageWindow = document.defaultView ?? window;
       let run = null;
 
       const box = document.createElement('section');
@@ -3414,7 +3420,7 @@
               <div class="pafk-daily-count"><strong data-daily-left></strong><span>Vitórias <span data-daily-total></span></span></div>
               <div class="pafk-daily-bar" role="progressbar" aria-label="Vitórias" aria-valuemin="0" data-daily-bar><i></i></div>
             </div>
-            <p class="pafk-daily-status" role="status" data-daily-status></p>
+            <p class="pafk-daily-status" role="status" aria-live="polite" data-daily-status></p>
             <ol class="pafk-daily-route" aria-label="Rota de treinadores" hidden data-daily-route></ol>
             <div class="pafk-daily-options">
               <label class="pafk-daily-levels">
@@ -3427,8 +3433,6 @@
               </label>
             </div>
           </div>
-          <p class="pafk-daily-status" role="status" aria-live="polite" data-daily-status></p>
-          <ol class="pafk-daily-route" hidden data-daily-route></ol>
           <div class="pafk-daily-actions">
             <button type="button" class="pafk-daily-go" data-daily-go>Fazer daily</button>
             <button type="button" class="pafk-daily-stop" hidden data-daily-stop>Parar</button>
@@ -3837,7 +3841,7 @@
             value = null;
           }
           if (value) return value;
-          if (performance.now() - started > timeout) throw new Error(`O jogo não respondeu: ${what}.`);
+          if (performance.now() - started > timeout) throw new NoResponse(`O jogo não respondeu: ${what}.`);
           await sleep(150);
         }
       }
@@ -3885,7 +3889,7 @@
         if (!map) return;
         const close = map.querySelector('[aria-label="Fechar"], .close, [data-close]');
         if (close) close.click();
-        else dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        else pageWindow.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
         await until(() => !mapWindow(), 5000, 'fechar o MAPA');
       }
 
@@ -4055,7 +4059,7 @@
       // the trainer makes the game walk up to it and talk.
       let npcMetaCache;
       async function npcMeta() {
-        npcMetaCache ??= fetch('/assets/npcs/npcs.json').then(response => response.json()).catch(() => ({}));
+        npcMetaCache ??= fetch(new URL('/assets/npcs/npcs.json', location.href)).then(response => response.json()).catch(() => ({}));
         return npcMetaCache;
       }
       const appearanceCache = new Map();
@@ -4212,8 +4216,8 @@
       const interactionWindow = () => challenge() ?? $('.b5-again') ?? $('.npc-dialogue-backdrop, .quest-backdrop, .modal.open .win');
       function tapKey(key) {
         const init = { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true, cancelable: true };
-        dispatchEvent(new KeyboardEvent('keydown', init));
-        dispatchEvent(new KeyboardEvent('keyup', init));
+        pageWindow.dispatchEvent(new KeyboardEvent('keydown', init));
+        pageWindow.dispatchEvent(new KeyboardEvent('keyup', init));
       }
 
       async function findTrainer(npc) {
@@ -4456,7 +4460,7 @@
             } catch (error) {
               // The game did not react (teleport or talk went nowhere): skip this trainer, unless
               // a battle is on screen, where moving on would be unsafe.
-              if (error instanceof Stop || inArena() || resultWindow()) throw error;
+              if (!(error instanceof NoResponse) || inArena() || resultWindow()) throw error;
               await recoverScreen();
               npc.failure = error.message;
               outcome = 'unreachable';
@@ -4471,22 +4475,30 @@
             if (outcome === 'lost-healed') outcome = 'lost';
             npc.state = outcome;
             if (outcome === 'won') run.done += 1;
+            // A closed place (gym without the badges) or a locked trainer cannot be done today,
+            // so it does not count in "Faltam N".
+            if (outcome === 'closed' || outcome === 'locked') run.total -= 1;
             renderProgress();
             await pause();
           }
           await closeMap().catch(() => {});
           const lost = run.route.filter(npc => npc.state === 'lost').length;
           const skipped = run.route.filter(npc => npc.state === 'skipped' || npc.state === 'locked').length;
-          const unreachable = run.route.filter(npc => npc.state === 'unreachable' || npc.state === 'closed').length;
+          const unreachable = run.route.filter(npc => npc.state === 'unreachable').length;
+          const closed = run.route.filter(npc => npc.state === 'closed').length;
           setStatus(['Daily concluído.', lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
-            unreachable && `${unreachable} inacessível(is).`,
+            unreachable && `${unreachable} sem resposta do jogo.`,
+            closed && `${closed} em lugar fechado (falta insígnia).`,
             avoided && `${avoided} evitado(s) por vantagem de tipo.`]
             .filter(Boolean).join(' '), 'done');
         } catch (error) {
           const current = run.route.find(npc => npc.state === 'current');
           if (current) current.state = 'todo';
           if (run.route.length) renderProgress();
-          setStatus(error instanceof Stop ? error.message : `Parado: ${error.message}`, 'stop');
+          setStatus(error instanceof Stop ? error.message
+            : error instanceof NoResponse || !(error instanceof TypeError || error instanceof ReferenceError)
+              ? `Parado: ${error.message}`
+              : `Parado por um erro do script: ${error.message}`, 'stop');
         } finally {
           run = null;
           setRunning(false);
@@ -5876,8 +5888,10 @@
 
       function press(dir) {
         const init = { key: KEYS[dir], code: KEYS[dir], bubbles: true, cancelable: true };
-        dispatchEvent(new KeyboardEvent('keydown', init));
-        dispatchEvent(new KeyboardEvent('keyup', init));
+        // Tampermonkey's sandbox has no bare dispatchEvent; send to the page's window.
+        const target = document.defaultView ?? window;
+        target.dispatchEvent(new KeyboardEvent('keydown', init));
+        target.dispatchEvent(new KeyboardEvent('keyup', init));
       }
 
       async function waitFor(test, timeout) {
