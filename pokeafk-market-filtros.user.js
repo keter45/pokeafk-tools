@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK — Filtros do Mercado
 // @namespace    pokeafk-market-filtros
-// @version      0.15.0
+// @version      0.15.1
 // @description  Filtra anúncios de Pokémon, mostra tiers no mercado, no mapa e na ficha, recomenda golpes, naturezas e IVs e faz o daily de treinadores.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -2547,7 +2547,9 @@
 
     // The player taking over stops the loop. Clicks and keys sent by the script are not trusted.
     const onPlayerInput = event => {
-      if (!run || !event.isTrusted || box.contains(event.target)) return;
+      // The account monitor (pokeafk-monitor.user.js) is not the game either.
+      if (!run || !event.isTrusted || box.contains(event.target)
+        || (event.target instanceof Element && event.target.closest('#pafk-monitor'))) return;
       stop('Parado porque você usou o jogo.');
     };
     addEventListener('pointerdown', onPlayerInput, true);

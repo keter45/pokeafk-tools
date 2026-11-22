@@ -39,7 +39,39 @@ O botão **⚔ Daily** fica no HUD, abaixo de "Poke Market". Ele luta com os tre
 - **Card:** pode ser arrastado; um duplo clique no título volta ele ao lugar.
 - **Treinadores que andam:** se o treinador saiu do lugar e não responde, o script procura o sprite dele na tela e clica nele, e o jogo anda até lá.
 - **Treinadores inacessíveis:** pula, sem parar o daily, os treinadores de lugares fechados (como um Ginásio que pede insígnias) e os que não respondem depois do teleporte. Se quatro seguidos não respondem, o daily para.
-- **Parar:** qualquer clique ou tecla sua fora do card para o daily, assim como o botão **Parar**.
+- **Parar:** qualquer clique ou tecla sua fora do card para o daily, assim como o botão **Parar**. Cliques no painel **Contas** não param o daily.
+
+## Monitor de contas (script separado)
+
+Para quem joga com várias contas abertas, cada uma numa aba. Instale também este script no Tampermonkey:
+https://raw.githubusercontent.com/keter45/pokeafk-tools/main/pokeafk-monitor.user.js
+
+**Título e ícone da aba.** Cada aba do jogo passa a mostrar a conta, o que ela está fazendo e quantas bolas e poções tem, por exemplo `🟢 Keter · ◓1104 ✚1995`. O ícone da aba é um círculo com a inicial da conta, na cor do estado:
+
+| Cor | Estado |
+|---|---|
+| 🟢 verde | Caçando ou pescando |
+| 🔵 azul | Fazendo o daily (o título mostra quantos faltam) |
+| 🟣 roxo | Em batalha |
+| 🟡 amarelo (laranja no ícone) | Parado |
+| ⚪ cinza | Fora do jogo, sem sinal ou aba fechada |
+
+`◓` é o total de Poké Bolas de todos os tipos; `✚` é a soma de Poção, Superpoção e Hiperpoção. Com menos de 50 bolas ou 20 poções, aparece um `⚠` depois da bolinha de estado.
+
+**Painel Contas.** O botão **Contas**, à esquerda do botão AUTO, mostra um quadradinho colorido por conta. Clique para abrir o painel, que usa a moldura e a fonte do HUD do jogo e tem dois modos:
+- **Completo:** um cartão por conta, com o sprite do Pokémon principal sobre o fundo do tipo dele, o estado e há quanto tempo, a barra de HP, o Pokémon selvagem que está sendo caçado (ícone animado, nome e nível) ou o progresso do daily, as bolas, as poções, o dinheiro e a hora da última leitura.
+- **Compacto:** uma linha por conta, com o sprite, o estado, o selvagem que está sendo caçado, as bolas e as poções.
+
+Passe o mouse em cima dos números para ver cada tipo de bola e de poção. O modo escolhido vale para todas as abas. O painel pode ser arrastado; um duplo clique no título volta ele ao lugar.
+
+**Apelidos.** O título usa o nome da conta lido do HUD. Para trocar por um apelido, clique em ✎ ao lado da conta no modo Completo ou use **Dar um apelido a esta conta** no menu do Tampermonkey. Deixe o campo vazio para voltar ao nome da conta. O ✕ tira uma conta da lista; ela volta quando a aba dela atualizar.
+
+**Contêineres do Firefox.** As contas se enxergam mesmo em contêineres diferentes (Firefox Multi-Account Containers), porque o script guarda os dados no armazenamento do Tampermonkey, que é um só para todas as abas.
+
+**Limitações:**
+- Só aparecem as contas que estão abertas numa aba com o script. Uma aba fechada fica como **Aba fechada**, e uma aba que não manda notícias há mais de 2 min e meio fica como **Sem sinal**. Isso acontece quando o navegador descarrega uma aba parada há muito tempo para economizar memória.
+- As poções vêm do painel AUTOMAÇÕES do HUD. Se a conta não tiver esse painel, abra a Bolsa uma vez para o script ler as poções.
+- O script não troca de aba: ele só mostra o estado das outras contas.
 
 ## Tier list
 
@@ -66,6 +98,7 @@ Os golpes considerados são os aprendidos por nível na linha evolutiva e as 7 H
 node collect-pokepedia.mjs        # baixa o catálogo do jogo (pokepedia-data.json)
 node collect-competitive.mjs      # baixa as referências da Gen 3 (competitive-data.json)
 node build-userscript.mjs         # recompila o bloco de dados do userscript
+node build-monitor.mjs            # recompila a tabela de espécies do monitor de contas
 node build-tierlist-page.mjs      # regenera tierlist.html
 node --check pokeafk-market-filtros.user.js
 ```
