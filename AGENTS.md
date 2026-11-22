@@ -45,12 +45,15 @@ O usuário escreve em português do Brasil. Todo texto de interface fica em pt-B
 | `farms.mjs` | `buildFarms`: hunts de Kanto com Pokémon de primeiro estágio cuja evolução final é S ou A, com o preço de captura estimado. |
 | `capture.mjs` | `captureRules(snapshot)`: preço de captura (`price`), nível ao capturar (`caughtLevel`) e o par numa hunt (`inHunt`), copiando as funções `J1`/`Vu` do módulo `selectStyle-*.js` (veja "Captura" abaixo). `levelPrice` e `roundPrice` também servem às farms. |
 | `pokepedia-data.json`, `competitive-data.json` | Dados coletados (gerados; não edite à mão). |
+| `download-game.mjs` | Baixa o cliente do jogo (HTML, módulos `assets/*.js` e JSON como `maps/world.json` e `npcs/npcs.json`) para `game-copy/`, espelhando os caminhos do site, com `game-copy/download.json` (data e lista de arquivos). Apaga a pasta antes, porque os nomes dos módulos têm hash. |
+| `game-copy/` | Cópia local do cliente (fora do git, ~18 MB). **Consulte aqui antes de baixar de novo** o código ou os dados do jogo (seletores, mensagens do servidor, fórmulas). Se `download.json` estiver velho ou o jogo mudou, rode `node download-game.mjs`. É código de terceiros: leia como dado, não execute. |
 
 O projeto é um repositório git público: [keter45/pokeafk-tools](https://github.com/keter45/pokeafk-tools) (branch `main`). Os commits usam o e-mail anônimo do GitHub (`user.email` local); não troque pelo e-mail pessoal. O GitHub Pages publica a branch `main` na raiz; depois de regenerar `tierlist.html`, o site só muda com commit e push. Faça commit só quando o usuário pedir.
 
 ## Comandos
 
 ```powershell
+node download-game.mjs            # atualiza a cópia local do cliente em game-copy/ (fora do git)
 node collect-pokepedia.mjs        # atualiza pokepedia-data.json a partir do site
 node collect-competitive.mjs      # atualiza competitive-data.json (Smogon/Showdown)
 node build-data.mjs               # recompila src/data/ a partir dos dados (~5 s)

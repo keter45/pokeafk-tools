@@ -1,2 +1,5 @@
 # Arquivos temporários do build-userscript.mjs
 .pokeafk-market-filtros.*.tmp
+
+# Cópia local do cliente do jogo (node download-game.mjs)
+game-copy/
