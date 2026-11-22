@@ -439,7 +439,8 @@
   function talkKey() {
     try {
       const keys = JSON.parse(localStorage.getItem(KEYS_STORAGE) ?? 'null');
-      if (keys && typeof keys.talk === 'string' && keys.talk) return keys.talk;
+      const talk = Array.isArray(keys?.talk) ? keys.talk.find(key => typeof key === 'string' && key) : keys?.talk;
+      if (typeof talk === 'string' && talk) return talk;
     } catch {
       // The game's default binding is used below.
     }
@@ -619,7 +620,10 @@
     if (/Bloquead/i.test(cardText)) return 'locked';
     // The selected card may report an access requirement outside the shared error alert.
     const restriction = card.parentElement.querySelector(':scope > .mx-msg:not(.bad)');
-    if (/abre quando|ins[ií]gnia/i.test(text(restriction))) return 'closed';
+    if (/abre quando|ins[ií]gnia/i.test(text(restriction))) {
+      npc.failure = text(restriction);
+      return 'closed';
+    }
 
     await pause(150, 400);
     const tp = await until(() => {
@@ -628,6 +632,11 @@
     }, 15000, 'liberar o teleporte');
     const previousError = mapTeleportError();
     const previousMessage = text(previousError);
+    const newError = () => {
+      const error = mapTeleportError();
+      const message = text(error);
+      return error !== previousError || message !== previousMessage ? message : '';
+    };
     tp.click();
 
     // The MAPA closes when the transition starts. A refusal finishes the transition and
@@ -640,11 +649,24 @@
         return null;
       }
       if (!mapWindow()) return 'there';
-      const error = mapTeleportError();
-      if (started || (error && (error !== previousError || text(error) !== previousMessage))) return 'closed';
-      return null;
+      if (newError()) return 'closed';
+      return started ? 'reopened' : null;
     }, 15000, 'teleportar');
-    if (arrival === 'unreachable') cancelFailedTeleport()?.click();
+    if (arrival === 'closed' || arrival === 'reopened') {
+      if (arrival === 'reopened') await pause(250, 450);
+      const rejection = newError();
+      if (rejection) {
+        npc.failure = rejection;
+        return 'closed';
+      }
+      // An open MAPA without a new error does not prove the move failed.
+      await closeMap();
+      return 'there';
+    }
+    if (arrival === 'unreachable') {
+      cancelFailedTeleport()?.click();
+      npc.failure = 'O teleporte não terminou.';
+    }
     return arrival;
   }
 
@@ -666,13 +688,15 @@
     npcMetaCache ??= fetch('/assets/npcs/npcs.json').then(response => response.json()).catch(() => ({}));
     return npcMetaCache;
   }
-  const templateCache = new Map();
-  async function npcTemplates(gfx) {
-    if (templateCache.has(gfx)) return templateCache.get(gfx);
+  const appearanceCache = new Map();
+  async function npcAppearance(gfx) {
+    if (appearanceCache.has(gfx)) return appearanceCache.get(gfx);
     const meta = (await npcMeta())[gfx];
-    let templates = [];
-    // HD sprites are drawn on another layer and are not searched.
+    const templates = [];
+    let markerToTile = meta?.hd?.tall ? meta.hd.tall + 6 : null;
+    // The blue badge is on the main canvas even when the sprite is drawn on the HD layer.
     if (meta && !meta.hd && meta.w && meta.h) {
+      let headRow = Infinity;
       const image = new Image();
       image.src = `/assets/npcs/${gfx}.png`;
       await image.decode().catch(() => {});
@@ -690,6 +714,7 @@
             for (let y = 0; y < meta.h; y += 1) {
               for (let x = 0; x < meta.w; x += 1) {
                 const at = (y * meta.w + x) * 4;
+                if (data[at + 3]) headRow = Math.min(headRow, y);
                 if (data[at + 3] < 200) continue;
                 pixels.push([flip ? meta.w - 1 - x : x, y, data[at], data[at + 1], data[at + 2]]);
               }
@@ -701,23 +726,59 @@
           }
         }
       }
+      // The game draws the badge 13 px above the visible top of the sprite.
+      markerToTile = meta.h + 5 - (Number.isFinite(headRow) ? headRow : 10);
     }
-    templateCache.set(gfx, templates);
-    return templates;
+    const appearance = { templates, markerToTile };
+    appearanceCache.set(gfx, appearance);
+    return appearance;
   }
 
   function worldCanvas() {
+    const scene = $('canvas:has(+ canvas.scene-names)');
+    if (scene?.width && scene.getBoundingClientRect().width) return scene;
     return $$('canvas')
       .filter(canvas => canvas.width && canvas.getBoundingClientRect().width / canvas.width > 1.2
         && !canvas.closest('[hidden]') && !canvas.classList.contains('title-scene'))
       .sort((a, b) => b.width * b.height - a.width * a.height)[0];
   }
 
-  // Where the trainer's sprite is drawn, as the client point of its feet tile, or null.
+  function nearbyBattleMarker(data, width, height, markerToTile) {
+    if (markerToTile === null) return null;
+    const cx = width / 2;
+    const cy = height / 2;
+    const radius = 16 * 3;
+    const isColor = (x, y, red, green, blue) => {
+      const index = (y * width + x) * 4;
+      return data[index] === red && data[index + 1] === green && data[index + 2] === blue;
+    };
+    const dark = (x, y) => isColor(x, y, 19, 43, 99);
+    let best = null;
+    let nearest = radius;
+    for (let top = Math.max(0, Math.floor(cy - markerToTile - radius));
+      top + 11 < height && top <= cy - markerToTile + radius; top += 1) {
+      for (let left = Math.max(0, Math.floor(cx - 5 - radius));
+        left + 9 < width && left <= cx - 5 + radius; left += 1) {
+        // The main layer contains the blue fill, navy outline and two-pixel tail.
+        if (!isColor(left + 1, top + 1, 40, 124, 224) || !isColor(left + 8, top + 8, 40, 124, 224)
+          || !dark(left + 1, top) || !dark(left + 8, top) || !dark(left, top + 4)
+          || !dark(left + 9, top + 4) || !dark(left + 4, top + 11) || !dark(left + 5, top + 11)) continue;
+        const x = left + 5;
+        const y = top + markerToTile;
+        const distance = Math.hypot(x - cx, y - cy);
+        if (y < 0 || y >= height || distance >= nearest) continue;
+        best = { x, y };
+        nearest = distance;
+      }
+    }
+    return best;
+  }
+
+  // Read the target sprite first, or the closest blue marker if the sprite is covered.
   async function locateTrainer(npc) {
-    const templates = await npcTemplates(npc.gfx);
+    const { templates, markerToTile } = await npcAppearance(npc.gfx);
     const canvas = worldCanvas();
-    if (!templates.length || !canvas) return null;
+    if (!canvas || (!templates.length && markerToTile === null)) return null;
     const { width, height } = canvas;
     let data;
     try {
@@ -761,9 +822,10 @@
         }
       }
     }
-    if (!matches.length) return null;
     const centre = [width / 2, height / 2];
-    const best = matches.sort((a, b) => Math.hypot(a.x - centre[0], a.y - centre[1]) - Math.hypot(b.x - centre[0], b.y - centre[1]))[0];
+    const best = matches.sort((a, b) => Math.hypot(a.x - centre[0], a.y - centre[1]) - Math.hypot(b.x - centre[0], b.y - centre[1]))[0]
+      ?? nearbyBattleMarker(data, width, height, markerToTile);
+    if (!best) return null;
     const rect = canvas.getBoundingClientRect();
     return { canvas, x: rect.left + best.x * rect.width / width, y: rect.top + best.y * rect.height / height };
   }
@@ -830,9 +892,20 @@
 
     await pause(350, 700);
     for (let attempt = 0; attempt < 2 && !replied; attempt += 1) {
-      const result = await tryInteraction(() => tapKey(key), 2200);
+      const result = await tryInteraction(() => tapKey(key), 3500);
       if (result) return result;
     }
+
+    async function tryVisibleTrainer() {
+      const spot = npc.gfx ? await locateTrainer(npc) : null;
+      if (!spot && !interactionWindow()) return null;
+      setStatus(`Tentando alcançar ${npc.name} pelo mapa...`);
+      return tryInteraction(() => { if (spot) clickTrainer(spot); }, 6000);
+    }
+
+    // Walk to the intended sprite before a direction tap can move the player away.
+    const visible = await tryVisibleTrainer();
+    if (visible) return visible;
 
     // A quick direction tap faces a new side. If already facing that way, the first tap
     // may take one step. Talk after the server has had time to receive the new facing.
@@ -847,17 +920,9 @@
       if (result) return result;
     }
 
-    // If the trainer wandered farther, let the game's click-to-walk find a path to it.
-    for (let attempt = 0; npc.gfx && attempt < 3; attempt += 1) {
-      const spot = await locateTrainer(npc);
-      if (!spot && !interactionWindow()) {
-        await pause(450, 650);
-        continue;
-      }
-      setStatus(`Tentando alcançar ${npc.name} pelo mapa...`);
-      const result = await tryInteraction(() => { if (spot) clickTrainer(spot); }, 6000);
-      if (result) return result;
-    }
+    const afterTurning = await tryVisibleTrainer();
+    if (afterTurning) return afterTurning;
+    npc.failure = replied ? 'Nenhuma resposta confirmou este desafio.' : 'O NPC não respondeu à interação.';
     return { outcome: replied ? 'skipped' : 'unreachable' };
   }
 
@@ -924,7 +989,8 @@
       if (npc.state === 'current') item.setAttribute('aria-current', 'step');
       item.innerHTML = '<div><strong></strong><small></small></div><b></b>';
       item.querySelector('strong').textContent = `${npc.name} · Nv. ${npc.level}`;
-      item.querySelector('small').textContent = npc.edge ? `${npc.place} · time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : npc.place;
+      const edge = npc.edge ? `time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : '';
+      item.querySelector('small').textContent = [npc.place, edge, npc.failure].filter(Boolean).join(' · ');
       item.querySelector('b').textContent = LABELS[npc.state] ?? '';
       return item;
     }));
@@ -1022,6 +1088,7 @@
           // a battle is on screen, where moving on would be unsafe.
           if (error instanceof Stop || inArena() || resultWindow()) throw error;
           await recoverScreen();
+          npc.failure = error.message;
           outcome = 'unreachable';
         }
         unreachableStreak = outcome === 'unreachable' ? unreachableStreak + 1 : 0;
