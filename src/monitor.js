@@ -588,6 +588,15 @@ style.textContent = `
   #pafk-monitor .pafk-mon-meta .pafk-mon-age { margin-right: 4px; }
   #pafk-monitor .pafk-mon-meta button { border: 0; background: none; color: ${MUTED}; padding: 0 4px; font-size: 12px; border-radius: 4px; line-height: 20px; }
   #pafk-monitor .pafk-mon-meta button:hover { background: #e9eef8; color: ${NAVY}; }
+  #pafk-monitor .pafk-mon-trade {
+    flex: none; border: 1px solid #b7c6db; border-radius: 5px; background: #fff; color: ${NAVY};
+    padding: 0 7px; font: 600 11px/20px system-ui, sans-serif; white-space: nowrap;
+  }
+  #pafk-monitor .pafk-mon-meta .pafk-mon-trade { border: 1px solid #b7c6db; color: ${NAVY}; padding: 0 7px; margin-right: 2px; font-size: 11px; }
+  #pafk-monitor .pafk-mon-trade:not(:disabled):hover { background: ${NAVY}; color: #fff; }
+  #pafk-monitor .pafk-mon-trade:disabled { color: ${MUTED}; background: #f3f6fb; cursor: default; }
+  #pafk-monitor .pafk-mon-row .pafk-mon-name .pafk-mon-trade { margin-left: 6px; }
+  #pafk-monitor .pafk-mon-row .pafk-mon-name .pafk-mon-age + .pafk-mon-trade { margin-left: 4px; }
   #pafk-monitor .pafk-mon-name input {
     width: 100%; box-sizing: border-box; font: 13px system-ui, sans-serif; font-weight: 700; color: ${NAVY};
     border: 1px solid #b7c6db; border-radius: 6px; padding: 1px 6px;
@@ -792,6 +801,86 @@ function setHtml(element, html) {
 // Rows are kept per account and updated in place, so the buttons keep working while the
 // numbers change every second.
 const rows = new Map();
+// ---- Trade with another account ----
+// The game's path is menu → Amigos → the friend → Ver perfil → TROCAR. The Amigos window also
+// has "Buscar jogador", which opens any trainer's profile by name, so the button does:
+// menu → Amigos → Buscar jogador (name) → the profile's TROCAR (`.pa1-act[data-tr]`), which sends
+// the invite and closes the profile. Only DOM clicks, as a player would do them.
+const TRADE_STATES = new Set(['daily', 'battle', 'hunting', 'fishing', 'idle']);
+let trading = false;
+
+function tradeButtonHtml(name) {
+  return `<button type="button" class="pafk-mon-trade" data-mon-trade hidden aria-label="Trocar com ${esc(name)}">⇄ Trocar</button>`;
+}
+
+const visible = element => Boolean(element && element.getClientRects().length && !element.closest('[hidden], [inert]'));
+async function waitFor(test, timeout, what) {
+  const end = performance.now() + timeout;
+  for (;;) {
+    const value = test();
+    if (value) return value;
+    if (performance.now() > end) throw new Error(`o jogo não respondeu (${what})`);
+    await new Promise(resolve => setTimeout(resolve, 120));
+  }
+}
+
+async function startTrade(name, button) {
+  if (trading) return;
+  trading = true;
+  button.dataset.busy = '';
+  button.disabled = true;
+  const label = button.textContent;
+  button.textContent = '⇄ Abrindo...';
+  let message = '';
+  try {
+    if ($('.in-arena') || $('.ah-result[data-result]')) throw new Error('termine a batalha antes');
+    // Amigos window, from the trainer menu.
+    let dmName = $('.friends-window:not([hidden]) [data-friends-dm-name]');
+    if (!visible(dmName)) {
+      const menuItem = $('.hud-pm-item[data-act="friends"]');
+      if (!menuItem) throw new Error('não achei Amigos no menu do treinador');
+      if (menuItem.closest('[inert]')) {
+        $('[data-act="playerMenu"]')?.click();
+        await waitFor(() => !menuItem.closest('[inert]'), 3000, 'abrir o menu');
+      }
+      menuItem.click();
+      dmName = await waitFor(() => {
+        const input = $('.friends-window:not([hidden]) [data-friends-dm-name]');
+        return visible(input) ? input : null;
+      }, 5000, 'abrir Amigos');
+    }
+    // "Buscar jogador" opens the profile and closes the Amigos window.
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    setValue.call(dmName, name);
+    dmName.dispatchEvent(new Event('input', { bubbles: true }));
+    const search = dmName.form?.querySelector('[data-friends-action="dm"]');
+    if (!search) throw new Error('não achei Buscar jogador em Amigos');
+    search.click();
+    const tradeButton = await waitFor(() => {
+      const profile = $$('.pa1-trainer').find(element => visible(element)
+        && nameKey($('.pa1-name', element)?.textContent) === nameKey(name));
+      const found = profile && $('.pa1-act[data-tr]', profile);
+      return found && !found.disabled ? found : null;
+    }, 8000, 'abrir o perfil');
+    tradeButton.click();
+    message = '⇄ Convite enviado';
+  } catch (error) {
+    // Only the game not reacting is expected here; anything else is a bug and must show.
+    if (!/o jogo não respondeu|não achei|termine a batalha/.test(error.message)) console.error(error);
+    message = '⇄ Não abriu';
+    button.title = `Trocar com ${name}: ${error.message}. Tente pelo menu do jogo.`;
+  } finally {
+    trading = false;
+    button.textContent = message;
+    // The panel leaves a busy button alone, so the result stays readable for a moment.
+    setTimeout(() => {
+      button.textContent = label;
+      delete button.dataset.busy;
+      button.disabled = false;
+    }, message.includes('enviado') ? 2500 : 6000);
+  }
+}
+
 let shownMode = null;
 let editing = null;
 const mode = () => (store.get(COMPACT_KEY, SHORT_SCREEN.matches) ? 'compact' : 'full');
@@ -803,10 +892,11 @@ function makeRow(name, compact) {
     item.innerHTML = `
       <span data-f="pic"></span>
       <div style="min-width: 0">
-        <div class="pafk-mon-name"><b data-f="name"></b><small data-f="sub"></small><span class="pafk-mon-age" data-f="age"></span></div>
+        <div class="pafk-mon-name"><b data-f="name"></b><small data-f="sub"></small><span class="pafk-mon-age" data-f="age"></span>${tradeButtonHtml(name)}</div>
         <div class="pafk-mon-line" data-f="line"></div>
       </div>
       <div class="pafk-mon-counts" data-f="counts"></div>`;
+    $('[data-mon-trade]', item).addEventListener('click', event => startTrade(name, event.currentTarget));
     return item;
   }
   item.className = 'pafk-mon-card';
@@ -815,6 +905,7 @@ function makeRow(name, compact) {
     <div class="pafk-mon-name"><b data-f="name"></b><small data-f="sub"></small></div>
     <div class="pafk-mon-meta">
       <span class="pafk-mon-age" data-f="age"></span>
+      ${tradeButtonHtml(name)}
       <button type="button" data-mon-rename title="Dar um apelido" aria-label="Dar um apelido a ${esc(name)}">✎</button>
       <button type="button" data-mon-forget title="Tirar da lista (volta quando a aba da conta atualizar)" aria-label="Tirar ${esc(name)} da lista">✕</button>
     </div>
@@ -825,6 +916,7 @@ function makeRow(name, compact) {
       <div class="pafk-mon-doing" data-f="doing"></div>
       <div class="pafk-mon-counts" data-f="counts"></div>
     </div>`;
+  $('[data-mon-trade]', item).addEventListener('click', event => startTrade(name, event.currentTarget));
   $('[data-mon-rename]', item).addEventListener('click', () => startRename(item, name));
   $('[data-mon-forget]', item).addEventListener('click', () => {
     store.del(PREFIX + name);
@@ -865,6 +957,16 @@ function renderList(all, now) {
     item.dataset.state = state;
     item.style.setProperty('--c', info.color);
     item.toggleAttribute('data-me', record.name === myName);
+    // A trade needs both accounts in the game, and this tab not busy with the Daily.
+    const trade = $('[data-mon-trade]', item);
+    if (trade && !trade.dataset.busy) {
+      const why = record.name === myName ? 'esta aba'
+        : !TRADE_STATES.has(state) ? `${info.label.toLowerCase()}: a conta precisa estar no jogo`
+          : $('#pafk-daily[data-running]') ? 'espere o Daily desta aba terminar' : '';
+      trade.hidden = record.name === myName;
+      trade.disabled = Boolean(why);
+      trade.title = why ? `Trocar com ${record.name}: ${why}` : `Abrir uma troca com ${record.name} nesta aba`;
+    }
 
     const nick = allNicks[record.name];
     if (editing !== record.name) {
