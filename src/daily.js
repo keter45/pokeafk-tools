@@ -2,8 +2,8 @@
 // Fights the trainers of the day whose level sits between the main Pokémon's level and 10 below.
 // The route comes from the MAPA's NPC list (sorted by XP, which also marks the locked ones),
 // grouped by place. Each fight: open MAPA → NPCs → pick the trainer → "Teleportar até lá" →
-// talk key → LUTAR → wait for the result → CONTINUAR. Any input from the player, a timeout or
-// something unexpected stops the loop.
+// talk to the trainer → LUTAR → wait for the result → CONTINUAR. Input from the player stops
+// the loop, as do failures where it would be unsafe to continue.
 (() => {
   // Levels below the main Pokémon; the player can change it in the card.
   const DEFAULT_RANGE = 10;
@@ -12,6 +12,7 @@
   const FIGHT_TIMEOUT = 10 * 60 * 1000;
   const KEYS_STORAGE = 'pokeafk.ui.keys';
   const HEAL_BELOW = 0.5;
+  const NEARBY_DIRECTIONS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
   // Trainers in a row where the game did not react before the daily gives up.
   const MAX_UNREACHABLE_STREAK = 4;
 
@@ -23,29 +24,38 @@
   box.dataset.pafk = '';
   box.setAttribute('aria-label', 'Daily de treinadores');
   box.innerHTML = `
-    <button type="button" class="pafk-daily-toggle" aria-expanded="false" data-daily-toggle>
+    <button type="button" class="pafk-daily-toggle" aria-expanded="false" aria-controls="pafk-daily-panel" data-daily-toggle>
       <span aria-hidden="true">⚔</span> Daily
     </button>
-    <div class="pafk-daily-body" hidden data-daily-body>
+    <div class="pafk-daily-body" id="pafk-daily-panel" hidden data-daily-body>
       <header>
-        <strong title="Arraste para mover; clique duas vezes para voltar ao lugar">Treinadores do dia</strong>
-        <button type="button" class="pafk-daily-x" aria-label="Fechar" data-daily-toggle>✕</button>
+        <h2 title="Arraste para mover. Clique duas vezes para voltar ao lugar.">Treinadores do dia</h2>
+        <button type="button" class="pafk-daily-x" aria-label="Fechar painel do Daily" data-daily-toggle>×</button>
       </header>
-      <label class="pafk-daily-levels">
-        Lutar até
-        <input type="number" min="0" max="${MAX_RANGE}" step="1" value="${DEFAULT_RANGE}" inputmode="numeric" data-daily-levels>
-        níveis abaixo do principal
-        <small>Sugerido: ${DEFAULT_RANGE}.</small>
-      </label>
-      <p class="pafk-daily-range" data-daily-range>Faixa: nível do Pokémon principal até ${DEFAULT_RANGE} abaixo.</p>
-      <label class="pafk-daily-avoid">
-        <input type="checkbox" data-daily-avoid checked>
-        Evitar times com vantagem de tipo
-        <small>O time de cada treinador é aprendido na primeira luta.</small>
-      </label>
-      <div class="pafk-daily-progress" hidden data-daily-progress>
-        <div class="pafk-daily-count"><strong data-daily-left></strong><span data-daily-total></span></div>
-        <div class="pafk-daily-bar" role="progressbar" aria-valuemin="0" data-daily-bar><i></i></div>
+      <div class="pafk-daily-content">
+        <div class="pafk-daily-main">
+          <img alt="" hidden data-daily-sprite>
+          <div>
+            <strong data-daily-main>Pokémon principal</strong>
+            <p class="pafk-daily-range" data-daily-range></p>
+          </div>
+        </div>
+        <div class="pafk-daily-progress" hidden data-daily-progress>
+          <div class="pafk-daily-count"><strong data-daily-left></strong><span>Vitórias <span data-daily-total></span></span></div>
+          <div class="pafk-daily-bar" role="progressbar" aria-label="Vitórias" aria-valuemin="0" data-daily-bar><i></i></div>
+        </div>
+        <p class="pafk-daily-status" role="status" data-daily-status></p>
+        <ol class="pafk-daily-route" aria-label="Rota de treinadores" hidden data-daily-route></ol>
+        <div class="pafk-daily-options">
+          <label class="pafk-daily-levels">
+            <span><strong>Níveis abaixo do principal</strong><small>Sugerido: ${DEFAULT_RANGE}</small></span>
+            <input type="number" min="0" max="${MAX_RANGE}" step="1" value="${DEFAULT_RANGE}" inputmode="numeric" data-daily-levels>
+          </label>
+          <label class="pafk-daily-avoid">
+            <input type="checkbox" aria-describedby="pafk-daily-avoid-help" data-daily-avoid checked>
+            <span><strong>Evitar vantagem de tipo</strong><small id="pafk-daily-avoid-help">O Daily aprende o time de cada treinador na primeira luta.</small></span>
+          </label>
+        </div>
       </div>
       <p class="pafk-daily-status" role="status" aria-live="polite" data-daily-status></p>
       <ol class="pafk-daily-route" hidden data-daily-route></ol>
@@ -54,11 +64,14 @@
         <button type="button" class="pafk-daily-stop" hidden data-daily-stop>Parar</button>
       </div>
     </div>`;
+  const toggleButton = box.querySelector('.pafk-daily-toggle');
   const body = box.querySelector('[data-daily-body]');
   const goButton = box.querySelector('[data-daily-go]');
   const stopButton = box.querySelector('[data-daily-stop]');
   const statusEl = box.querySelector('[data-daily-status]');
   const rangeEl = box.querySelector('[data-daily-range]');
+  const mainEl = box.querySelector('[data-daily-main]');
+  const spriteEl = box.querySelector('[data-daily-sprite]');
   const progressEl = box.querySelector('[data-daily-progress]');
   const routeEl = box.querySelector('[data-daily-route]');
   const avoidBox = box.querySelector('[data-daily-avoid]');
@@ -68,69 +81,119 @@
   style.dataset.pafk = '';
   style.textContent = `
     #pafk-daily {
+      --daily-ink: #15264f; --daily-muted: #485d7e; --daily-line: #d9e4f3;
+      --daily-blue: #2459aa; --daily-navy: #14265a;
       position: fixed; right: 8px; top: 96px; z-index: 40;
-      display: flex; flex-direction: column; align-items: flex-end;
-      font: 13px/1.35 system-ui, sans-serif; color: #152964;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+      font: 13px/1.4 system-ui, sans-serif; color: var(--daily-ink);
+      font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased;
     }
     #pafk-daily [hidden] { display: none !important; }
+    #pafk-daily :is(h2, p, ol) { margin: 0; }
+    #pafk-daily :focus-visible { outline: 2px solid #3279cf; outline-offset: 2px; }
     #pafk-daily button { font: inherit; cursor: pointer; }
     #pafk-daily .pafk-daily-toggle {
-      border: 1px solid #bed0ec; border-radius: 999px; background: #fff; color: #152964;
-      padding: 6px 12px; font-weight: 800; box-shadow: 0 2px 8px rgb(0 0 0 / .18);
+      display: inline-flex; gap: 7px; align-items: center; min-height: 40px;
+      border: 1px solid #5875ac; border-radius: 9px; background: var(--daily-navy); color: #fff;
+      padding: 0 12px; font-weight: 800; box-shadow: 0 2px 0 #0e1b3e, 0 4px 12px rgb(13 29 64 / .22);
     }
-    #pafk-daily[data-running] .pafk-daily-toggle { background: #2459aa; border-color: #2459aa; color: #fff; }
+    #pafk-daily .pafk-daily-toggle:is(:hover, [aria-expanded="true"]),
+    #pafk-daily[data-running] .pafk-daily-toggle { background: var(--daily-blue); }
     #pafk-daily .pafk-daily-body {
-      box-sizing: border-box; width: min(290px, calc(100vw - 24px)); margin-top: 6px;
-      border: 1px solid #bed0ec; border-radius: 10px; background: #fff; padding: 10px 12px 12px;
-      box-shadow: 0 6px 20px rgb(0 0 0 / .22); display: grid; gap: 8px;
+      box-sizing: border-box; width: min(334px, calc(100vw - 16px));
+      max-height: calc(var(--daily-room, 80vh) - 46px); overflow: hidden;
+      display: flex; flex-direction: column;
+      border: 1px solid #a7bce1; border-radius: 14px; background: #fff;
+      box-shadow: 0 2px 6px rgb(12 29 64 / .17), 0 12px 30px rgb(12 29 64 / .28);
     }
-    #pafk-daily header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    #pafk-daily .pafk-daily-body > header {
+      display: flex; align-items: center; justify-content: space-between; flex: none;
+      gap: 8px; padding: 4px 6px 4px 14px; background: var(--daily-navy); color: #fff;
+    }
+    #pafk-daily h2 { font: 800 15px/1.2 system-ui, sans-serif; text-wrap: balance; }
     #pafk-daily :is(.pafk-daily-toggle, .pafk-daily-body > header) { cursor: grab; touch-action: none; user-select: none; }
     #pafk-daily[data-dragging] :is(.pafk-daily-toggle, .pafk-daily-body > header) { cursor: grabbing; }
-    #pafk-daily .pafk-daily-x { cursor: pointer; }
-    #pafk-daily .pafk-daily-x { border: 0; background: none; color: #4a5f8f; padding: 2px 4px; }
-    #pafk-daily p { margin: 0; }
-    #pafk-daily .pafk-daily-range { color: #4a5f8f; font-size: 12px; }
-    #pafk-daily .pafk-daily-levels { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
-    #pafk-daily .pafk-daily-levels input {
-      width: 4.5em; box-sizing: border-box; padding: 3px 6px; font: inherit; font-weight: 700;
-      color: #152964; border: 1px solid #bed0ec; border-radius: 6px; background: #fff;
-      font-variant-numeric: tabular-nums;
+    #pafk-daily .pafk-daily-x {
+      display: grid; place-items: center; flex: 0 0 40px; height: 40px;
+      border: 0; border-radius: 8px; background: transparent; color: #fff; padding: 0;
+      font-size: 23px; line-height: 1;
     }
-    #pafk-daily .pafk-daily-levels input:focus-visible { outline: 2px solid #2459aa; outline-offset: 1px; }
-    #pafk-daily .pafk-daily-levels input:disabled { background: #eef2f9; color: #4a5f8f; }
-    #pafk-daily .pafk-daily-levels small { flex-basis: 100%; color: #4a5f8f; font-size: 11px; }
-    #pafk-daily .pafk-daily-avoid { display: grid; grid-template-columns: auto 1fr; gap: 0 6px; align-items: center; cursor: pointer; }
-    #pafk-daily .pafk-daily-avoid input { margin: 0; }
-    #pafk-daily .pafk-daily-avoid small { grid-column: 2; color: #4a5f8f; font-size: 11px; }
-    #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="unreachable"], [data-state="closed"]) { opacity: .6; }
-    #pafk-daily .pafk-daily-route li[data-state="avoided"] b { color: #b35c00; }
-    #pafk-daily .pafk-daily-count { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
-    #pafk-daily .pafk-daily-count span { color: #4a5f8f; }
-    #pafk-daily .pafk-daily-bar { height: 8px; border-radius: 4px; background: #e3ebf7; overflow: hidden; margin-top: 4px; }
-    #pafk-daily .pafk-daily-bar i { display: block; height: 100%; width: 0; background: #2f9e44; transition: width .3s; }
-    #pafk-daily .pafk-daily-status { min-height: 1.35em; }
+    #pafk-daily .pafk-daily-x:hover { background: #294275; }
+    #pafk-daily .pafk-daily-content {
+      display: grid; align-content: start; gap: 10px; padding: 12px; overflow: auto; overscroll-behavior: contain;
+    }
+    #pafk-daily .pafk-daily-main {
+      display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 10px;
+      border-radius: 9px; background: #eaf2ff; overflow-wrap: anywhere;
+    }
+    #pafk-daily .pafk-daily-main img {
+      width: 48px; height: 48px; flex: none; object-fit: contain; image-rendering: pixelated;
+    }
+    #pafk-daily .pafk-daily-main strong { font-size: 14px; }
+    #pafk-daily :is(.pafk-daily-range, .pafk-daily-options small) {
+      color: var(--daily-muted); font-size: 12px; text-wrap: pretty;
+    }
+    #pafk-daily .pafk-daily-options { border: 1px solid var(--daily-line); border-radius: 9px; }
+    #pafk-daily[data-running] .pafk-daily-options { display: none; }
+    #pafk-daily .pafk-daily-options label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+    #pafk-daily .pafk-daily-options small { display: block; margin-top: 2px; }
+    #pafk-daily .pafk-daily-levels { justify-content: space-between; }
+    #pafk-daily .pafk-daily-levels input {
+      box-sizing: border-box; flex: 0 0 58px; width: 58px; min-height: 40px; padding: 4px 6px;
+      font: inherit; font-weight: 800; color: var(--daily-ink);
+      border: 1px solid #aabfdf; border-radius: 6px; background: #f6f9ff;
+    }
+    #pafk-daily .pafk-daily-levels input:disabled { color: var(--daily-muted); }
+    #pafk-daily .pafk-daily-avoid { border-top: 1px solid var(--daily-line); cursor: pointer; }
+    #pafk-daily .pafk-daily-avoid:has(input:disabled) { cursor: default; }
+    #pafk-daily .pafk-daily-avoid input { width: 17px; height: 17px; flex: none; margin: 0; accent-color: var(--daily-blue); }
+    #pafk-daily .pafk-daily-count { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; }
+    #pafk-daily .pafk-daily-count strong { font-size: 15px; }
+    #pafk-daily .pafk-daily-count span { color: var(--daily-muted); }
+    #pafk-daily .pafk-daily-bar { height: 7px; border-radius: 4px; background: #e1e9f6; overflow: hidden; margin-top: 5px; }
+    #pafk-daily .pafk-daily-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: #23744c; }
+    #pafk-daily .pafk-daily-status {
+      padding: 7px 9px; border-radius: 6px; border-left: 3px solid #507cb9; background: #eff5ff; text-wrap: pretty;
+    }
+    #pafk-daily .pafk-daily-status:empty { display: none; }
+    #pafk-daily .pafk-daily-status[data-tone="stop"] { border-color: #ad6216; background: #fff1de; color: #713a05; }
+    #pafk-daily .pafk-daily-status[data-tone="done"] { border-color: #23744c; background: #e7f6ed; color: #17603d; }
     #pafk-daily .pafk-daily-route {
-      margin: 0; padding: 0; list-style: none; max-height: 180px; overflow: auto;
-      border-top: 1px solid #e3ebf7; font-size: 12px;
+      list-style: none; padding: 0; max-height: 168px; overflow: auto;
+      border: 1px solid var(--daily-line); border-radius: 9px; scrollbar-width: thin;
     }
     #pafk-daily .pafk-daily-route li {
-      display: grid; grid-template-columns: 1fr auto; gap: 0 8px; padding: 4px 0;
-      border-bottom: 1px solid #eef2f9;
+      display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+      gap: 8px; padding: 7px 9px; font-size: 12px;
     }
-    #pafk-daily .pafk-daily-route li small { grid-column: 1; color: #4a5f8f; }
-    #pafk-daily .pafk-daily-route li b { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-weight: 700; }
-    #pafk-daily .pafk-daily-route li[data-state="current"] { background: #eef4ff; }
-    #pafk-daily .pafk-daily-route li[data-state="won"] b { color: #2f9e44; }
-    #pafk-daily .pafk-daily-route li[data-state="lost"] b,
-    #pafk-daily .pafk-daily-route li[data-state="skipped"] b { color: #c92a2a; }
-    #pafk-daily .pafk-daily-actions { display: flex; gap: 8px; }
+    #pafk-daily .pafk-daily-route li + li { border-top: 1px solid var(--daily-line); }
+    #pafk-daily .pafk-daily-route li div { overflow-wrap: anywhere; }
+    #pafk-daily .pafk-daily-route li :is(strong, small) { display: block; }
+    #pafk-daily .pafk-daily-route li small { color: var(--daily-muted); font-size: 11px; }
+    #pafk-daily .pafk-daily-route li b {
+      border-radius: 5px; padding: 3px 6px; background: #edf0f6; color: #455473; font-size: 11px;
+    }
+    #pafk-daily .pafk-daily-route li b:empty { display: none; }
+    #pafk-daily .pafk-daily-route li[data-state="current"] { background: #edf4ff; box-shadow: inset 3px 0 var(--daily-blue); }
+    #pafk-daily .pafk-daily-route li[data-state="current"] b { color: #174683; background: #dceaff; }
+    #pafk-daily .pafk-daily-route li[data-state="won"] b { color: #17603d; background: #e0f3e8; }
+    #pafk-daily .pafk-daily-route li[data-state="lost"] b { color: #a02735; background: #fbe7ea; }
+    #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="unreachable"]) b { color: #713a05; background: #fff0da; }
+    #pafk-daily .pafk-daily-actions {
+      display: flex; flex: none; padding: 10px 12px 12px; border-top: 1px solid var(--daily-line); background: #f6f9ff;
+    }
     #pafk-daily .pafk-daily-actions button {
-      flex: 1; border-radius: 8px; padding: 7px 10px; font-weight: 800; border: 1px solid #2459aa;
+      flex: 1; border-radius: 8px; min-height: 42px; padding: 6px 10px; font-weight: 800; border: 1px solid transparent;
     }
-    #pafk-daily .pafk-daily-go { background: #2459aa; color: #fff; }
-    #pafk-daily .pafk-daily-go:disabled { opacity: .55; cursor: default; }
-    #pafk-daily .pafk-daily-stop { background: #fff; color: #c92a2a; border-color: #c92a2a !important; }
+    #pafk-daily .pafk-daily-go { background: var(--daily-blue); color: #fff; }
+    #pafk-daily .pafk-daily-go:hover { background: #194985; }
+    #pafk-daily .pafk-daily-stop { background: #fff0f0; color: #a02735; border-color: #f0bac1; }
+    #pafk-daily .pafk-daily-stop:hover { background: #fce0e4; }
+    @media (prefers-reduced-motion: no-preference) {
+      #pafk-daily .pafk-daily-actions button { transition: scale .12s ease-out; }
+      #pafk-daily .pafk-daily-actions button:active { scale: .96; }
+      #pafk-daily .pafk-daily-bar i { transition: width .2s ease-out; }
+    }
   `;
   document.head.append(style);
   document.body.append(box);
@@ -145,16 +208,16 @@
     saved = null;
   }
   function clampPosition({ right, top }) {
-    const width = box.querySelector('.pafk-daily-toggle').offsetWidth || 80;
+    const width = (body.hidden ? toggleButton.offsetWidth : body.offsetWidth) || 80;
     return {
       right: Math.min(Math.max(0, right), Math.max(0, innerWidth - width)),
-      top: Math.min(Math.max(0, top), Math.max(0, innerHeight - 40)),
+      top: Math.min(Math.max(0, top), Math.max(0, innerHeight - (body.hidden ? 40 : 230))),
     };
   }
   function placeBox() {
     let position;
     if (saved) {
-      position = clampPosition(saved);
+      position = saved;
     } else {
       const rect = document.querySelector('.hud.world-hud .hud-quick')?.getBoundingClientRect();
       const visible = rect && rect.width > 0;
@@ -163,8 +226,10 @@
         right: visible ? Math.max(8, Math.round(innerWidth - rect.right)) : 8,
       };
     }
-    box.style.top = `${position.top}px`;
-    box.style.right = `${position.right}px`;
+    const { right, top } = clampPosition(position);
+    box.style.top = `${top}px`;
+    box.style.right = `${right}px`;
+    box.style.setProperty('--daily-room', `${innerHeight - top - 6}px`);
   }
   placeBox();
   setInterval(placeBox, 1000);
@@ -225,8 +290,10 @@
         return;
       }
       body.hidden = !body.hidden;
-      box.querySelector('.pafk-daily-toggle').setAttribute('aria-expanded', String(!body.hidden));
+      toggleButton.setAttribute('aria-expanded', String(!body.hidden));
+      if (body.hidden && toggle !== toggleButton) toggleButton.focus();
       if (!body.hidden && !run) showRange();
+      placeBox();
     });
   }
 
@@ -235,15 +302,13 @@
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const text = element => element?.textContent.replace(/\s+/g, ' ').trim() ?? '';
   const fold = value => value.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
-  // The list shows "PESCADOR DALE"; the challenge shows the class and the name apart.
-  const sameTrainer = (full, foe) => fold(full) === fold(foe) || fold(full).endsWith(` ${fold(foe)}`);
-
   function mainPokemon() {
     const button = $('button.hud-active-button');
     const label = button?.getAttribute('aria-label') ?? '';
     const match = label.match(/Resumo de (.+), nível (\d+)/i);
-    const dex = Number(button?.querySelector('img.front')?.getAttribute('src')?.match(/\/(\d+)[^/]*\.png/)?.[1] ?? 0);
-    return match ? { name: match[1], level: Number(match[2]), dex } : null;
+    const sprite = button?.querySelector('img.front')?.getAttribute('src') ?? '';
+    const dex = Number(sprite.match(/\/(\d+)[^/]*\.png/)?.[1] ?? 0);
+    return match ? { name: match[1], level: Number(match[2]), dex, sprite } : null;
   }
 
   // ---- Trainer teams and type edge ----
@@ -410,7 +475,8 @@
     run.stopped = true;
     run.reason = reason;
   }
-  function setStatus(message) {
+  function setStatus(message, tone = 'info') {
+    statusEl.dataset.tone = tone;
     statusEl.textContent = message;
   }
 
@@ -678,50 +744,105 @@
     return { canvas, x: rect.left + best.x * rect.width / width, y: rect.top + best.y * rect.height / height };
   }
 
-  async function walkToTrainer(npc) {
-    for (let attempt = 0; attempt < 3 && !challenge(); attempt += 1) {
-      const spot = await locateTrainer(npc);
-      if (!spot) {
-        await sleep(600);
-        continue;
-      }
-      setStatus(`Procurando ${npc.name} por perto...`);
-      const init = { bubbles: true, cancelable: true, clientX: spot.x, clientY: spot.y, button: 0, buttons: 1, pointerId: 1, pointerType: 'mouse', isPrimary: true };
-      spot.canvas.dispatchEvent(new PointerEvent('pointerdown', init));
-      spot.canvas.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0 }));
+  function clickTrainer(spot) {
+    const init = {
+      bubbles: true, cancelable: true, clientX: spot.x, clientY: spot.y,
+      button: 0, buttons: 1, pointerId: 1, pointerType: 'mouse', isPrimary: true,
+    };
+    spot.canvas.dispatchEvent(new PointerEvent('pointerdown', init));
+    spot.canvas.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0 }));
+  }
+
+  const interactionWindow = () => challenge() ?? $('.b5-again') ?? $('.npc-dialogue-backdrop, .quest-backdrop, .modal.open .win');
+  function tapKey(key) {
+    const init = { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true, cancelable: true };
+    dispatchEvent(new KeyboardEvent('keydown', init));
+    dispatchEvent(new KeyboardEvent('keyup', init));
+  }
+
+  async function findTrainer(npc) {
+    const expected = fold(npc.name);
+    const key = talkKey();
+    let replied = false;
+
+    async function tryInteraction(action, timeout) {
+      alive();
+      if (inArena() || resultWindow()) throw new Stop('Parado porque uma batalha foi aberta.');
+      if (!interactionWindow()) await action();
+
+      let response;
       try {
-        await until(challenge, 6000, 'andar até o treinador');
+        response = await until(interactionWindow, timeout, 'responder à interação');
       } catch (error) {
         if (error instanceof Stop) throw error;
+        return null;
       }
+
+      replied = true;
+      const fight = response.querySelector('[data-fight]');
+      const foe = text(response.querySelector('.b5-ch-name'));
+      const trainer = foe
+        ? [text(response.querySelector('.b5-ch-cls')), foe].filter(Boolean).join(' ')
+        : text(response.querySelector('.b5-ch-msg')).match(/^(.+) quer batalhar\.$/i)?.[1];
+      if (fight && trainer && fold(trainer) === expected) return { fight };
+
+      // Talking can return the cooldown notice instead of a challenge, even if the MAPA
+      // listed the trainer as available. Only credit a win for the named trainer.
+      const ofToday = text(response.querySelector('.b5-again-head span')).replace(/\.$/, '')
+        || text(response.querySelector('.b5-plain-text')).match(/^(.+?):\s*Já batalhamos hoje\b/i)?.[1];
+      const beatToday = response.matches('.b5-again') && ofToday && fold(ofToday) === expected;
+      const dismiss = response.querySelector('[data-nofight], [data-npc-close], [data-quest-close], button[aria-label="Fechar"]')
+        ?? (response.matches('.b5-again') ? response.querySelector('[data-ok]') : null);
+      if (!dismiss) throw new Stop('Parado. Feche a janela aberta no jogo.');
+      dismiss.click();
+      try {
+        await until(() => interactionWindow() !== response, 2500, 'fechar a resposta do NPC');
+      } catch (error) {
+        if (error instanceof Stop) throw error;
+        throw new Stop('Parado. A resposta do NPC ficou aberta.');
+      }
+      return beatToday ? { outcome: 'won' } : null;
     }
-    return challenge();
+
+    await pause(350, 700);
+    for (let attempt = 0; attempt < 2 && !replied; attempt += 1) {
+      const result = await tryInteraction(() => tapKey(key), 2200);
+      if (result) return result;
+    }
+
+    // A quick direction tap faces a new side. If already facing that way, the first tap
+    // may take one step. Talk after the server has had time to receive the new facing.
+    setStatus(`Procurando ${npc.name} entre os NPCs próximos...`);
+    for (const direction of NEARBY_DIRECTIONS) {
+      const result = await tryInteraction(async () => {
+        tapKey(direction);
+        await pause(280, 380);
+        // In the game, Z/E also accept an open challenge. Never use talk over a response.
+        if (!interactionWindow()) tapKey(key);
+      }, 1600);
+      if (result) return result;
+    }
+
+    // If the trainer wandered farther, let the game's click-to-walk find a path to it.
+    for (let attempt = 0; npc.gfx && attempt < 3; attempt += 1) {
+      const spot = await locateTrainer(npc);
+      if (!spot && !interactionWindow()) {
+        await pause(450, 650);
+        continue;
+      }
+      setStatus(`Tentando alcançar ${npc.name} pelo mapa...`);
+      const result = await tryInteraction(() => { if (spot) clickTrainer(spot); }, 6000);
+      if (result) return result;
+    }
+    return { outcome: replied ? 'skipped' : 'unreachable' };
   }
 
   async function talkAndFight(npc) {
-    const key = talkKey();
-    for (let attempt = 0; attempt < 2 && !challenge(); attempt += 1) {
-      await pause(350, 700);
-      dispatchEvent(new KeyboardEvent('keydown', { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true }));
-      await sleep(80);
-      dispatchEvent(new KeyboardEvent('keyup', { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true }));
-      try {
-        await until(challenge, 3500, 'abrir o desafio');
-      } catch (error) {
-        if (error instanceof Stop) throw error;
-      }
-    }
-    // Nothing happened after talking: the trainer may have wandered off, so look for it.
-    const dialog = challenge() ?? (npc.gfx ? await walkToTrainer(npc) : null);
-    if (!dialog) return 'unreachable';
-    const foe = text(dialog.querySelector('.b5-ch-name'));
-    if (foe && !sameTrainer(npc.name, foe)) {
-      dialog.querySelector('[data-nofight]')?.click();
-      await pause();
-      return 'skipped';
-    }
+    const { fight, outcome } = await findTrainer(npc);
+    if (outcome) return outcome;
     await pause(200, 500);
-    dialog.querySelector('[data-fight]')?.click();
+    if (challenge()?.querySelector('[data-fight]') !== fight) return 'skipped';
+    fight.click();
     await until(() => inArena() || resultWindow(), 15000, 'começar a batalha');
     setStatus(`Lutando contra ${npc.name}...`);
     const seen = new Set();
@@ -731,12 +852,12 @@
       return resultWindow();
     }, FIGHT_TIMEOUT, 'terminar a batalha');
     saveTeam(npc, [...seen]);
-    const outcome = result.dataset.result;
+    const battleResult = result.dataset.result;
     const sentToCenter = /Centro Pokémon/i.test(text(result));
     await pause();
     result.querySelector('[data-ah="ok"]')?.click();
     await until(() => !resultWindow(), 8000, 'fechar o resultado');
-    return outcome === 'win' ? 'won' : (sentToCenter ? 'lost-healed' : 'lost');
+    return battleResult === 'win' ? 'won' : (sentToCenter ? 'lost-healed' : 'lost');
   }
 
   // HP of the main Pokémon from the HUD ("33/ 50").
@@ -764,7 +885,7 @@
   function renderProgress() {
     const { route, done, total } = run;
     const left = total - done;
-    progressEl.hidden = false;
+    progressEl.hidden = !total;
     box.querySelector('[data-daily-left]').textContent = left ? (left === 1 ? 'Falta 1' : `Faltam ${left}`) : 'Tudo feito!';
     box.querySelector('[data-daily-total]').textContent = `${done} de ${total}`;
     const bar = box.querySelector('[data-daily-bar]');
@@ -772,34 +893,48 @@
     bar.setAttribute('aria-valuenow', String(done));
     bar.querySelector('i').style.width = `${total ? Math.round(done / total * 100) : 100}%`;
     routeEl.hidden = !route.length;
+    const scrollTop = routeEl.scrollTop;
     routeEl.replaceChildren(...route.map(npc => {
       const item = document.createElement('li');
       item.dataset.state = npc.state;
-      item.innerHTML = '<span></span><small></small><b></b>';
-      item.children[0].textContent = `${npc.name} · Nv. ${npc.level}`;
-      item.children[1].textContent = npc.edge ? `${npc.place} · time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : npc.place;
-      item.children[2].textContent = LABELS[npc.state] ?? '';
+      if (npc.state === 'current') item.setAttribute('aria-current', 'step');
+      item.innerHTML = '<div><strong></strong><small></small></div><b></b>';
+      item.querySelector('strong').textContent = `${npc.name} · Nv. ${npc.level}`;
+      item.querySelector('small').textContent = npc.edge ? `${npc.place} · time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : npc.place;
+      item.querySelector('b').textContent = LABELS[npc.state] ?? '';
       return item;
     }));
-    routeEl.querySelector('[data-state="current"]')?.scrollIntoView({ block: 'nearest' });
+    routeEl.scrollTop = scrollTop;
+    const current = routeEl.querySelector('[aria-current]');
+    if (current && !body.hidden) {
+      const list = routeEl.getBoundingClientRect();
+      const row = current.getBoundingClientRect();
+      routeEl.scrollTop += Math.min(0, row.top - list.top) + Math.max(0, row.bottom - list.bottom);
+    }
   }
 
   function showRange() {
     const main = mainPokemon();
     const below = levelRange();
-    const lowest = Math.max(1, main ? main.level - below : 1);
+    const lowest = Math.max(1, (main?.level ?? 1) - below);
+    mainEl.textContent = main ? `${main.name} · Nv. ${main.level}` : 'Pokémon principal';
+    spriteEl.hidden = !main?.sprite;
+    if (main?.sprite && spriteEl.getAttribute('src') !== main.sprite) spriteEl.src = main.sprite;
     rangeEl.textContent = main
       ? (lowest === main.level
-        ? `${main.name}, Nv. ${main.level}: só treinadores do Nv. ${main.level}.`
-        : `${main.name}, Nv. ${main.level}: treinadores do Nv. ${lowest} ao ${main.level}.`)
-      : 'Entre no jogo para ver o Pokémon principal.';
+        ? `Treinadores de nível ${main.level}`
+        : `Treinadores do nível ${lowest} ao ${main.level}`)
+      : 'Entre no jogo para ver a faixa de níveis.';
   }
 
   function setRunning(on) {
+    const restoreFocus = document.activeElement === (on ? goButton : stopButton);
     goButton.hidden = on;
     stopButton.hidden = !on;
     levelsInput.disabled = on;
+    avoidBox.disabled = on;
     box.toggleAttribute('data-running', on);
+    if (restoreFocus) (on ? stopButton : goButton).focus({ preventScroll: true });
   }
 
   stopButton.addEventListener('click', () => stop('Parado.'));
@@ -809,7 +944,7 @@
     const main = mainPokemon();
     showRange();
     if (!main) {
-      setStatus('Não achei o Pokémon principal no HUD.');
+      setStatus('Não achei o Pokémon principal no HUD.', 'stop');
       return;
     }
     run = { stopped: false, reason: '', route: [], done: 0, total: 0 };
@@ -884,12 +1019,12 @@
       setStatus(['Daily concluído.', lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
         unreachable && `${unreachable} inacessível(is).`,
         avoided && `${avoided} evitado(s) por vantagem de tipo.`]
-        .filter(Boolean).join(' '));
+        .filter(Boolean).join(' '), 'done');
     } catch (error) {
       const current = run.route.find(npc => npc.state === 'current');
       if (current) current.state = 'todo';
       if (run.route.length) renderProgress();
-      setStatus(error instanceof Stop ? error.message : `Parado: ${error.message}`);
+      setStatus(error instanceof Stop ? error.message : `Parado: ${error.message}`, 'stop');
     } finally {
       run = null;
       setRunning(false);

@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.1.0
-// @description  Ferramentas para o pokeAFK: filtros e tiers no mercado, no mapa e na ficha, recomendações de natureza, IVs e golpes, daily de treinadores, monitor de contas entre abas e desvio de golpes em área (experimental).
+// @version      1.3.1
+// @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
 // @updateURL    https://raw.githubusercontent.com/keter45/pokeafk-tools/main/poke-tools.user.js
@@ -1057,14 +1057,18 @@
 
     function readOffer(row) {
       const rawNature = row.querySelector('.mk-lr-nature, :scope > .mk-offer-who > small')?.textContent.trim();
+      return { nature: NATURES.includes(rawNature) ? rawNature : null, ivs: readIVs(row.querySelector('.mk-ivs')) };
+    }
+
+    function readIVs(grid) {
       const ivs = {};
-      for (const stat of row.querySelectorAll('.mk-ivs > span')) {
+      for (const stat of grid?.children ?? []) {
         const label = stat.querySelector('small')?.textContent.trim().toUpperCase();
         const value = stat.querySelector('b')?.textContent.trim();
         const key = STAT_KEYS.get(label);
         if (key && /^\d{1,2}$/.test(value)) ivs[key] = Number(value);
       }
-      return { nature: NATURES.includes(rawNature) ? rawNature : null, ivs };
+      return ivs;
     }
 
     function setNatureCheckboxes(form, natures) {
@@ -2116,6 +2120,1163 @@
       decorateTierBadges();
     }
 
+    // ==== src/market/price-data.js ====
+    // Comparação de preço a partir dos IVs e dos preços pedidos no mercado.
+    const PRICE_HISTORY_KEY = 'pokeafk-market-filtros:price-history';
+    const PRICE_HISTORY_AGE = 7 * 24 * 60 * 60 * 1000;
+    const IV_MAX_TOTAL = 186;
+    const PRICE_SAMPLE_SIZE = 5;
+    const priceNumber = new Intl.NumberFormat('pt-BR');
+    const priceDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+    function priceIVTotal(ivs) {
+      const values = STATS.map(([stat]) => ivs?.[stat]);
+      return values.every(validIV) ? values.reduce((sum, value) => sum + value, 0) : null;
+    }
+
+    function priceVariant(sprite) {
+      return sprite?.getAttribute('src')?.match(/\/assets\/mon\/front\/((\d+)[\w-]*)\.png(?:[?#].*)?$/);
+    }
+
+    function readPriceTarget(main) {
+      if (!main?.parentElement.matches('.mk[data-page="create"]')) return null;
+      const preview = main.querySelector('.mk-ivs-pv')?.parentElement;
+      const variant = priceVariant(preview?.querySelector('.mk-pv-mon img'));
+      const name = preview?.querySelector('.mk-pv-name')?.textContent.trim();
+      const ivs = readIVs(preview?.querySelector('.mk-ivs-pv'));
+      const total = priceIVTotal(ivs);
+      if (!variant || !name || total === null) return null;
+      const level = readPriceLevel([...preview.querySelectorAll('.mk-fact b')].find(el =>
+        /^Nv\./.test(el.textContent.trim())));
+      const own = main.querySelector('[data-own-mon][aria-pressed="true"], [data-own-mon].on');
+      const key = own?.dataset.ownMon ?? JSON.stringify([variant[1], name, ivs, level]);
+      return { key, dex: Number(variant[2]), variant: variant[1], name, ivs, total, level };
+    }
+
+    function defaultPriceCriteria({ ivs, total }) {
+      const perfect = STATS.filter(([stat]) => ivs[stat] === 31);
+      const best = STATS.reduce((a, b) => ivs[b[0]] > ivs[a[0]] ? b : a);
+      const priority = perfect.length ? perfect : [best];
+      return {
+        total: Math.max(0, total - 5),
+        minimums: new Map(priority.map(([stat]) => [stat, Math.max(0, ivs[stat] - (perfect.length ? 0 : 2))])),
+      };
+    }
+
+    function readPriceAmount(raw = '') {
+      const amount = raw.trim().replace(/^₽\s*/, '');
+      if (!/^(?:\d+|\d{1,3}(?:[.\s]\d{3})+)$/.test(amount)) return null;
+      const value = Number(amount.replace(/\D/g, ''));
+      return Number.isSafeInteger(value) && value > 0 ? value : null;
+    }
+
+    function readPriceLevel(node) {
+      return Number(node?.textContent.trim().match(/^Nv\.\s*([\d.]+)$/)?.[1].replaceAll('.', '')) || 0;
+    }
+
+    function readPriceOffers(main) {
+      const variants = new Map();
+      const rows = main.querySelectorAll(OFFER_ROW);
+      for (const row of rows) {
+        const id = row.querySelector('[data-buy]')?.dataset.buy;
+        const variant = priceVariant(row.querySelector('img.mk-front'))?.[1];
+        if (!id || !variant) continue;
+        const { ivs, nature } = readOffer(row);
+        const total = priceIVTotal(ivs);
+        const money = row.querySelector('.mk-coin-n');
+        const gems = row.querySelector('.mk-gem-n');
+        const price = readPriceAmount(money?.title || money?.textContent);
+        if (total === null || price === null) continue;
+        if (!variants.has(variant)) variants.set(variant, new Map());
+        variants.get(variant).set(id, {
+          ivs, total, nature, price,
+          gems: readPriceAmount(gems?.title || gems?.textContent),
+          level: readPriceLevel(row.querySelector('.mk-lv')),
+        });
+      }
+      return {
+        variants: new Map([...variants].map(([variant, offers]) => [variant, [...offers.values()]])),
+        rowCount: rows.length,
+      };
+    }
+
+    function nearestPriceOffers(offers, target, { total, minimums }) {
+      const stats = [...minimums];
+      const matches = offers.flatMap(offer => {
+        if (offer.total < total || stats.some(([stat, min]) => offer.ivs[stat] < min)) return [];
+        const statDistance = stats.reduce((sum, [stat]) => sum + Math.abs(offer.ivs[stat] - target.ivs[stat]), 0);
+        return [{ offer, distance: Math.abs(offer.total - target.total) + 4 * statDistance }];
+      });
+      matches.sort((a, b) => a.distance - b.distance ||
+        Math.abs(a.offer.level - target.level) - Math.abs(b.offer.level - target.level));
+      return { count: matches.length, sample: matches.slice(0, PRICE_SAMPLE_SIZE).map(({ offer }) => offer) };
+    }
+
+    function summarizePrice(values) {
+      if (!values.length) return null;
+      const sorted = [...values].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      return {
+        estimate: sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2),
+        min: sorted[0],
+        max: sorted.at(-1),
+      };
+    }
+
+    function readPriceHistory() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(PRICE_HISTORY_KEY) ?? '[]');
+        if (!Array.isArray(saved)) return [];
+        return saved.filter(entry => typeof entry?.variant === 'string'
+          && Date.now() - entry.at < PRICE_HISTORY_AGE && Array.isArray(entry.offers) && entry.offers.length);
+      } catch {
+        return [];
+      }
+    }
+
+    function savePriceHistoryFallback(variant, snapshot) {
+      if (!snapshot.offers.length) return;
+      const previous = readPriceHistory().filter(entry => entry.variant !== variant);
+      try {
+        localStorage.setItem(PRICE_HISTORY_KEY, JSON.stringify([
+          { variant, ...snapshot }, ...previous.slice(0, 11),
+        ]));
+      } catch {
+        // O resultado da consulta continua disponível no formulário.
+      }
+    }
+
+    // ==== src/market/price-book-data.js ====
+    // Vendas públicas individuais e uma observação de preços pedidos por forma e dia.
+    const PRICE_BOOK_DB = 'pokeafk-tools-prices';
+    const PRICE_BOOK_DAY = 24 * 60 * 60 * 1000;
+    const priceBookDay = new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short' });
+    let priceBookConnection;
+    let priceBookImport;
+    let priceBookRevision = 0;
+
+    const priceBookText = value => value.normalize('NFD').replace(/\p{M}/gu, '').trim().toLowerCase();
+
+    function openPriceBook() {
+      if (priceBookConnection) return priceBookConnection;
+      priceBookConnection = new Promise((resolve, reject) => {
+        const request = indexedDB.open(PRICE_BOOK_DB, 1);
+        request.onupgradeneeded = () => {
+          for (const kind of ['sales', 'asks']) {
+            const store = request.result.createObjectStore(kind, { keyPath: 'id' });
+            store.createIndex('at', 'at');
+            store.createIndex('variant', 'variant');
+          }
+        };
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const db = request.result;
+          db.onversionchange = () => {
+            db.close();
+            priceBookConnection = null;
+          };
+          resolve(db);
+        };
+      }).catch(error => {
+        priceBookConnection = null;
+        throw error;
+      });
+      return priceBookConnection;
+    }
+
+    async function writePriceBook(kind, records) {
+      if (!records.length) return false;
+      const db = await openPriceBook();
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(kind, 'readwrite');
+        const store = transaction.objectStore(kind);
+        let changed = false;
+        for (const record of records) {
+          const request = store.get(record.id);
+          request.onsuccess = () => {
+            const previous = request.result;
+            // Uma linha resumida do histórico não pode apagar os IVs de um detalhe já aberto.
+            const newer = kind === 'asks' ? record.at > previous?.at : record.ivs && !previous?.ivs;
+            if (previous && !newer) return;
+            store.put(record);
+            changed = true;
+          };
+        }
+        transaction.oncomplete = () => {
+          if (changed) priceBookRevision++;
+          resolve(changed);
+        };
+        transaction.onabort = () => reject(transaction.error);
+      });
+    }
+
+    function priceBookAsks(variant, at, offers) {
+      return { id: [variant, priceBookDay.format(at)], variant, at, offers };
+    }
+
+    async function readPriceBook(kind, since, variant) {
+      priceBookImport ??= writePriceBook('asks', readPriceHistory().filter(entry => !entry.scoped)
+        .map(entry => priceBookAsks(entry.variant, entry.at, entry.offers)));
+      await priceBookImport.catch(() => { priceBookImport = null; });
+      const db = await openPriceBook();
+      return new Promise((resolve, reject) => {
+        const store = db.transaction(kind).objectStore(kind);
+        const request = variant
+          ? store.index('variant').getAll(variant)
+          : store.index('at').getAll(IDBKeyRange.lowerBound(since));
+        request.onsuccess = () => resolve(request.result.filter(row => row.at >= since));
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function readPriceSale(row) {
+      const target = row.querySelector('.mk-history-target');
+      const variant = priceVariant(target?.querySelector('img'))?.[1];
+      const iv = [...(target?.querySelectorAll('small span') ?? [])]
+        .map(el => el.textContent.trim().match(/^IV\s+(\d+)\/186$/)).find(Boolean);
+      const total = Number(iv?.[1]);
+      const id = row.dataset.histDetail;
+      const at = Date.parse(row.querySelector('time')?.dateTime);
+      const value = row.querySelector('.mk-history-value .mk-coin-n, .mk-history-value .mk-gem-n');
+      const amount = readPriceAmount(value?.title || value?.textContent);
+      if (!id || !variant || !Number.isFinite(at) || !amount || !Number.isInteger(total) || total > IV_MAX_TOTAL) return null;
+      const level = [...target.querySelectorAll('small span')].map(readPriceLevel).find(Boolean) ?? 0;
+      const detail = row.nextElementSibling;
+      const ivs = detail?.matches('.mk-history-detail') ? readIVs(detail.querySelector('.mk-ivs')) : null;
+      const currency = value.matches('.mk-coin-n') ? 'money' : 'gems';
+      return { id, variant, at, amount, currency, total, level, ...(priceIVTotal(ivs) === total ? { ivs } : {}) };
+    }
+
+    function priceBookIdentity(variant) {
+      const dex = Number(variant.match(/^\d+/)?.[0]);
+      const shiny = variant.endsWith('s');
+      const form = shiny ? variant.slice(0, -1) : variant;
+      const species = MARKET_GUIDE.species[dex]?.name ?? `Pokémon #${dex}`;
+      const name = MARKET_GUIDE.profiles[form]?.name ?? (form.includes('-')
+        ? `${species} (${form.split('-').slice(1).join(' ')})` : species);
+      return { dex, name, form: shiny ? 'Shiny' : form.includes('-') ? 'Forma especial' : 'Normal' };
+    }
+
+    function priceBookSnapshotSample(snapshot, { min, max, currency }) {
+      return snapshot.offers.flatMap(offer => {
+        const amount = currency === 'gems' ? offer.gems : offer.price;
+        return amount && offer.total >= min && offer.total <= max ? [amount] : [];
+      });
+    }
+
+    function priceBookGroups(records, kind, filters) {
+      const groups = new Map();
+      for (const record of records) {
+        if (!groups.has(record.variant)) groups.set(record.variant, []);
+        groups.get(record.variant).push(record);
+      }
+      return [...groups].flatMap(([variant, group]) => {
+        group.sort((a, b) => b.at - a.at);
+        const sales = kind === 'sales';
+        const observations = sales
+          ? group.filter(({ total, currency }) => total >= filters.min && total <= filters.max && currency === filters.currency)
+          : group;
+        let latest = observations[0];
+        let sample = [];
+        if (sales) sample = observations.map(sale => sale.amount);
+        else {
+          for (const observation of observations) {
+            sample = priceBookSnapshotSample(observation, filters);
+            if (!sample.length) continue;
+            latest = observation;
+            break;
+          }
+        }
+        if (!sample.length) return [];
+        return [{
+          variant, ...priceBookIdentity(variant), at: latest.at, count: sample.length,
+          summary: summarizePrice(sample), observations,
+        }];
+      });
+    }
+
+    // ==== src/market/price-panel.js ====
+    // Painel do comparador. O mesmo nó é recolocado quando o jogo redesenha o anúncio.
+    const pricePanel = document.createElement('section');
+    pricePanel.className = 'pafk-price';
+    pricePanel.dataset.pafk = '';
+    pricePanel.setAttribute('aria-labelledby', 'pafk-price-title');
+    pricePanel.innerHTML = `
+      <h4 id="pafk-price-title">Comparar preços</h4>
+      <p data-price-target></p>
+      <details data-price-filters>
+        <summary>Filtros de IV</summary>
+        <label class="pafk-price-total">IV total mínimo <input type="number" min="0" max="186" step="1" data-price-total></label>
+        <fieldset>
+          <legend>IV mínimo por atributo</legend>
+          <div class="pafk-price-stats">
+            ${STATS.map(([stat, label, short]) => `
+              <div>
+                <label title="${label}"><input type="checkbox" data-price-stat="${stat}"> ${short}</label>
+                <input type="number" min="0" max="31" step="1" aria-label="IV mínimo de ${label}" data-price-min="${stat}">
+              </div>`).join('')}
+          </div>
+        </fieldset>
+        <button type="button" class="pafk-price-link" data-price-reset>Restaurar filtros sugeridos</button>
+      </details>
+      <p class="pafk-price-muted" data-price-criteria></p>
+      <button type="button" class="mk-btn mk-pri pafk-price-action" data-price-search>Buscar comparáveis</button>
+      <p class="pafk-price-muted" data-price-status role="status"></p>
+      <button type="button" class="pafk-price-link" data-price-old hidden>Ver consulta anterior</button>
+      <div class="pafk-price-result" data-price-result hidden>
+        <div class="pafk-price-estimate">
+          <span>Preço aproximado</span>
+          <strong data-price-estimate></strong>
+          <small data-price-range></small>
+          <small data-price-gap hidden></small>
+        </div>
+        <button type="button" class="mk-btn mk-ghost pafk-price-action" data-price-use>Preencher preço em ₽</button>
+        <button type="button" class="pafk-price-link" data-price-use-gems hidden></button>
+        <details data-price-comparables>
+          <summary></summary>
+          <ul></ul>
+        </details>
+      </div>
+      <div class="pafk-price-estimate" data-price-sales hidden>
+        <span>Vendas na base por IV total</span>
+        <b></b><small></small>
+      </div>`;
+
+    const priceSearchButton = pricePanel.querySelector('[data-price-search]');
+    const priceTotalInput = pricePanel.querySelector('[data-price-total]');
+    const priceStatFields = new Map(STATS.map(([stat, , label]) => [stat, {
+      label,
+      check: pricePanel.querySelector(`[data-price-stat="${stat}"]`),
+      input: pricePanel.querySelector(`[data-price-min="${stat}"]`),
+    }]));
+    const priceResult = pricePanel.querySelector('[data-price-result]');
+    const priceComparables = pricePanel.querySelector('[data-price-comparables]');
+    const priceUse = pricePanel.querySelector('[data-price-use]');
+    const priceUseGems = pricePanel.querySelector('[data-price-use-gems]');
+    const priceOld = pricePanel.querySelector('[data-price-old]');
+    const priceStatus = pricePanel.querySelector('[data-price-status]');
+    const priceSales = pricePanel.querySelector('[data-price-sales]');
+
+    function setPriceCriteria(target) {
+      const { total, minimums } = defaultPriceCriteria(target);
+      priceTotalInput.value = total;
+      for (const [stat, { check, input }] of priceStatFields) {
+        check.checked = minimums.has(stat);
+        input.value = minimums.get(stat) ?? target.ivs[stat];
+      }
+    }
+
+    function priceInputNumber(input) {
+      return Math.min(Number(input.max), Math.max(0, Math.round(input.valueAsNumber || 0)));
+    }
+
+    function getPriceCriteria() {
+      return {
+        total: priceInputNumber(priceTotalInput),
+        minimums: new Map([...priceStatFields].flatMap(([stat, { check, input }]) =>
+          check.checked && input.value !== '' ? [[stat, priceInputNumber(input)]] : [])),
+      };
+    }
+
+    const formatPriceMoney = amount => `₽${priceNumber.format(amount)}`;
+
+    function formatPriceComparable(offer, criteria) {
+      const row = document.createElement('li');
+      const strong = document.createElement('b');
+      strong.textContent = formatPriceMoney(offer.price);
+      const iv = document.createElement('span');
+      iv.textContent = [
+        `IV ${offer.total}/${IV_MAX_TOTAL}`,
+        ...[...criteria.minimums].map(([stat]) => `${priceStatFields.get(stat).label} ${offer.ivs[stat]}`),
+      ].join(' · ');
+      const detail = document.createElement('small');
+      detail.textContent = [
+        offer.level && `Nv. ${offer.level}`,
+        offer.nature,
+        offer.gems && `${priceNumber.format(offer.gems)} diam.`,
+      ].filter(Boolean).join(' · ');
+      row.append(strong, iv, detail);
+      return row;
+    }
+
+    function showPriceComparison(state) {
+      const { target, snapshot, previous, error, applied } = state;
+      const criteria = getPriceCriteria();
+      for (const { check, input } of priceStatFields.values()) input.disabled = !check.checked;
+      const { count, sample } = nearestPriceOffers(snapshot?.offers ?? [], target, criteria);
+      const money = summarizePrice(sample.map(offer => offer.price));
+      const gems = summarizePrice(sample.map(offer => offer.gems).filter(Boolean));
+      state.money = money?.estimate;
+      state.gems = gems?.estimate;
+      const filters = [`IV total ≥ ${criteria.total}`, ...[...criteria.minimums].map(([stat, min]) =>
+        `${priceStatFields.get(stat).label} ≥ ${min}`)];
+      pricePanel.querySelector('[data-price-criteria]').textContent = filters.join(' · ');
+      priceSearchButton.textContent = snapshot ? 'Consultar novamente' : 'Buscar comparáveis';
+      priceOld.hidden = !previous || previous === snapshot || count > 0 ||
+        !nearestPriceOffers(previous.offers, target, criteria).count;
+      priceResult.hidden = !money;
+      const messages = [error];
+      if (snapshot) {
+        messages.push(snapshot.historical
+          ? `Histórico local de ${priceDate.format(snapshot.at)}.`
+          : `Consulta de ${priceDate.format(snapshot.at)}.`);
+        if (snapshot.scoped) messages.push('Limpe os filtros do mercado para ampliar a busca.');
+        if (!snapshot.offers.length) messages.push('Nenhum anúncio disponível para esta forma.');
+        else if (!count) messages.push('Nenhum anúncio comparável. Você pode reduzir os mínimos de IV.');
+        else messages.push(`${count} ${count === 1 ? 'anúncio atende' : 'anúncios atendem'} aos filtros.`);
+      }
+      if (applied) messages.push('Preço preenchido. Você pode editá-lo no anúncio.');
+      priceStatus.textContent = messages.filter(Boolean).join(' ');
+      showPriceSales(state, criteria.total);
+      if (!money) return;
+
+      pricePanel.querySelector('[data-price-estimate]').textContent = `≈ ${formatPriceMoney(money.estimate)}`;
+      pricePanel.querySelector('[data-price-range]').textContent = sample.length > 1
+        ? `Preços pedidos de ${formatPriceMoney(money.min)} a ${formatPriceMoney(money.max)}${sample.length < 3 ? ' · amostra pequena' : ''}`
+        : 'Preço pedido em um único anúncio';
+      const gap = sample[0].total - target.total;
+      const gapNote = pricePanel.querySelector('[data-price-gap]');
+      gapNote.hidden = Math.abs(gap) <= 5;
+      if (!gapNote.hidden) {
+        gapNote.textContent = `O mais próximo tem IV ${sample[0].total}/186 (${gap > 0 ? '+' : '−'}${Math.abs(gap)}).`;
+      }
+      priceUseGems.hidden = !gems;
+      if (gems) priceUseGems.textContent = `Preencher ≈ ${priceNumber.format(gems.estimate)} diam.`;
+      priceComparables.querySelector('summary').textContent = sample.length === 1
+        ? '1 anúncio comparável' : `${sample.length} anúncios mais próximos`;
+      priceComparables.querySelector('ul').replaceChildren(...sample.map(offer => formatPriceComparable(offer, criteria)));
+    }
+
+    function showPriceSales({ target, sales }, minimum) {
+      const min = Math.max(0, minimum, target.total - 10);
+      const max = Math.min(IV_MAX_TOTAL, target.total + 10);
+      const close = (sales ?? []).filter(sale => sale.total >= min && sale.total <= max);
+      priceSales.hidden = !close.length;
+      if (priceSales.hidden) return;
+      const money = summarizePrice(close.filter(sale => sale.currency === 'money').map(sale => sale.amount));
+      const gems = summarizePrice(close.filter(sale => sale.currency === 'gems').map(sale => sale.amount));
+      priceSales.querySelector('b').textContent = [
+        money && `≈ ${formatPriceMoney(money.estimate)}`,
+        gems && `≈ ${priceNumber.format(gems.estimate)} diam.`,
+      ].filter(Boolean).join(' · ');
+      priceSales.querySelector('small').textContent =
+        `${close.length} ${close.length === 1 ? 'venda' : 'vendas'} · IV ${min}–${max}/186 · últimos 30 dias`;
+    }
+
+    function showPriceTarget(target) {
+      const percent = Math.round(target.total / IV_MAX_TOTAL * 100);
+      pricePanel.querySelector('[data-price-target]').textContent =
+        `${target.name} · IV ${target.total}/${IV_MAX_TOTAL} (${percent}%)`;
+      pricePanel.querySelector('[data-price-filters]').open = false;
+      priceComparables.open = false;
+      setPriceCriteria(target);
+    }
+
+    function installPriceStyles() {
+      const style = document.createElement('style');
+      style.textContent = `
+        .mk .pafk-price, .mk .pafk-price-wait {
+          display:grid; gap:8px; padding:11px; border:1px solid #bfd7fa; border-radius:12px;
+          background:#f5f9ff; color:#152a61; font-size:12px; line-height:1.4;
+          font-variant-numeric:tabular-nums;
+        }
+        .mk .pafk-price { margin:0 0 12px; min-width:0; }
+        .mk .pafk-price-wait { margin:0 0 10px; grid-template-columns:1fr auto; align-items:center; }
+        .mk .pafk-price [hidden] { display:none !important; }
+        .mk .pafk-price h4, .mk .pafk-price p { margin:0; }
+        .mk .pafk-price h4 { font-size:14px; text-wrap:balance; }
+        .mk .pafk-price [data-price-target] { font-weight:700; }
+        .mk .pafk-price-muted, .mk .pafk-price small { color:#425b85; }
+        .mk .pafk-price [data-price-status]:empty { display:none; }
+        .mk .pafk-price details { border-top:1px solid #d5e3f7; }
+        .mk .pafk-price summary { cursor:pointer; padding:8px 0 2px; color:#1556b4; font-weight:750; }
+        .mk .pafk-price fieldset { margin:8px 0 4px; padding:0; border:0; min-width:0; }
+        .mk .pafk-price legend { margin-bottom:4px; padding:0; }
+        .mk .pafk-price-total { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:7px; }
+        .mk .pafk-price-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; }
+        .mk .pafk-price-stats label { display:flex; align-items:center; gap:3px; white-space:nowrap; cursor:pointer; }
+        .mk .pafk-price input[type="checkbox"] { flex:none; margin:0; accent-color:#1556b4; }
+        .mk[data-page="create"] .pafk-price input[type="number"] {
+          box-sizing:border-box; width:100%; min-width:0; min-height:29px; padding:2px 4px;
+          border:1px solid #a9c6ee; border-radius:6px; background:#fff; color:#152a61; font:inherit;
+        }
+        .mk .pafk-price-total input { width:64px !important; }
+        .mk[data-page="create"] .pafk-price input[type="number"]:disabled {
+          color:#4b6082; background:#eaf0fa; opacity:1;
+        }
+        .mk[data-page="create"] .pafk-price button.pafk-price-action {
+          width:100%; min-height:40px; font-size:12px; white-space:normal;
+        }
+        .mk .pafk-price-link {
+          justify-self:start; color:#1556b4; font:inherit; font-weight:750; background:none;
+          border:0; padding:4px 0; cursor:pointer; text-decoration:underline;
+        }
+        .mk .pafk-price :is(button, input, summary):focus-visible, .mk .pafk-price-wait button:focus-visible {
+          outline:2px solid #1556b4; outline-offset:2px;
+        }
+        .mk .pafk-price-result { display:grid; gap:7px; }
+        .mk .pafk-price-estimate {
+          display:grid; gap:1px; padding:8px; border:1px solid #c9ddf7; border-radius:8px; background:#eaf3ff;
+        }
+        .mk .pafk-price-estimate strong { font-size:19px; line-height:1.2; overflow-wrap:anywhere; }
+        .mk .pafk-price ul { margin:5px 0 0; padding:0; list-style:none; }
+        .mk .pafk-price li { display:grid; gap:1px; padding:5px 0; border-bottom:1px solid #d5e3f7; }
+        .mk .pafk-price li:last-child { border-bottom:0; }
+      `;
+      document.head.append(style);
+    }
+
+    // ==== src/market/price-search.js ====
+    // Abre a própria página de ofertas do jogo, lê os anúncios e volta ao mesmo rascunho.
+    const priceWait = document.createElement('section');
+    priceWait.className = 'pafk-price-wait';
+    priceWait.dataset.pafk = '';
+    priceWait.innerHTML = `
+      <span role="status">Consultando anúncios no mercado…</span>
+      <button type="button" class="mk-btn mk-ghost">Voltar ao anúncio</button>`;
+
+    let priceState = null;
+    let priceLookup = null;
+    let priceStylesInstalled = false;
+    let priceBrowseFilters = false;
+    let priceBrowseQuery = '';
+
+    function syncPriceComparison(main) {
+      if (!main) {
+        pricePanel.remove();
+        priceWait.remove();
+        priceLookup = null;
+        priceState = null;
+        return;
+      }
+      const page = main.parentElement.dataset.page;
+      if (page === 'mons') {
+        const region = main.querySelector('[data-dd="region"] span');
+        const type = main.querySelector('[data-dd="mon-type"] span');
+        priceBrowseQuery = priceBookText(main.querySelector('[data-mon-q]')?.value ?? '');
+        priceBrowseFilters = Boolean((region && region.textContent.trim() !== 'Todas as regiões') ||
+          (type && type.textContent.trim() !== 'Todos'));
+      }
+      if (priceLookup && priceSpeciesDex(main) === priceLookup.state.target.dex) {
+        if (main.firstElementChild !== priceWait) main.prepend(priceWait);
+      } else {
+        priceWait.remove();
+      }
+
+      const field = main.querySelector('.mk-conf [data-price]')?.closest('.mk-field');
+      const target = field && readPriceTarget(main);
+      if (!target) {
+        pricePanel.remove();
+        return;
+      }
+      if (!priceStylesInstalled) {
+        installPriceStyles();
+        priceStylesInstalled = true;
+      }
+      if (priceState?.target.key !== target.key) {
+        const cached = readPriceHistory().find(entry => entry.variant === target.variant);
+        priceState = { target, snapshot: cached ? { ...cached, historical: true } : null };
+        showPriceTarget(target);
+        showPriceComparison(priceState);
+      }
+      if (field.previousElementSibling !== pricePanel) field.before(pricePanel);
+      loadPriceBookComparison(priceState);
+    }
+
+    // Os botões nativos de navegação usam delegação na raiz .mk.
+    function navigatePriceMarket(main, key, value) {
+      const action = document.createElement('button');
+      action.type = 'button';
+      action.dataset[key] = value;
+      action.dataset.pafk = '';
+      action.hidden = true;
+      main.append(action);
+      action.click();
+      action.remove();
+    }
+
+    function priceSpeciesDex(main) {
+      if (main?.parentElement.dataset.page !== 'species') return null;
+      return Number(main.querySelector('.mk-dexno')?.textContent.trim().slice(1)) || null;
+    }
+
+    function speciesPriceTotal(main, dex) {
+      if (priceSpeciesDex(main) !== dex) return null;
+      const text = main.querySelector('.mk-stat-total b')?.textContent.trim();
+      return text === '0' ? 0 : readPriceAmount(text);
+    }
+
+    function nativePriceFilters(main) {
+      const side = main.parentElement.querySelector('.mk-side');
+      const name = priceBookText(main.querySelector('.mk-spec-name h2')?.textContent ?? '');
+      return priceBrowseFilters || (priceBrowseQuery && !name.includes(priceBrowseQuery)) || Boolean(side?.querySelector(
+        '[data-rar][aria-pressed="true"], [data-tier][aria-pressed="true"], ' +
+        '[data-favs-only][aria-pressed="true"], [data-cur]:not([data-cur="all"])[aria-pressed="true"]',
+      )) || [...(side?.querySelectorAll('[data-range]') ?? [])].some(input => readPriceAmount(input.value));
+    }
+
+    function readSpeciesPriceSnapshot(main, total) {
+      const { variants, rowCount } = readPriceOffers(main);
+      return { at: Date.now(), variants, scoped: rowCount !== total || Boolean(nativePriceFilters(main)) };
+    }
+
+    function loadPriceBookComparison(state) {
+      const revision = priceBookRevision;
+      if (state.bookRevision === revision) return;
+      state.bookRevision = revision;
+      const now = Date.now();
+      const { variant } = state.target;
+      Promise.all([
+        readPriceBook('sales', now - 30 * PRICE_BOOK_DAY, variant),
+        readPriceBook('asks', now - PRICE_HISTORY_AGE, variant),
+      ]).then(([sales, asks]) => {
+        if (priceState !== state || state.bookRevision !== revision) return;
+        state.sales = sales;
+        const latest = asks.reduce((a, b) => !a || b.at > a.at ? b : a, null);
+        if (latest && (!state.snapshot || (state.snapshot.historical && latest.at > state.snapshot.at))) {
+          state.snapshot = { ...latest, historical: true };
+        }
+        if (pricePanel.isConnected) showPriceComparison(state);
+      }).catch(() => {
+        // O preço do anúncio pode ser consultado normalmente sem armazenamento local.
+      });
+    }
+
+    async function returnToPriceDraft(job) {
+      const main = marketMain();
+      if (priceLookup !== job || priceSpeciesDex(main) !== job.state.target.dex) return;
+      navigatePriceMarket(main, 'go', 'create');
+      await waitFor(() => priceLookup !== job ||
+        readPriceTarget(marketMain())?.key === job.state.target.key, 2000);
+      if (priceLookup !== job) return;
+      priceLookup = null;
+      const draft = marketMain();
+      if (readPriceTarget(draft)?.key !== job.state.target.key) return;
+      syncPriceComparison(draft);
+      showPriceComparison(job.state);
+      draft.scrollTop = job.scroll;
+      const list = draft.querySelector('.mk-owns');
+      if (list) list.scrollTop = job.listScroll;
+      priceSearchButton.focus({ preventScroll: true });
+    }
+
+    async function searchPriceOffers() {
+      const main = marketMain();
+      if (priceLookup || !priceState || !pricePanel.isConnected || !main) return;
+      const job = {
+        state: priceState, scroll: main.scrollTop, listScroll: main.querySelector('.mk-owns')?.scrollTop ?? 0,
+      };
+      const { state } = job;
+      const { target } = state;
+      priceLookup = job;
+      state.error = '';
+      state.applied = false;
+      navigatePriceMarket(main, 'species', String(target.dex));
+      await waitFor(() => {
+        const current = marketMain();
+        const dex = priceSpeciesDex(current);
+        return priceLookup !== job || !current ||
+          !['create', 'species'].includes(current.parentElement.dataset.page) ||
+          (dex !== null && dex !== target.dex) ||
+          speciesPriceTotal(current, target.dex) !== null;
+      });
+      if (priceLookup !== job) return;
+      const current = marketMain();
+      const total = speciesPriceTotal(current, target.dex);
+      if (total === null) {
+        state.error = 'O mercado não carregou os anúncios. Tente consultar novamente.';
+      } else {
+        const { at, variants, scoped } = readSpeciesPriceSnapshot(current, total);
+        if (state.snapshot && !state.snapshot.scoped) {
+          state.previous = state.snapshot.historical ? state.snapshot : { ...state.snapshot, historical: true };
+        }
+        state.snapshot = { at, offers: variants.get(target.variant) ?? [], scoped };
+        if (!scoped) {
+          const snapshot = state.snapshot;
+          recordPriceBookAsks(variants, at).then(ok => {
+            if (!ok) savePriceHistoryFallback(target.variant, snapshot);
+          });
+        }
+      }
+      if (priceSpeciesDex(current) === target.dex) {
+        await returnToPriceDraft(job);
+      } else if (priceState === state && pricePanel.isConnected) {
+        showPriceComparison(state);
+      }
+      if (priceLookup === job) priceLookup = null;
+    }
+
+    function applyPriceEstimate(gems) {
+      const main = marketMain();
+      if (readPriceTarget(main)?.key !== priceState?.target.key || !priceState) return;
+      const amount = gems ? priceState.gems : priceState.money;
+      const input = main.querySelector(gems ? '.mk-conf [data-gems]' : '.mk-conf [data-price]');
+      if (!amount || !input) return;
+      input.value = String(amount);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      priceState.applied = true;
+      showPriceComparison(priceState);
+      input.focus();
+    }
+
+    priceSearchButton.onclick = searchPriceOffers;
+    priceWait.querySelector('button').onclick = event => {
+      event.stopPropagation();
+      const job = priceLookup;
+      if (!job) return;
+      // Troca a identidade para invalidar a consulta ainda em espera.
+      priceLookup = { ...job };
+      returnToPriceDraft(priceLookup);
+    };
+    priceUse.onclick = () => applyPriceEstimate(false);
+    priceUseGems.onclick = () => applyPriceEstimate(true);
+    priceOld.onclick = () => {
+      priceState.snapshot = priceState.previous;
+      priceState.applied = false;
+      showPriceComparison(priceState);
+    };
+    pricePanel.querySelector('[data-price-reset]').onclick = () => {
+      setPriceCriteria(priceState.target);
+      priceState.applied = false;
+      showPriceComparison(priceState);
+    };
+    pricePanel.addEventListener('click', event => event.stopPropagation());
+    pricePanel.addEventListener('input', () => {
+      priceState.applied = false;
+      showPriceComparison(priceState);
+    });
+    pricePanel.addEventListener('change', ({ target }) => {
+      if (target.matches('input[type="number"]') && target.value !== '') target.value = priceInputNumber(target);
+    });
+
+    // ==== src/market/price-book.js ====
+    // Consulta e coleta passiva das páginas de mercado que o jogador abriu.
+    const priceBookTrigger = document.createElement('button');
+    priceBookTrigger.type = 'button';
+    priceBookTrigger.className = 'mk-nav';
+    priceBookTrigger.dataset.pafk = '';
+    priceBookTrigger.textContent = 'Base de preços';
+    priceBookTrigger.setAttribute('aria-haspopup', 'dialog');
+
+    const priceBookDialog = document.createElement('dialog');
+    priceBookDialog.className = 'pafk-book';
+    priceBookDialog.dataset.pafk = '';
+    priceBookDialog.setAttribute('aria-labelledby', 'pafk-book-title');
+    priceBookDialog.innerHTML = `
+      <header class="pafk-book-head">
+        <h2 id="pafk-book-title">Base de preços</h2>
+        <button type="button" data-book-close aria-label="Fechar base de preços">✕</button>
+      </header>
+      <div class="pafk-book-body">
+        <div class="pafk-book-tabs" role="group" aria-label="Origem dos preços">
+          <button type="button" data-book-source="sales" aria-pressed="true">Vendas concluídas</button>
+          <button type="button" data-book-source="asks" aria-pressed="false">Preços anunciados</button>
+        </div>
+        <div class="pafk-book-controls">
+          <label>Pokémon <input type="search" data-book-query placeholder="Buscar espécie ou nº da Pokédex"></label>
+          <label>Moeda <select data-book-currency aria-label="Moeda"><option value="money">₽</option><option value="gems">Diamantes</option></select></label>
+          <label>Período <select data-book-days aria-label="Período"><option value="7">7 dias</option><option value="30" selected>30 dias</option>
+            <option value="90">90 dias</option><option value="0">Todo o período</option></select></label>
+          <label>IV mínimo <input type="number" min="0" max="186" step="1" placeholder="0" data-book-min></label>
+          <label>IV máximo <input type="number" min="0" max="186" step="1" placeholder="186" data-book-max></label>
+        </div>
+        <p class="pafk-book-muted" data-book-status role="status"></p>
+        <div class="pafk-book-content" data-book-content hidden>
+          <div class="pafk-book-scroll" tabindex="0" aria-label="Tabela de preços">
+            <table>
+              <thead><tr><th scope="col">Pokémon</th><th scope="col">Mediana</th><th scope="col">Faixa observada</th>
+                <th scope="col">Amostra</th><th scope="col">Mais recente</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <section class="pafk-book-detail" aria-labelledby="pafk-book-detail-title" hidden>
+            <h3 id="pafk-book-detail-title"></h3>
+            <p class="pafk-book-muted"></p>
+            <ul></ul>
+            <button type="button" data-book-species>Ver anúncios da espécie</button>
+          </section>
+        </div>
+      </div>
+      <footer class="pafk-book-footer">
+        <span>Registros salvos neste navegador.</span>
+        <button type="button" data-book-open-history>Ver histórico do jogo</button>
+        <button type="button" data-book-open-mons>Explorar Pokémon à venda</button>
+      </footer>`;
+
+    const bookStatus = priceBookDialog.querySelector('[data-book-status]');
+    const bookQuery = priceBookDialog.querySelector('[data-book-query]');
+    const bookCurrency = priceBookDialog.querySelector('[data-book-currency]');
+    const bookDays = priceBookDialog.querySelector('[data-book-days]');
+    const bookMin = priceBookDialog.querySelector('[data-book-min]');
+    const bookMax = priceBookDialog.querySelector('[data-book-max]');
+    const bookContent = priceBookDialog.querySelector('[data-book-content]');
+    const bookBody = priceBookDialog.querySelector('tbody');
+    const bookDetail = priceBookDialog.querySelector('.pafk-book-detail');
+    const bookSources = [...priceBookDialog.querySelectorAll('[data-book-source]')];
+    let bookSource = 'sales';
+    let bookRecords = [];
+    let bookSelection = null;
+    let bookRequest = 0;
+    let bookLoading = false;
+    let bookError = false;
+    let bookWriteError = false;
+    const observedBookSpecies = new WeakSet();
+    const observedBookHistory = new WeakSet();
+    const observedBookSales = new Map();
+    const observedBookAsks = new Map();
+
+    function recordPriceBook(kind, records) {
+      return writePriceBook(kind, records).then(changed => {
+        bookWriteError = false;
+        if (changed && pricePanel.isConnected && priceState) loadPriceBookComparison(priceState);
+        if (changed && priceBookDialog.open && kind === bookSource) refreshPriceBook();
+        return true;
+      }).catch(() => {
+        bookWriteError = true;
+        if (priceBookDialog.open) renderPriceBook();
+        return false;
+      });
+    }
+
+    function recordPriceBookAsks(variants, at) {
+      const records = [];
+      for (const [variant, offers] of variants) {
+        const snapshot = priceBookAsks(variant, at, offers);
+        const signature = `${snapshot.id[1]}|${offers.map(offer => JSON.stringify(offer)).sort().join('|')}`;
+        if (observedBookAsks.get(variant) === signature) continue;
+        observedBookAsks.set(variant, signature);
+        records.push(snapshot);
+      }
+      return recordPriceBook('asks', records).then(ok => {
+        if (!ok) for (const { variant } of records) observedBookAsks.delete(variant);
+        return ok;
+      });
+    }
+
+    function capturePriceBookSales(main) {
+      const table = main.querySelector('.mk-history-table');
+      if (!table) return;
+      const repeated = observedBookHistory.has(table);
+      observedBookHistory.add(table);
+      const selector = repeated ? '[data-hist-detail^="general:"][aria-expanded="true"]' : '[data-hist-detail^="general:"]';
+      const records = [...table.querySelectorAll(selector)].flatMap(row => {
+        const seen = observedBookSales.get(row.dataset.histDetail);
+        if (seen === true || (seen === false && row.getAttribute('aria-expanded') !== 'true')) return [];
+        const sale = readPriceSale(row);
+        if (!sale || (seen === false && !sale.ivs)) return [];
+        observedBookSales.set(sale.id, Boolean(sale.ivs));
+        return [sale];
+      });
+      if (records.length) recordPriceBook('sales', records).then(ok => {
+        if (!ok) for (const { id } of records) observedBookSales.delete(id);
+      });
+    }
+
+    function syncPriceBook(main) {
+      if (!main) {
+        if (priceBookDialog.open) priceBookDialog.close();
+        return;
+      }
+      const nav = main.parentElement.querySelector('.mk-side .mk-navs');
+      if (nav && priceBookTrigger.parentElement !== nav) nav.append(priceBookTrigger);
+      const page = main.parentElement.dataset.page;
+      if (page === 'history') capturePriceBookSales(main);
+      if (page !== 'species' || priceLookup) return;
+      const list = main.querySelector(OFFER_LIST);
+      const total = speciesPriceTotal(main, priceSpeciesDex(main));
+      if (!list || !total || observedBookSpecies.has(list)) return;
+      observedBookSpecies.add(list);
+      const { variants, at, scoped } = readSpeciesPriceSnapshot(main, total);
+      if (!scoped) recordPriceBookAsks(variants, at);
+    }
+
+    function bookAmount(amount, currency) {
+      return currency === 'money' ? formatPriceMoney(amount) : `${priceNumber.format(amount)} diam.`;
+    }
+
+    function bookRange({ min, max }, currency) {
+      return min === max ? bookAmount(min, currency) : `${bookAmount(min, currency)} a ${bookAmount(max, currency)}`;
+    }
+
+    function bookFilters() {
+      return {
+        currency: bookCurrency.value,
+        min: bookMin.value === '' ? 0 : priceInputNumber(bookMin),
+        max: bookMax.value === '' ? IV_MAX_TOTAL : priceInputNumber(bookMax),
+      };
+    }
+
+    function bookDetailRows(group, filters) {
+      const sales = bookSource === 'sales';
+      return group.observations.flatMap(observation => {
+        if (sales) {
+          const stats = observation.ivs && STATS.map(([stat, , label]) => `${label} ${observation.ivs[stat]}`).join(' ');
+          return [{
+            at: observation.at,
+            amount: bookAmount(observation.amount, filters.currency),
+            detail: [`IV ${observation.total}/186`, observation.level && `Nv. ${observation.level}`, stats]
+              .filter(Boolean).join(' · '),
+          }];
+        }
+        const sample = priceBookSnapshotSample(observation, filters);
+        const summary = summarizePrice(sample);
+        return summary ? [{
+          at: observation.at,
+          amount: `≈ ${bookAmount(summary.estimate, filters.currency)}`,
+          detail: `${sample.length} ${sample.length === 1 ? 'anúncio' : 'anúncios'} · ${bookRange(summary, filters.currency)}`,
+        }] : [];
+      });
+    }
+
+    function renderBookDetail(group, filters) {
+      bookDetail.hidden = !group;
+      bookContent.classList.toggle('pafk-book-has-detail', Boolean(group));
+      if (!group) return;
+      const rows = bookDetailRows(group, filters);
+      const visible = rows.slice(0, 12);
+      bookDetail.querySelector('h3').textContent = `${group.name} · ${group.form}`;
+      bookDetail.querySelector('p').textContent = bookSource === 'sales'
+        ? `${visible.length} de ${rows.length} vendas na faixa de IV.`
+        : `${visible.length} de ${rows.length} dias com anúncios na faixa de IV.`;
+      bookDetail.querySelector('ul').replaceChildren(...visible.map(row => {
+        const item = document.createElement('li');
+        const amount = document.createElement('b');
+        amount.textContent = row.amount;
+        const date = document.createElement('time');
+        date.dateTime = new Date(row.at).toISOString();
+        date.textContent = priceDate.format(row.at);
+        const detail = document.createElement('small');
+        detail.textContent = row.detail;
+        item.append(amount, date, detail);
+        return item;
+      }));
+      bookDetail.querySelector('[data-book-species]').dataset.dex = group.dex;
+    }
+
+    function renderPriceBook() {
+      if (!priceBookDialog.open) return;
+      const filters = bookFilters();
+      const query = priceBookText(bookQuery.value);
+      let message = '';
+      let groups = [];
+      if (bookLoading) message = 'Carregando a base de preços…';
+      else if (bookError) message = 'A base local está indisponível. Feche e abra de novo para tentar novamente.';
+      else if (filters.min > filters.max) message = 'O IV mínimo deve ser menor ou igual ao máximo.';
+      else {
+        groups = priceBookGroups(bookRecords, bookSource, filters)
+          .filter(group => priceBookText(`${group.name} ${group.form} #${group.dex}`).includes(query))
+          .sort((a, b) => b.at - a.at || a.name.localeCompare(b.name, 'pt-BR'));
+        if (groups.length) {
+          const scope = bookSource === 'sales'
+            ? 'Valores pagos no histórico público.'
+            : 'Preços pedidos na consulta mais recente que atende aos filtros.';
+          message = `${groups.length} ${groups.length === 1 ? 'forma encontrada' : 'formas encontradas'}. ${scope}`;
+        } else if (bookRecords.length) message = 'Nenhum preço encontrado com esses filtros.';
+        else message = bookSource === 'sales'
+          ? 'Abra o histórico do jogo para registrar as vendas exibidas.'
+          : 'Abra a página de uma espécie para registrar os anúncios exibidos.';
+      }
+      bookStatus.textContent = bookWriteError ? `${message} Não foi possível salvar a última leitura.` : message;
+      bookContent.hidden = !groups.length;
+      renderBookDetail(groups.find(group => group.variant === bookSelection), filters);
+      bookBody.replaceChildren(...groups.map(group => {
+        const row = document.createElement('tr');
+        row.classList.toggle('pafk-book-selected', group.variant === bookSelection);
+        const species = document.createElement('button');
+        species.type = 'button';
+        species.className = 'pafk-book-name';
+        species.dataset.bookVariant = group.variant;
+        species.setAttribute('aria-expanded', String(group.variant === bookSelection));
+        const sprite = document.createElement('img');
+        sprite.src = `/assets/mon/front/${group.variant}.png`;
+        sprite.alt = '';
+        sprite.loading = 'lazy';
+        const identity = document.createElement('span');
+        const name = document.createElement('b');
+        name.textContent = group.name;
+        const form = document.createElement('small');
+        form.textContent = group.form;
+        identity.append(name, form);
+        species.append(sprite, identity);
+        row.insertCell().append(species);
+        row.insertCell().textContent = `≈ ${bookAmount(group.summary.estimate, filters.currency)}`;
+        row.insertCell().textContent = bookRange(group.summary, filters.currency);
+        const sample = row.insertCell();
+        sample.textContent = priceNumber.format(group.count);
+        if (group.count < 3) {
+          const small = document.createElement('small');
+          small.textContent = 'Poucos dados';
+          sample.append(small);
+        }
+        row.insertCell().textContent = priceDate.format(group.at);
+        return row;
+      }));
+    }
+
+    async function refreshPriceBook() {
+      const request = ++bookRequest;
+      const days = Number(bookDays.value);
+      bookLoading = true;
+      renderPriceBook();
+      try {
+        const records = await readPriceBook(bookSource, days ? Date.now() - days * PRICE_BOOK_DAY : 0);
+        if (request !== bookRequest) return;
+        bookRecords = records;
+        bookError = false;
+      } catch {
+        if (request !== bookRequest) return;
+        bookError = true;
+      } finally {
+        if (request === bookRequest) {
+          bookLoading = false;
+          renderPriceBook();
+        }
+      }
+    }
+
+    function openPriceBookPage(key, value) {
+      const main = marketMain();
+      if (!main) return;
+      priceBookDialog.close();
+      navigatePriceMarket(main, key, value);
+    }
+
+    priceBookTrigger.onclick = event => {
+      event.stopPropagation();
+      if (!priceBookDialog.isConnected) {
+        installPriceBookStyles();
+        document.body.append(priceBookDialog);
+      }
+      if (priceBookDialog.open) return;
+      priceBookDialog.showModal();
+      bookQuery.focus();
+      refreshPriceBook();
+    };
+    priceBookDialog.querySelector('[data-book-close]').onclick = () => priceBookDialog.close();
+    priceBookDialog.querySelector('[data-book-open-history]').onclick = async () => {
+      openPriceBookPage('go', 'history');
+      await waitFor(() => marketMain()?.parentElement.dataset.page === 'history', 2000);
+      const main = marketMain();
+      if (main?.parentElement.dataset.page === 'history') {
+        main.querySelector('[data-hist-scope="general"][aria-pressed="false"]')?.click();
+      }
+    };
+    priceBookDialog.querySelector('[data-book-open-mons]').onclick = () => openPriceBookPage('go', 'mons');
+    priceBookDialog.querySelector('[data-book-species]').onclick = ({ currentTarget }) =>
+      openPriceBookPage('species', currentTarget.dataset.dex);
+    priceBookDialog.addEventListener('keydown', event => {
+      event.stopPropagation();
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        priceBookDialog.close();
+      }
+    });
+    priceBookDialog.addEventListener('close', () => {
+      if (priceBookTrigger.isConnected) priceBookTrigger.focus();
+    });
+    for (const button of bookSources) button.onclick = () => {
+      if (bookSource === button.dataset.bookSource) return;
+      bookSource = button.dataset.bookSource;
+      for (const tab of bookSources) tab.setAttribute('aria-pressed', String(tab === button));
+      refreshPriceBook();
+    };
+    bookDays.onchange = refreshPriceBook;
+    bookCurrency.onchange = renderPriceBook;
+    bookQuery.oninput = bookMin.oninput = bookMax.oninput = renderPriceBook;
+    for (const input of [bookMin, bookMax]) input.onchange = () => {
+      if (input.value !== '') input.value = priceInputNumber(input);
+      renderPriceBook();
+    };
+    bookBody.onclick = ({ target }) => {
+      const button = target.closest('[data-book-variant]');
+      if (!button) return;
+      const { bookVariant } = button.dataset;
+      bookSelection = bookVariant === bookSelection ? null : bookVariant;
+      renderPriceBook();
+      bookBody.querySelector(`[data-book-variant="${CSS.escape(bookVariant)}"]`)?.focus({ preventScroll: true });
+      if (!bookDetail.hidden) bookDetail.scrollIntoView({ block: 'nearest' });
+    };
+
+    // ==== src/market/price-book-styles.js ====
+    function installPriceBookStyles() {
+      const style = document.createElement('style');
+      style.textContent = `
+        .pafk-book {
+          box-sizing:border-box; width:min(1060px, calc(100% - 24px)); max-width:none; max-height:calc(100% - 24px);
+          padding:0; border:1px solid #b4ccef; border-radius:15px; color:#152a61; background:#f5f9ff;
+          font:13px/1.45 system-ui, sans-serif; font-variant-numeric:tabular-nums;
+          box-shadow:0 10px 28px #112f673d, 0 2px 6px #112f6730;
+        }
+        .pafk-book::backdrop { background:#071a499c; }
+        .pafk-book [hidden] { display:none !important; }
+        .pafk-book :is(h2,h3,p) { margin:0; }
+        .pafk-book-head, .pafk-book-footer {
+          display:flex; align-items:center; gap:8px; padding:12px 16px; background:#fff;
+        }
+        .pafk-book-head { justify-content:space-between; border-bottom:1px solid #d6e3f7; }
+        .pafk-book-head h2 { font-size:21px; text-wrap:balance; }
+        .pafk-book-footer { flex-wrap:wrap; border-top:1px solid #d6e3f7; }
+        .pafk-book-footer span { flex:1 1 150px; color:#425b85; }
+        .pafk-book-body { display:grid; gap:12px; padding:14px 16px; }
+        .pafk-book-tabs { display:flex; flex-wrap:wrap; gap:6px; }
+        .pafk-book button {
+          min-height:40px; padding:6px 11px; border:1px solid #aac6ee; border-radius:8px;
+          color:#1554ad; background:#fff; cursor:pointer; font:inherit; font-weight:700;
+        }
+        .pafk-book button:hover { background:#eaf3ff; }
+        .pafk-book button[aria-pressed="true"] { color:#fff; background:#195cb5; border-color:#195cb5; }
+        .pafk-book [data-book-close] { min-width:40px; font-size:16px; }
+        .pafk-book :is(button,input,select,[tabindex]):focus-visible { outline:2px solid #1556b4; outline-offset:2px; }
+        .pafk-book-controls { display:grid; grid-template-columns:minmax(185px, 2fr) repeat(4, minmax(95px, 1fr)); gap:8px; }
+        .pafk-book-controls label { display:grid; gap:4px; min-width:0; color:#294378; font-size:12px; font-weight:700; }
+        .pafk-book-controls :is(input,select) {
+          box-sizing:border-box; width:100%; min-width:0; min-height:40px; padding:5px 8px;
+          border:1px solid #aac6ee; border-radius:7px; background:#fff; color:#152a61; font:inherit;
+        }
+        .pafk-book-controls input::placeholder { color:#51668b; font-weight:400; opacity:1; }
+        .pafk-book-muted { color:#425b85; text-wrap:pretty; }
+        .pafk-book-content { display:grid; align-items:start; gap:12px; min-width:0; }
+        .pafk-book-has-detail { grid-template-columns:minmax(0, 1fr) 252px; }
+        .pafk-book-scroll, .pafk-book-detail {
+          min-width:0; max-height:clamp(200px, 47vh, 474px); overflow:auto;
+          border:1px solid #c9ddf7; border-radius:9px; background:#fff;
+        }
+        .pafk-book table { width:100%; border-collapse:separate; border-spacing:0; text-align:left; }
+        .pafk-book :is(th,td) { border-bottom:1px solid #dce8f9; padding:6px 9px; white-space:nowrap; }
+        .pafk-book th { position:sticky; top:0; z-index:1; background:#eaf3ff; color:#294378; font-size:12px; }
+        .pafk-book tr:last-child td { border-bottom:0; }
+        .pafk-book td:nth-child(2) { font-weight:750; }
+        .pafk-book .pafk-book-name {
+          display:flex; align-items:center; gap:6px; text-align:left; padding:0 4px;
+          border:0; color:#152a61; background:transparent;
+        }
+        .pafk-book-name span, .pafk-book td small { display:block; }
+        .pafk-book small { color:#425b85; font-size:11px; font-weight:400; }
+        .pafk-book-name img { width:36px; height:36px; object-fit:contain; image-rendering:pixelated; }
+        .pafk-book .pafk-book-name:hover b { text-decoration:underline; }
+        .pafk-book tr.pafk-book-selected { background:#eaf3ff; }
+        .pafk-book-detail { padding:10px; }
+        .pafk-book-detail h3 { font-size:15px; }
+        .pafk-book-detail ul { list-style:none; padding:0; margin:5px 0 10px; }
+        .pafk-book-detail li {
+          display:grid; grid-template-columns:1fr auto; gap:2px 5px; align-items:baseline;
+          padding:5px 0; border-bottom:1px solid #dce8f9;
+        }
+        .pafk-book-detail time { font-size:10px; color:#425b85; }
+        .pafk-book-detail small { grid-column:1 / -1; }
+        @media (max-width:840px) {
+          .pafk-book-has-detail { grid-template-columns:minmax(0, 1fr); }
+        }
+        @media (max-width:630px) {
+          .pafk-book-head, .pafk-book-footer, .pafk-book-body { padding:10px; }
+          .pafk-book-controls { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+          .pafk-book-controls label:first-child { grid-column:1 / -1; }
+          .pafk-book-has-detail .pafk-book-scroll { max-height:220px; }
+        }
+      `;
+      document.head.append(style);
+    }
+
     // ==== src/tiers/observer.js ====
     // Sincronização com a tela do jogo: um único MutationObserver para mercado, MAPA e ficha.
     function syncAll() {
@@ -2131,6 +3292,8 @@
         decorateTierBadges();
       }
       const main = document.querySelector('.mk > .mk-main');
+      syncPriceComparison(main);
+      syncPriceBook(main);
       const speciesTools = main?.querySelector(':scope > .mk-offer-tools');
       const species = main?.querySelector(':scope > .mk-spec');
       const market = main?.parentElement;
@@ -2209,8 +3372,8 @@
     // Fights the trainers of the day whose level sits between the main Pokémon's level and 10 below.
     // The route comes from the MAPA's NPC list (sorted by XP, which also marks the locked ones),
     // grouped by place. Each fight: open MAPA → NPCs → pick the trainer → "Teleportar até lá" →
-    // talk key → LUTAR → wait for the result → CONTINUAR. Any input from the player, a timeout or
-    // something unexpected stops the loop.
+    // talk to the trainer → LUTAR → wait for the result → CONTINUAR. Input from the player stops
+    // the loop, as do failures where it would be unsafe to continue.
     (() => {
       // Levels below the main Pokémon; the player can change it in the card.
       const DEFAULT_RANGE = 10;
@@ -2219,6 +3382,7 @@
       const FIGHT_TIMEOUT = 10 * 60 * 1000;
       const KEYS_STORAGE = 'pokeafk.ui.keys';
       const HEAL_BELOW = 0.5;
+      const NEARBY_DIRECTIONS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
       // Trainers in a row where the game did not react before the daily gives up.
       const MAX_UNREACHABLE_STREAK = 4;
 
@@ -2230,29 +3394,38 @@
       box.dataset.pafk = '';
       box.setAttribute('aria-label', 'Daily de treinadores');
       box.innerHTML = `
-        <button type="button" class="pafk-daily-toggle" aria-expanded="false" data-daily-toggle>
+        <button type="button" class="pafk-daily-toggle" aria-expanded="false" aria-controls="pafk-daily-panel" data-daily-toggle>
           <span aria-hidden="true">⚔</span> Daily
         </button>
-        <div class="pafk-daily-body" hidden data-daily-body>
+        <div class="pafk-daily-body" id="pafk-daily-panel" hidden data-daily-body>
           <header>
-            <strong title="Arraste para mover; clique duas vezes para voltar ao lugar">Treinadores do dia</strong>
-            <button type="button" class="pafk-daily-x" aria-label="Fechar" data-daily-toggle>✕</button>
+            <h2 title="Arraste para mover. Clique duas vezes para voltar ao lugar.">Treinadores do dia</h2>
+            <button type="button" class="pafk-daily-x" aria-label="Fechar painel do Daily" data-daily-toggle>×</button>
           </header>
-          <label class="pafk-daily-levels">
-            Lutar até
-            <input type="number" min="0" max="${MAX_RANGE}" step="1" value="${DEFAULT_RANGE}" inputmode="numeric" data-daily-levels>
-            níveis abaixo do principal
-            <small>Sugerido: ${DEFAULT_RANGE}.</small>
-          </label>
-          <p class="pafk-daily-range" data-daily-range>Faixa: nível do Pokémon principal até ${DEFAULT_RANGE} abaixo.</p>
-          <label class="pafk-daily-avoid">
-            <input type="checkbox" data-daily-avoid checked>
-            Evitar times com vantagem de tipo
-            <small>O time de cada treinador é aprendido na primeira luta.</small>
-          </label>
-          <div class="pafk-daily-progress" hidden data-daily-progress>
-            <div class="pafk-daily-count"><strong data-daily-left></strong><span data-daily-total></span></div>
-            <div class="pafk-daily-bar" role="progressbar" aria-valuemin="0" data-daily-bar><i></i></div>
+          <div class="pafk-daily-content">
+            <div class="pafk-daily-main">
+              <img alt="" hidden data-daily-sprite>
+              <div>
+                <strong data-daily-main>Pokémon principal</strong>
+                <p class="pafk-daily-range" data-daily-range></p>
+              </div>
+            </div>
+            <div class="pafk-daily-progress" hidden data-daily-progress>
+              <div class="pafk-daily-count"><strong data-daily-left></strong><span>Vitórias <span data-daily-total></span></span></div>
+              <div class="pafk-daily-bar" role="progressbar" aria-label="Vitórias" aria-valuemin="0" data-daily-bar><i></i></div>
+            </div>
+            <p class="pafk-daily-status" role="status" data-daily-status></p>
+            <ol class="pafk-daily-route" aria-label="Rota de treinadores" hidden data-daily-route></ol>
+            <div class="pafk-daily-options">
+              <label class="pafk-daily-levels">
+                <span><strong>Níveis abaixo do principal</strong><small>Sugerido: ${DEFAULT_RANGE}</small></span>
+                <input type="number" min="0" max="${MAX_RANGE}" step="1" value="${DEFAULT_RANGE}" inputmode="numeric" data-daily-levels>
+              </label>
+              <label class="pafk-daily-avoid">
+                <input type="checkbox" aria-describedby="pafk-daily-avoid-help" data-daily-avoid checked>
+                <span><strong>Evitar vantagem de tipo</strong><small id="pafk-daily-avoid-help">O Daily aprende o time de cada treinador na primeira luta.</small></span>
+              </label>
+            </div>
           </div>
           <p class="pafk-daily-status" role="status" aria-live="polite" data-daily-status></p>
           <ol class="pafk-daily-route" hidden data-daily-route></ol>
@@ -2261,11 +3434,14 @@
             <button type="button" class="pafk-daily-stop" hidden data-daily-stop>Parar</button>
           </div>
         </div>`;
+      const toggleButton = box.querySelector('.pafk-daily-toggle');
       const body = box.querySelector('[data-daily-body]');
       const goButton = box.querySelector('[data-daily-go]');
       const stopButton = box.querySelector('[data-daily-stop]');
       const statusEl = box.querySelector('[data-daily-status]');
       const rangeEl = box.querySelector('[data-daily-range]');
+      const mainEl = box.querySelector('[data-daily-main]');
+      const spriteEl = box.querySelector('[data-daily-sprite]');
       const progressEl = box.querySelector('[data-daily-progress]');
       const routeEl = box.querySelector('[data-daily-route]');
       const avoidBox = box.querySelector('[data-daily-avoid]');
@@ -2275,69 +3451,119 @@
       style.dataset.pafk = '';
       style.textContent = `
         #pafk-daily {
+          --daily-ink: #15264f; --daily-muted: #485d7e; --daily-line: #d9e4f3;
+          --daily-blue: #2459aa; --daily-navy: #14265a;
           position: fixed; right: 8px; top: 96px; z-index: 40;
-          display: flex; flex-direction: column; align-items: flex-end;
-          font: 13px/1.35 system-ui, sans-serif; color: #152964;
+          display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+          font: 13px/1.4 system-ui, sans-serif; color: var(--daily-ink);
+          font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased;
         }
         #pafk-daily [hidden] { display: none !important; }
+        #pafk-daily :is(h2, p, ol) { margin: 0; }
+        #pafk-daily :focus-visible { outline: 2px solid #3279cf; outline-offset: 2px; }
         #pafk-daily button { font: inherit; cursor: pointer; }
         #pafk-daily .pafk-daily-toggle {
-          border: 1px solid #bed0ec; border-radius: 999px; background: #fff; color: #152964;
-          padding: 6px 12px; font-weight: 800; box-shadow: 0 2px 8px rgb(0 0 0 / .18);
+          display: inline-flex; gap: 7px; align-items: center; min-height: 40px;
+          border: 1px solid #5875ac; border-radius: 9px; background: var(--daily-navy); color: #fff;
+          padding: 0 12px; font-weight: 800; box-shadow: 0 2px 0 #0e1b3e, 0 4px 12px rgb(13 29 64 / .22);
         }
-        #pafk-daily[data-running] .pafk-daily-toggle { background: #2459aa; border-color: #2459aa; color: #fff; }
+        #pafk-daily .pafk-daily-toggle:is(:hover, [aria-expanded="true"]),
+        #pafk-daily[data-running] .pafk-daily-toggle { background: var(--daily-blue); }
         #pafk-daily .pafk-daily-body {
-          box-sizing: border-box; width: min(290px, calc(100vw - 24px)); margin-top: 6px;
-          border: 1px solid #bed0ec; border-radius: 10px; background: #fff; padding: 10px 12px 12px;
-          box-shadow: 0 6px 20px rgb(0 0 0 / .22); display: grid; gap: 8px;
+          box-sizing: border-box; width: min(334px, calc(100vw - 16px));
+          max-height: calc(var(--daily-room, 80vh) - 46px); overflow: hidden;
+          display: flex; flex-direction: column;
+          border: 1px solid #a7bce1; border-radius: 14px; background: #fff;
+          box-shadow: 0 2px 6px rgb(12 29 64 / .17), 0 12px 30px rgb(12 29 64 / .28);
         }
-        #pafk-daily header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        #pafk-daily .pafk-daily-body > header {
+          display: flex; align-items: center; justify-content: space-between; flex: none;
+          gap: 8px; padding: 4px 6px 4px 14px; background: var(--daily-navy); color: #fff;
+        }
+        #pafk-daily h2 { font: 800 15px/1.2 system-ui, sans-serif; text-wrap: balance; }
         #pafk-daily :is(.pafk-daily-toggle, .pafk-daily-body > header) { cursor: grab; touch-action: none; user-select: none; }
         #pafk-daily[data-dragging] :is(.pafk-daily-toggle, .pafk-daily-body > header) { cursor: grabbing; }
-        #pafk-daily .pafk-daily-x { cursor: pointer; }
-        #pafk-daily .pafk-daily-x { border: 0; background: none; color: #4a5f8f; padding: 2px 4px; }
-        #pafk-daily p { margin: 0; }
-        #pafk-daily .pafk-daily-range { color: #4a5f8f; font-size: 12px; }
-        #pafk-daily .pafk-daily-levels { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
-        #pafk-daily .pafk-daily-levels input {
-          width: 4.5em; box-sizing: border-box; padding: 3px 6px; font: inherit; font-weight: 700;
-          color: #152964; border: 1px solid #bed0ec; border-radius: 6px; background: #fff;
-          font-variant-numeric: tabular-nums;
+        #pafk-daily .pafk-daily-x {
+          display: grid; place-items: center; flex: 0 0 40px; height: 40px;
+          border: 0; border-radius: 8px; background: transparent; color: #fff; padding: 0;
+          font-size: 23px; line-height: 1;
         }
-        #pafk-daily .pafk-daily-levels input:focus-visible { outline: 2px solid #2459aa; outline-offset: 1px; }
-        #pafk-daily .pafk-daily-levels input:disabled { background: #eef2f9; color: #4a5f8f; }
-        #pafk-daily .pafk-daily-levels small { flex-basis: 100%; color: #4a5f8f; font-size: 11px; }
-        #pafk-daily .pafk-daily-avoid { display: grid; grid-template-columns: auto 1fr; gap: 0 6px; align-items: center; cursor: pointer; }
-        #pafk-daily .pafk-daily-avoid input { margin: 0; }
-        #pafk-daily .pafk-daily-avoid small { grid-column: 2; color: #4a5f8f; font-size: 11px; }
-        #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="unreachable"], [data-state="closed"]) { opacity: .6; }
-        #pafk-daily .pafk-daily-route li[data-state="avoided"] b { color: #b35c00; }
-        #pafk-daily .pafk-daily-count { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
-        #pafk-daily .pafk-daily-count span { color: #4a5f8f; }
-        #pafk-daily .pafk-daily-bar { height: 8px; border-radius: 4px; background: #e3ebf7; overflow: hidden; margin-top: 4px; }
-        #pafk-daily .pafk-daily-bar i { display: block; height: 100%; width: 0; background: #2f9e44; transition: width .3s; }
-        #pafk-daily .pafk-daily-status { min-height: 1.35em; }
+        #pafk-daily .pafk-daily-x:hover { background: #294275; }
+        #pafk-daily .pafk-daily-content {
+          display: grid; align-content: start; gap: 10px; padding: 12px; overflow: auto; overscroll-behavior: contain;
+        }
+        #pafk-daily .pafk-daily-main {
+          display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 10px;
+          border-radius: 9px; background: #eaf2ff; overflow-wrap: anywhere;
+        }
+        #pafk-daily .pafk-daily-main img {
+          width: 48px; height: 48px; flex: none; object-fit: contain; image-rendering: pixelated;
+        }
+        #pafk-daily .pafk-daily-main strong { font-size: 14px; }
+        #pafk-daily :is(.pafk-daily-range, .pafk-daily-options small) {
+          color: var(--daily-muted); font-size: 12px; text-wrap: pretty;
+        }
+        #pafk-daily .pafk-daily-options { border: 1px solid var(--daily-line); border-radius: 9px; }
+        #pafk-daily[data-running] .pafk-daily-options { display: none; }
+        #pafk-daily .pafk-daily-options label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+        #pafk-daily .pafk-daily-options small { display: block; margin-top: 2px; }
+        #pafk-daily .pafk-daily-levels { justify-content: space-between; }
+        #pafk-daily .pafk-daily-levels input {
+          box-sizing: border-box; flex: 0 0 58px; width: 58px; min-height: 40px; padding: 4px 6px;
+          font: inherit; font-weight: 800; color: var(--daily-ink);
+          border: 1px solid #aabfdf; border-radius: 6px; background: #f6f9ff;
+        }
+        #pafk-daily .pafk-daily-levels input:disabled { color: var(--daily-muted); }
+        #pafk-daily .pafk-daily-avoid { border-top: 1px solid var(--daily-line); cursor: pointer; }
+        #pafk-daily .pafk-daily-avoid:has(input:disabled) { cursor: default; }
+        #pafk-daily .pafk-daily-avoid input { width: 17px; height: 17px; flex: none; margin: 0; accent-color: var(--daily-blue); }
+        #pafk-daily .pafk-daily-count { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; }
+        #pafk-daily .pafk-daily-count strong { font-size: 15px; }
+        #pafk-daily .pafk-daily-count span { color: var(--daily-muted); }
+        #pafk-daily .pafk-daily-bar { height: 7px; border-radius: 4px; background: #e1e9f6; overflow: hidden; margin-top: 5px; }
+        #pafk-daily .pafk-daily-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: #23744c; }
+        #pafk-daily .pafk-daily-status {
+          padding: 7px 9px; border-radius: 6px; border-left: 3px solid #507cb9; background: #eff5ff; text-wrap: pretty;
+        }
+        #pafk-daily .pafk-daily-status:empty { display: none; }
+        #pafk-daily .pafk-daily-status[data-tone="stop"] { border-color: #ad6216; background: #fff1de; color: #713a05; }
+        #pafk-daily .pafk-daily-status[data-tone="done"] { border-color: #23744c; background: #e7f6ed; color: #17603d; }
         #pafk-daily .pafk-daily-route {
-          margin: 0; padding: 0; list-style: none; max-height: 180px; overflow: auto;
-          border-top: 1px solid #e3ebf7; font-size: 12px;
+          list-style: none; padding: 0; max-height: 168px; overflow: auto;
+          border: 1px solid var(--daily-line); border-radius: 9px; scrollbar-width: thin;
         }
         #pafk-daily .pafk-daily-route li {
-          display: grid; grid-template-columns: 1fr auto; gap: 0 8px; padding: 4px 0;
-          border-bottom: 1px solid #eef2f9;
+          display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center;
+          gap: 8px; padding: 7px 9px; font-size: 12px;
         }
-        #pafk-daily .pafk-daily-route li small { grid-column: 1; color: #4a5f8f; }
-        #pafk-daily .pafk-daily-route li b { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-weight: 700; }
-        #pafk-daily .pafk-daily-route li[data-state="current"] { background: #eef4ff; }
-        #pafk-daily .pafk-daily-route li[data-state="won"] b { color: #2f9e44; }
-        #pafk-daily .pafk-daily-route li[data-state="lost"] b,
-        #pafk-daily .pafk-daily-route li[data-state="skipped"] b { color: #c92a2a; }
-        #pafk-daily .pafk-daily-actions { display: flex; gap: 8px; }
+        #pafk-daily .pafk-daily-route li + li { border-top: 1px solid var(--daily-line); }
+        #pafk-daily .pafk-daily-route li div { overflow-wrap: anywhere; }
+        #pafk-daily .pafk-daily-route li :is(strong, small) { display: block; }
+        #pafk-daily .pafk-daily-route li small { color: var(--daily-muted); font-size: 11px; }
+        #pafk-daily .pafk-daily-route li b {
+          border-radius: 5px; padding: 3px 6px; background: #edf0f6; color: #455473; font-size: 11px;
+        }
+        #pafk-daily .pafk-daily-route li b:empty { display: none; }
+        #pafk-daily .pafk-daily-route li[data-state="current"] { background: #edf4ff; box-shadow: inset 3px 0 var(--daily-blue); }
+        #pafk-daily .pafk-daily-route li[data-state="current"] b { color: #174683; background: #dceaff; }
+        #pafk-daily .pafk-daily-route li[data-state="won"] b { color: #17603d; background: #e0f3e8; }
+        #pafk-daily .pafk-daily-route li[data-state="lost"] b { color: #a02735; background: #fbe7ea; }
+        #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="unreachable"]) b { color: #713a05; background: #fff0da; }
+        #pafk-daily .pafk-daily-actions {
+          display: flex; flex: none; padding: 10px 12px 12px; border-top: 1px solid var(--daily-line); background: #f6f9ff;
+        }
         #pafk-daily .pafk-daily-actions button {
-          flex: 1; border-radius: 8px; padding: 7px 10px; font-weight: 800; border: 1px solid #2459aa;
+          flex: 1; border-radius: 8px; min-height: 42px; padding: 6px 10px; font-weight: 800; border: 1px solid transparent;
         }
-        #pafk-daily .pafk-daily-go { background: #2459aa; color: #fff; }
-        #pafk-daily .pafk-daily-go:disabled { opacity: .55; cursor: default; }
-        #pafk-daily .pafk-daily-stop { background: #fff; color: #c92a2a; border-color: #c92a2a !important; }
+        #pafk-daily .pafk-daily-go { background: var(--daily-blue); color: #fff; }
+        #pafk-daily .pafk-daily-go:hover { background: #194985; }
+        #pafk-daily .pafk-daily-stop { background: #fff0f0; color: #a02735; border-color: #f0bac1; }
+        #pafk-daily .pafk-daily-stop:hover { background: #fce0e4; }
+        @media (prefers-reduced-motion: no-preference) {
+          #pafk-daily .pafk-daily-actions button { transition: scale .12s ease-out; }
+          #pafk-daily .pafk-daily-actions button:active { scale: .96; }
+          #pafk-daily .pafk-daily-bar i { transition: width .2s ease-out; }
+        }
       `;
       document.head.append(style);
       document.body.append(box);
@@ -2352,16 +3578,16 @@
         saved = null;
       }
       function clampPosition({ right, top }) {
-        const width = box.querySelector('.pafk-daily-toggle').offsetWidth || 80;
+        const width = (body.hidden ? toggleButton.offsetWidth : body.offsetWidth) || 80;
         return {
           right: Math.min(Math.max(0, right), Math.max(0, innerWidth - width)),
-          top: Math.min(Math.max(0, top), Math.max(0, innerHeight - 40)),
+          top: Math.min(Math.max(0, top), Math.max(0, innerHeight - (body.hidden ? 40 : 230))),
         };
       }
       function placeBox() {
         let position;
         if (saved) {
-          position = clampPosition(saved);
+          position = saved;
         } else {
           const rect = document.querySelector('.hud.world-hud .hud-quick')?.getBoundingClientRect();
           const visible = rect && rect.width > 0;
@@ -2370,8 +3596,10 @@
             right: visible ? Math.max(8, Math.round(innerWidth - rect.right)) : 8,
           };
         }
-        box.style.top = `${position.top}px`;
-        box.style.right = `${position.right}px`;
+        const { right, top } = clampPosition(position);
+        box.style.top = `${top}px`;
+        box.style.right = `${right}px`;
+        box.style.setProperty('--daily-room', `${innerHeight - top - 6}px`);
       }
       placeBox();
       setInterval(placeBox, 1000);
@@ -2432,8 +3660,10 @@
             return;
           }
           body.hidden = !body.hidden;
-          box.querySelector('.pafk-daily-toggle').setAttribute('aria-expanded', String(!body.hidden));
+          toggleButton.setAttribute('aria-expanded', String(!body.hidden));
+          if (body.hidden && toggle !== toggleButton) toggleButton.focus();
           if (!body.hidden && !run) showRange();
+          placeBox();
         });
       }
 
@@ -2442,15 +3672,13 @@
       const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
       const text = element => element?.textContent.replace(/\s+/g, ' ').trim() ?? '';
       const fold = value => value.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
-      // The list shows "PESCADOR DALE"; the challenge shows the class and the name apart.
-      const sameTrainer = (full, foe) => fold(full) === fold(foe) || fold(full).endsWith(` ${fold(foe)}`);
-
       function mainPokemon() {
         const button = $('button.hud-active-button');
         const label = button?.getAttribute('aria-label') ?? '';
         const match = label.match(/Resumo de (.+), nível (\d+)/i);
-        const dex = Number(button?.querySelector('img.front')?.getAttribute('src')?.match(/\/(\d+)[^/]*\.png/)?.[1] ?? 0);
-        return match ? { name: match[1], level: Number(match[2]), dex } : null;
+        const sprite = button?.querySelector('img.front')?.getAttribute('src') ?? '';
+        const dex = Number(sprite.match(/\/(\d+)[^/]*\.png/)?.[1] ?? 0);
+        return match ? { name: match[1], level: Number(match[2]), dex, sprite } : null;
       }
 
       // ---- Trainer teams and type edge ----
@@ -2617,7 +3845,8 @@
         run.stopped = true;
         run.reason = reason;
       }
-      function setStatus(message) {
+      function setStatus(message, tone = 'info') {
+        statusEl.dataset.tone = tone;
         statusEl.textContent = message;
       }
 
@@ -2885,50 +4114,105 @@
         return { canvas, x: rect.left + best.x * rect.width / width, y: rect.top + best.y * rect.height / height };
       }
 
-      async function walkToTrainer(npc) {
-        for (let attempt = 0; attempt < 3 && !challenge(); attempt += 1) {
-          const spot = await locateTrainer(npc);
-          if (!spot) {
-            await sleep(600);
-            continue;
-          }
-          setStatus(`Procurando ${npc.name} por perto...`);
-          const init = { bubbles: true, cancelable: true, clientX: spot.x, clientY: spot.y, button: 0, buttons: 1, pointerId: 1, pointerType: 'mouse', isPrimary: true };
-          spot.canvas.dispatchEvent(new PointerEvent('pointerdown', init));
-          spot.canvas.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0 }));
+      function clickTrainer(spot) {
+        const init = {
+          bubbles: true, cancelable: true, clientX: spot.x, clientY: spot.y,
+          button: 0, buttons: 1, pointerId: 1, pointerType: 'mouse', isPrimary: true,
+        };
+        spot.canvas.dispatchEvent(new PointerEvent('pointerdown', init));
+        spot.canvas.dispatchEvent(new PointerEvent('pointerup', { ...init, buttons: 0 }));
+      }
+
+      const interactionWindow = () => challenge() ?? $('.b5-again') ?? $('.npc-dialogue-backdrop, .quest-backdrop, .modal.open .win');
+      function tapKey(key) {
+        const init = { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true, cancelable: true };
+        dispatchEvent(new KeyboardEvent('keydown', init));
+        dispatchEvent(new KeyboardEvent('keyup', init));
+      }
+
+      async function findTrainer(npc) {
+        const expected = fold(npc.name);
+        const key = talkKey();
+        let replied = false;
+
+        async function tryInteraction(action, timeout) {
+          alive();
+          if (inArena() || resultWindow()) throw new Stop('Parado porque uma batalha foi aberta.');
+          if (!interactionWindow()) await action();
+
+          let response;
           try {
-            await until(challenge, 6000, 'andar até o treinador');
+            response = await until(interactionWindow, timeout, 'responder à interação');
           } catch (error) {
             if (error instanceof Stop) throw error;
+            return null;
           }
+
+          replied = true;
+          const fight = response.querySelector('[data-fight]');
+          const foe = text(response.querySelector('.b5-ch-name'));
+          const trainer = foe
+            ? [text(response.querySelector('.b5-ch-cls')), foe].filter(Boolean).join(' ')
+            : text(response.querySelector('.b5-ch-msg')).match(/^(.+) quer batalhar\.$/i)?.[1];
+          if (fight && trainer && fold(trainer) === expected) return { fight };
+
+          // Talking can return the cooldown notice instead of a challenge, even if the MAPA
+          // listed the trainer as available. Only credit a win for the named trainer.
+          const ofToday = text(response.querySelector('.b5-again-head span')).replace(/\.$/, '')
+            || text(response.querySelector('.b5-plain-text')).match(/^(.+?):\s*Já batalhamos hoje\b/i)?.[1];
+          const beatToday = response.matches('.b5-again') && ofToday && fold(ofToday) === expected;
+          const dismiss = response.querySelector('[data-nofight], [data-npc-close], [data-quest-close], button[aria-label="Fechar"]')
+            ?? (response.matches('.b5-again') ? response.querySelector('[data-ok]') : null);
+          if (!dismiss) throw new Stop('Parado. Feche a janela aberta no jogo.');
+          dismiss.click();
+          try {
+            await until(() => interactionWindow() !== response, 2500, 'fechar a resposta do NPC');
+          } catch (error) {
+            if (error instanceof Stop) throw error;
+            throw new Stop('Parado. A resposta do NPC ficou aberta.');
+          }
+          return beatToday ? { outcome: 'won' } : null;
         }
-        return challenge();
+
+        await pause(350, 700);
+        for (let attempt = 0; attempt < 2 && !replied; attempt += 1) {
+          const result = await tryInteraction(() => tapKey(key), 2200);
+          if (result) return result;
+        }
+
+        // A quick direction tap faces a new side. If already facing that way, the first tap
+        // may take one step. Talk after the server has had time to receive the new facing.
+        setStatus(`Procurando ${npc.name} entre os NPCs próximos...`);
+        for (const direction of NEARBY_DIRECTIONS) {
+          const result = await tryInteraction(async () => {
+            tapKey(direction);
+            await pause(280, 380);
+            // In the game, Z/E also accept an open challenge. Never use talk over a response.
+            if (!interactionWindow()) tapKey(key);
+          }, 1600);
+          if (result) return result;
+        }
+
+        // If the trainer wandered farther, let the game's click-to-walk find a path to it.
+        for (let attempt = 0; npc.gfx && attempt < 3; attempt += 1) {
+          const spot = await locateTrainer(npc);
+          if (!spot && !interactionWindow()) {
+            await pause(450, 650);
+            continue;
+          }
+          setStatus(`Tentando alcançar ${npc.name} pelo mapa...`);
+          const result = await tryInteraction(() => { if (spot) clickTrainer(spot); }, 6000);
+          if (result) return result;
+        }
+        return { outcome: replied ? 'skipped' : 'unreachable' };
       }
 
       async function talkAndFight(npc) {
-        const key = talkKey();
-        for (let attempt = 0; attempt < 2 && !challenge(); attempt += 1) {
-          await pause(350, 700);
-          dispatchEvent(new KeyboardEvent('keydown', { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true }));
-          await sleep(80);
-          dispatchEvent(new KeyboardEvent('keyup', { key: key.length === 1 ? key.toLowerCase() : key, bubbles: true }));
-          try {
-            await until(challenge, 3500, 'abrir o desafio');
-          } catch (error) {
-            if (error instanceof Stop) throw error;
-          }
-        }
-        // Nothing happened after talking: the trainer may have wandered off, so look for it.
-        const dialog = challenge() ?? (npc.gfx ? await walkToTrainer(npc) : null);
-        if (!dialog) return 'unreachable';
-        const foe = text(dialog.querySelector('.b5-ch-name'));
-        if (foe && !sameTrainer(npc.name, foe)) {
-          dialog.querySelector('[data-nofight]')?.click();
-          await pause();
-          return 'skipped';
-        }
+        const { fight, outcome } = await findTrainer(npc);
+        if (outcome) return outcome;
         await pause(200, 500);
-        dialog.querySelector('[data-fight]')?.click();
+        if (challenge()?.querySelector('[data-fight]') !== fight) return 'skipped';
+        fight.click();
         await until(() => inArena() || resultWindow(), 15000, 'começar a batalha');
         setStatus(`Lutando contra ${npc.name}...`);
         const seen = new Set();
@@ -2938,12 +4222,12 @@
           return resultWindow();
         }, FIGHT_TIMEOUT, 'terminar a batalha');
         saveTeam(npc, [...seen]);
-        const outcome = result.dataset.result;
+        const battleResult = result.dataset.result;
         const sentToCenter = /Centro Pokémon/i.test(text(result));
         await pause();
         result.querySelector('[data-ah="ok"]')?.click();
         await until(() => !resultWindow(), 8000, 'fechar o resultado');
-        return outcome === 'win' ? 'won' : (sentToCenter ? 'lost-healed' : 'lost');
+        return battleResult === 'win' ? 'won' : (sentToCenter ? 'lost-healed' : 'lost');
       }
 
       // HP of the main Pokémon from the HUD ("33/ 50").
@@ -2971,7 +4255,7 @@
       function renderProgress() {
         const { route, done, total } = run;
         const left = total - done;
-        progressEl.hidden = false;
+        progressEl.hidden = !total;
         box.querySelector('[data-daily-left]').textContent = left ? (left === 1 ? 'Falta 1' : `Faltam ${left}`) : 'Tudo feito!';
         box.querySelector('[data-daily-total]').textContent = `${done} de ${total}`;
         const bar = box.querySelector('[data-daily-bar]');
@@ -2979,34 +4263,48 @@
         bar.setAttribute('aria-valuenow', String(done));
         bar.querySelector('i').style.width = `${total ? Math.round(done / total * 100) : 100}%`;
         routeEl.hidden = !route.length;
+        const scrollTop = routeEl.scrollTop;
         routeEl.replaceChildren(...route.map(npc => {
           const item = document.createElement('li');
           item.dataset.state = npc.state;
-          item.innerHTML = '<span></span><small></small><b></b>';
-          item.children[0].textContent = `${npc.name} · Nv. ${npc.level}`;
-          item.children[1].textContent = npc.edge ? `${npc.place} · time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : npc.place;
-          item.children[2].textContent = LABELS[npc.state] ?? '';
+          if (npc.state === 'current') item.setAttribute('aria-current', 'step');
+          item.innerHTML = '<div><strong></strong><small></small></div><b></b>';
+          item.querySelector('strong').textContent = `${npc.name} · Nv. ${npc.level}`;
+          item.querySelector('small').textContent = npc.edge ? `${npc.place} · time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : npc.place;
+          item.querySelector('b').textContent = LABELS[npc.state] ?? '';
           return item;
         }));
-        routeEl.querySelector('[data-state="current"]')?.scrollIntoView({ block: 'nearest' });
+        routeEl.scrollTop = scrollTop;
+        const current = routeEl.querySelector('[aria-current]');
+        if (current && !body.hidden) {
+          const list = routeEl.getBoundingClientRect();
+          const row = current.getBoundingClientRect();
+          routeEl.scrollTop += Math.min(0, row.top - list.top) + Math.max(0, row.bottom - list.bottom);
+        }
       }
 
       function showRange() {
         const main = mainPokemon();
         const below = levelRange();
-        const lowest = Math.max(1, main ? main.level - below : 1);
+        const lowest = Math.max(1, (main?.level ?? 1) - below);
+        mainEl.textContent = main ? `${main.name} · Nv. ${main.level}` : 'Pokémon principal';
+        spriteEl.hidden = !main?.sprite;
+        if (main?.sprite && spriteEl.getAttribute('src') !== main.sprite) spriteEl.src = main.sprite;
         rangeEl.textContent = main
           ? (lowest === main.level
-            ? `${main.name}, Nv. ${main.level}: só treinadores do Nv. ${main.level}.`
-            : `${main.name}, Nv. ${main.level}: treinadores do Nv. ${lowest} ao ${main.level}.`)
-          : 'Entre no jogo para ver o Pokémon principal.';
+            ? `Treinadores de nível ${main.level}`
+            : `Treinadores do nível ${lowest} ao ${main.level}`)
+          : 'Entre no jogo para ver a faixa de níveis.';
       }
 
       function setRunning(on) {
+        const restoreFocus = document.activeElement === (on ? goButton : stopButton);
         goButton.hidden = on;
         stopButton.hidden = !on;
         levelsInput.disabled = on;
+        avoidBox.disabled = on;
         box.toggleAttribute('data-running', on);
+        if (restoreFocus) (on ? stopButton : goButton).focus({ preventScroll: true });
       }
 
       stopButton.addEventListener('click', () => stop('Parado.'));
@@ -3016,7 +4314,7 @@
         const main = mainPokemon();
         showRange();
         if (!main) {
-          setStatus('Não achei o Pokémon principal no HUD.');
+          setStatus('Não achei o Pokémon principal no HUD.', 'stop');
           return;
         }
         run = { stopped: false, reason: '', route: [], done: 0, total: 0 };
@@ -3091,12 +4389,12 @@
           setStatus(['Daily concluído.', lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
             unreachable && `${unreachable} inacessível(is).`,
             avoided && `${avoided} evitado(s) por vantagem de tipo.`]
-            .filter(Boolean).join(' '));
+            .filter(Boolean).join(' '), 'done');
         } catch (error) {
           const current = run.route.find(npc => npc.state === 'current');
           if (current) current.state = 'todo';
           if (run.route.length) renderProgress();
-          setStatus(error instanceof Stop ? error.message : `Parado: ${error.message}`);
+          setStatus(error instanceof Stop ? error.message : `Parado: ${error.message}`, 'stop');
         } finally {
           run = null;
           setRunning(false);

@@ -12,6 +12,8 @@ function syncMarket() {
     decorateTierBadges();
   }
   const main = document.querySelector('.mk > .mk-main');
+  syncPriceComparison(main);
+  syncPriceBook(main);
   const speciesTools = main?.querySelector(':scope > .mk-offer-tools');
   const species = main?.querySelector(':scope > .mk-spec');
   const market = main?.parentElement;

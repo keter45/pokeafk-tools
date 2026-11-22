@@ -65,14 +65,18 @@ function matchOffer(offer, { natures, minimums }) {
 
 function readOffer(row) {
   const rawNature = row.querySelector('.mk-lr-nature, :scope > .mk-offer-who > small')?.textContent.trim();
+  return { nature: NATURES.includes(rawNature) ? rawNature : null, ivs: readIVs(row.querySelector('.mk-ivs')) };
+}
+
+function readIVs(grid) {
   const ivs = {};
-  for (const stat of row.querySelectorAll('.mk-ivs > span')) {
+  for (const stat of grid?.children ?? []) {
     const label = stat.querySelector('small')?.textContent.trim().toUpperCase();
     const value = stat.querySelector('b')?.textContent.trim();
     const key = STAT_KEYS.get(label);
     if (key && /^\d{1,2}$/.test(value)) ivs[key] = Number(value);
   }
-  return { nature: NATURES.includes(rawNature) ? rawNature : null, ivs };
+  return ivs;
 }
 
 function setNatureCheckboxes(form, natures) {

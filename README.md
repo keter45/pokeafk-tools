@@ -27,6 +27,8 @@ O Tampermonkey busca as versões novas no mesmo link. Para atualizar na hora, us
 - Ordena a lista agrupada por tier.
 - Painel com a natureza, os IVs prioritários e o moveset de 4 golpes recomendados. O botão **Preencher natureza e IVs** marca as naturezas sugeridas e IV mínimo 28 nos IVs que mais importam.
 - Abre a tier list completa num diálogo.
+- **Base de preços** reúne vendas concluídas do histórico público e preços pedidos nas páginas de espécies que você abriu. Consulte por espécie, forma, período, moeda e faixa de IV total. Os registros ficam no armazenamento local do navegador.
+- Ao criar um anúncio de Pokémon, **Comparar preços** sugere filtros de IV, lista os anúncios mais próximos e mostra a referência de vendas da base quando há dados para a forma e a faixa de IV.
 
 ### MAPA e ficha do Pokémon
 - Selo de tier na lista de hunts e no cartão da hunt selecionada.

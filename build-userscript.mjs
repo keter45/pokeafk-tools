@@ -8,7 +8,9 @@ const OUTPUT = 'poke-tools.user.js';
 const GROUPS = [
   { id: 'tiers', files: [
     'tiers/common.js', 'tiers/badges.js', 'market/filters.js', 'tiers/dialog.js', 'market/panel.js',
-    'tiers/styles.js', 'market/state.js', 'market/tier-sort.js', 'tiers/observer.js',
+    'tiers/styles.js', 'market/state.js', 'market/tier-sort.js', 'market/price-data.js',
+    'market/price-book-data.js', 'market/price-panel.js', 'market/price-search.js',
+    'market/price-book.js', 'market/price-book-styles.js', 'tiers/observer.js',
   ] },
   { id: 'daily', files: ['daily.js'] },
   { id: 'monitor', files: ['data/dex.js', 'monitor.js'] },
