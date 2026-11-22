@@ -5,21 +5,24 @@ const MODULES = {
   tiers: 'Tiers, filtros do mercado e ficha',
   daily: 'Daily de treinadores',
   monitor: 'Monitor de contas',
+  dodge: 'Desvio de golpes em área (experimental)',
 };
+// Experimental parts start turned off until the player turns them on in the menu.
+const MODULES_OFF_BY_DEFAULT = new Set(['dodge']);
 const MODULES_KEY = 'modules';
 const hasModuleStore = typeof GM_getValue === 'function' && typeof GM_setValue === 'function';
 
 function readModules() {
+  let saved = {};
   try {
-    const saved = hasModuleStore ? GM_getValue(MODULES_KEY, {}) : {};
-    return Object.fromEntries(Object.keys(MODULES).map(id => [id, saved?.[id] !== false]));
-  } catch {
-    return Object.fromEntries(Object.keys(MODULES).map(id => [id, true]));
-  }
+    saved = (hasModuleStore ? GM_getValue(MODULES_KEY, {}) : {}) || {};
+  } catch {}
+  return Object.fromEntries(Object.keys(MODULES).map(id => [id,
+    typeof saved[id] === 'boolean' ? saved[id] : !MODULES_OFF_BY_DEFAULT.has(id)]));
 }
 
 const enabledModules = readModules();
-const moduleEnabled = id => enabledModules[id] !== false;
+const moduleEnabled = id => enabledModules[id] === true;
 
 if (hasModuleStore && typeof GM_registerMenuCommand === 'function') {
   for (const [id, label] of Object.entries(MODULES)) {

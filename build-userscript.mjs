@@ -1,7 +1,7 @@
 // Assembles poke-tools.user.js from the files in src/. Every module of the "tiers" group shares
 // one scope (they were one file and call each other's functions), so their order matters for the
-// top-level constants. The daily and the monitor run in their own scopes. Each group runs only if
-// it is turned on in the userscript manager's menu (src/settings.js).
+// top-level constants. The daily, the monitor and the dodge run in their own scopes. Each group
+// runs only if it is turned on in the userscript manager's menu (src/settings.js).
 import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 
 const OUTPUT = 'poke-tools.user.js';
@@ -12,6 +12,7 @@ const GROUPS = [
   ] },
   { id: 'daily', files: ['daily.js'] },
   { id: 'monitor', files: ['data/dex.js', 'monitor.js'] },
+  { id: 'dodge', files: ['dodge.js'] },
 ];
 
 const read = file => readFile(new URL(`./src/${file}`, import.meta.url), 'utf8');

@@ -15,7 +15,7 @@ Ferramentas para o [pokeAFK](https://pokeafk.io/): um userscript que ajuda no Me
 
 O Tampermonkey busca as versões novas no mesmo link. Para atualizar na hora, use **Procurar atualizações de scripts** no menu da extensão.
 
-**Ligar e desligar partes.** No menu do Tampermonkey, com a página do jogo aberta, aparecem três opções: **Tiers, filtros do mercado e ficha**, **Daily de treinadores** e **Monitor de contas**. ✅ indica que a parte está ligada e ⬜ que está desligada. Clique para trocar; a mudança vale depois de recarregar a página e para todas as abas.
+**Ligar e desligar partes.** No menu do Tampermonkey, com a página do jogo aberta, aparecem quatro opções: **Tiers, filtros do mercado e ficha**, **Daily de treinadores**, **Monitor de contas** e **Desvio de golpes em área (experimental)**. ✅ indica que a parte está ligada e ⬜ que está desligada. O desvio vem desligado. Clique para trocar; a mudança vale depois de recarregar a página e para todas as abas.
 
 **Vindo dos scripts antigos?** "PokeAFK — Filtros do Mercado" e "PokeAFK — Monitor de contas" viraram um só. Instale o PokeAFK Tools e desinstale os dois antigos no painel do Tampermonkey. Os filtros, as opções do daily e os times aprendidos continuam salvos. Os apelidos das contas precisam ser dados de novo.
 
@@ -78,6 +78,17 @@ Passe o mouse em cima dos números para ver cada tipo de bola e de poção. O mo
 - As poções vêm do painel AUTOMAÇÕES do HUD. Se a conta não tiver esse painel, abra a Bolsa uma vez para o script ler as poções.
 - O script não troca de aba: ele só mostra o estado das outras contas.
 
+### Desvio de golpes em área (experimental)
+Vem desligado. Para usar, ligue **Desvio de golpes em área (experimental)** no menu do Tampermonkey e recarregue a página. Aparece o botão **DESVIO** ao lado de AUTO e MANUAL, na barra de COMBATE. Preenchido quer dizer ligado.
+
+Com ele ligado, durante a caça, quando o aviso vermelho de um golpe em área inimigo cobre o seu Pokémon, o script anda 1 ou 2 quadrados para sair dele. No AUTO, o jogo passa para MANUAL durante o passo e o script volta para AUTO em seguida. No MANUAL, o servidor continua atacando sozinho ("AUTO POR INATIVIDADE") entre os desvios. Passe o mouse sobre o botão para ver quantos desvios deram certo.
+
+**Limitações:**
+- O aviso chega atrasado pela latência. Golpes rápidos (0,3 s, a maioria dos cones e linhas) não dá para evitar; só os mais lentos.
+- Só funciona na aba em foco e com a janela visível. Em segundo plano o jogo não aceita movimento.
+- Avisos de outros jogadores atacando os próprios selvagens também são vermelhos, e o script pode desviar deles sem necessidade.
+- Qualquer tecla de movimento, de golpe (1 a 4) ou clique seu no mapa pausa o desvio por 3 s.
+
 ## Tier list
 
 São duas listas:
@@ -110,7 +121,7 @@ node --check poke-tools.user.js
 
 | Arquivo | Papel |
 |---|---|
-| `src/` | Código do userscript, dividido por módulo: `tiers/` e `market/` (tiers, mercado, MAPA e ficha), `daily.js`, `monitor.js`, `settings.js` (menu de módulos), `meta.js` (cabeçalho) e `data/` (gerado). |
+| `src/` | Código do userscript, dividido por módulo: `tiers/` e `market/` (tiers, mercado, MAPA e ficha), `daily.js`, `monitor.js`, `dodge.js` (desvio), `settings.js` (menu de módulos), `meta.js` (cabeçalho) e `data/` (gerado). |
 | `poke-tools.user.js` | O userscript instalado, gerado a partir de `src/`; não edite à mão. |
 | `pokeafk-market-filtros.user.js`, `pokeafk-monitor.user.js` | Scripts antigos, que agora só avisam para trocar pelo PokeAFK Tools. |
 | `rank-pokemon.mjs` | Motor do ranking: simula caça e duelos e escolhe golpes, natureza e IVs. |
