@@ -1,6 +1,6 @@
 # pokeAFK Tools
 
-Ferramentas para o [pokeAFK](https://pokeafk.io/): um userscript que ajuda no Mercado da Comunidade, na escolha de Pokémon e no daily de treinadores, e uma tier list on-line.
+Ferramentas para o [pokeAFK](https://pokeafk.io/): um userscript que ajuda no Mercado da Comunidade, na escolha de Pokémon, no daily de treinadores e no acompanhamento de várias contas, e uma tier list on-line.
 
 **Tier list:** https://keter45.github.io/pokeafk-tools/
 
@@ -10,10 +10,14 @@ Ferramentas para o [pokeAFK](https://pokeafk.io/): um userscript que ajuda no Me
 
 1. Instale o [Tampermonkey](https://www.tampermonkey.net/) no Chrome ou no Firefox.
 2. Abra o link do script e clique em **Instalar**:
-   https://raw.githubusercontent.com/keter45/pokeafk-tools/main/pokeafk-market-filtros.user.js
+   https://raw.githubusercontent.com/keter45/pokeafk-tools/main/poke-tools.user.js
 3. Recarregue a página do pokeAFK.
 
 O Tampermonkey busca as versões novas no mesmo link. Para atualizar na hora, use **Procurar atualizações de scripts** no menu da extensão.
+
+**Ligar e desligar partes.** No menu do Tampermonkey, com a página do jogo aberta, aparecem três opções: **Tiers, filtros do mercado e ficha**, **Daily de treinadores** e **Monitor de contas**. ✅ indica que a parte está ligada e ⬜ que está desligada. Clique para trocar; a mudança vale depois de recarregar a página e para todas as abas.
+
+**Vindo dos scripts antigos?** "PokeAFK — Filtros do Mercado" e "PokeAFK — Monitor de contas" viraram um só. Instale o PokeAFK Tools e desinstale os dois antigos no painel do Tampermonkey. Os filtros, as opções do daily e os times aprendidos continuam salvos. Os apelidos das contas precisam ser dados de novo.
 
 ## O que o script faz
 
@@ -41,10 +45,9 @@ O botão **⚔ Daily** fica no HUD, abaixo de "Poke Market". Ele luta com os tre
 - **Treinadores inacessíveis:** pula, sem parar o daily, os treinadores de lugares fechados (como um Ginásio que pede insígnias) e os que não respondem depois do teleporte. Se quatro seguidos não respondem, o daily para.
 - **Parar:** qualquer clique ou tecla sua fora do card para o daily, assim como o botão **Parar**. Cliques no painel **Contas** não param o daily.
 
-## Monitor de contas (script separado)
+### Monitor de contas
 
-Para quem joga com várias contas abertas, cada uma numa aba. Instale também este script no Tampermonkey:
-https://raw.githubusercontent.com/keter45/pokeafk-tools/main/pokeafk-monitor.user.js
+Para quem joga com várias contas abertas, cada uma numa aba.
 
 **Título e ícone da aba.** Cada aba do jogo passa a mostrar a conta, o que ela está fazendo e quantas bolas e poções tem, por exemplo `🟢 Keter · ◓1104 ✚1995`. O ícone da aba é um círculo com a inicial da conta, na cor do estado:
 
@@ -99,19 +102,21 @@ Os golpes considerados são os aprendidos por nível na linha evolutiva e as 7 H
 ```sh
 node collect-pokepedia.mjs        # baixa o catálogo do jogo (pokepedia-data.json)
 node collect-competitive.mjs      # baixa as referências da Gen 3 (competitive-data.json)
-node build-userscript.mjs         # recompila o bloco de dados do userscript
-node build-monitor.mjs            # recompila a tabela de espécies do monitor de contas
+node build-data.mjs               # recompila os dados do script (src/data/)
+node build-userscript.mjs         # junta src/ em poke-tools.user.js
 node build-tierlist-page.mjs      # regenera tierlist.html
-node --check pokeafk-market-filtros.user.js
+node --check poke-tools.user.js
 ```
 
 | Arquivo | Papel |
 |---|---|
-| `pokeafk-market-filtros.user.js` | O userscript. O bloco entre `GUIDE_DATA_START` e `GUIDE_DATA_END` é gerado; não edite à mão. |
+| `src/` | Código do userscript, dividido por módulo: `tiers/` e `market/` (tiers, mercado, MAPA e ficha), `daily.js`, `monitor.js`, `settings.js` (menu de módulos), `meta.js` (cabeçalho) e `data/` (gerado). |
+| `poke-tools.user.js` | O userscript instalado, gerado a partir de `src/`; não edite à mão. |
+| `pokeafk-market-filtros.user.js`, `pokeafk-monitor.user.js` | Scripts antigos, que agora só avisam para trocar pelo PokeAFK Tools. |
 | `rank-pokemon.mjs` | Motor do ranking: simula caça e duelos e escolhe golpes, natureza e IVs. |
 | `collect-pokepedia.mjs`, `collect-competitive.mjs` | Coletores de dados. |
-| `build-userscript.mjs`, `build-tierlist-page.mjs` | Geram o bloco de dados do script e a página da tier list. |
+| `build-data.mjs`, `build-userscript.mjs`, `build-tierlist-page.mjs` | Geram os dados do script, o userscript e a página da tier list. |
 | `farms.mjs` | Monta a lista de farms do early game (hunts, evoluções e preço de captura). |
 | `tierlist.html`, `index.html` | Página publicada no GitHub Pages. |
 
-Ao mudar o userscript, suba o `@version` no cabeçalho; o Tampermonkey só atualiza quando o número aumenta. Os detalhes do modelo e dos seletores do jogo estão em [AGENTS.md](AGENTS.md).
+Ao mudar o userscript, edite `src/`, suba o `@version` em `src/meta.js` e rode `node build-userscript.mjs`; o Tampermonkey só atualiza quando o número aumenta. Os detalhes do modelo e dos seletores do jogo estão em [AGENTS.md](AGENTS.md).

@@ -4,7 +4,7 @@ Leia e siga `F:\Projetos\AGENTS.md` antes de iniciar o design ou a implementaç�
 
 ## O que é
 
-Um userscript do **Tampermonkey** para o jogo [pokeAFK](https://pokeafk.io/) (Chrome e Firefox, o mesmo arquivo serve nos dois). Ele:
+Um userscript do **Tampermonkey**, o **PokeAFK Tools** (`poke-tools.user.js`), para o jogo [pokeAFK](https://pokeafk.io/) (Chrome e Firefox, o mesmo arquivo serve nos dois). O código fica dividido em módulos em `src/` e `build-userscript.mjs` junta tudo num arquivo só (pedido do usuário: um script principal que reúne os outros). Ele:
 
 - filtra anúncios de Pokémon no **Mercado da Comunidade** (natureza e IV mínimo);
 - mostra o selo de tier **PvE** e **Competitivo** ao lado do nome da espécie no mercado (lista, cartões e página da espécie), na janela **MAPA** (lista de hunts e cartão da hunt selecionada) e na **ficha do Pokémon**;
@@ -13,9 +13,11 @@ Um userscript do **Tampermonkey** para o jogo [pokeAFK](https://pokeafk.io/) (Ch
 - ordena a lista agrupada do mercado por tier (percorre as páginas do servidor);
 - botão **Daily** (abaixo de "Poke Market", no HUD): luta com os treinadores do dia do nível do Pokémon principal até N abaixo (o usuário escolhe; sugerido 10), com progresso "Faltam N" e botão Parar.
 
-Ao mudar `pokeafk-monitor.user.js`, suba o `// @version` dele (é independente do principal).
+- monitor de contas (pedido do usuário, que joga com 4 contas em 4 abas do Firefox, em contêineres diferentes): dá a cada aba do jogo um título e um ícone com a conta, o estado (caçando, daily, batalha, parado) e as contagens de bolas e poções, e mostra o painel **Contas** com todas as contas abertas.
 
-Um segundo userscript, `pokeafk-monitor.user.js` (pedido do usuário, que joga com 4 contas em 4 abas do Firefox, em contêineres diferentes), dá a cada aba do jogo um título e um ícone com a conta, o estado (caçando, daily, batalha, parado) e as contagens de bolas e poções, e mostra o painel **Contas** com todas as contas abertas.
+Cada grupo (tiers e mercado, daily, monitor) pode ser desligado no menu do Tampermonkey (`src/settings.js`, chave `modules` no armazenamento `GM_*`; vale ao recarregar).
+
+**Scripts antigos:** `pokeafk-market-filtros.user.js` e `pokeafk-monitor.user.js` viraram avisos de migração. Ficam no repositório para quem já os tem instalados receber essa última versão pelo `@updateURL`: depois de 4 s, se a página não tem `html[data-poke-tools]` (marcado pelo PokeAFK Tools), mostram um aviso com o link de instalação e pedem para desinstalar os antigos. Não volte a pôr código neles.
 
 Há também uma página, `tierlist.html`, gerada a partir dos mesmos dados e publicada no GitHub Pages: https://keter45.github.io/pokeafk-tools/ (o `index.html` redireciona para ela).
 
@@ -25,13 +27,18 @@ O usuário escreve em português do Brasil. Todo texto de interface fica em pt-B
 
 | Arquivo | Papel |
 |---|---|
-| `pokeafk-market-filtros.user.js` | O userscript. Código da interface + bloco de dados gerado entre `/* GUIDE_DATA_START */` e `/* GUIDE_DATA_END */`. Não edite o bloco de dados à mão. |
-| `pokeafk-monitor.user.js` | Monitor de contas (título e ícone da aba e painel Contas). Script separado, com grants `GM_*`. Versão própria em `// @version`. |
-| `build-monitor.mjs` | Escreve no monitor a tabela de espécies (`DEX`, índice = dex, `"Nome:tipo"`) entre `/* DEX_DATA_START */` e `/* DEX_DATA_END */`, lida de `pokepedia-data.json`. Não edite o bloco à mão. |
+| `poke-tools.user.js` | O userscript instalado (gerado por `build-userscript.mjs`; não edite à mão). |
+| `src/meta.js` | Cabeçalho do userscript (`@version`, grants, `@sandbox JavaScript`). |
+| `src/settings.js` | Liga e desliga os módulos (menu do Tampermonkey) e marca `html[data-poke-tools]`. |
+| `src/data/guide.js`, `src/data/dex.js` | Dados gerados por `build-data.mjs`: `MARKET_GUIDE` (perfis, tiers, tipos por dex) e `DEX` (`"Nome:tipo"` por dex, usado pelo monitor). Não edite à mão. |
+| `src/tiers/*.js`, `src/market/*.js` | Grupo **tiers**: constantes e selos (`tiers/common.js`), MAPA e ficha (`tiers/badges.js`), tier list (`tiers/dialog.js`), CSS (`tiers/styles.js`), filtros e recomendação (`market/filters.js`, `market/panel.js`, `market/state.js`), ordenação por tier (`market/tier-sort.js`) e o observador (`tiers/observer.js`). Dividem um escopo só, na ordem de `GROUPS` em `build-userscript.mjs`. |
+| `src/daily.js`, `src/monitor.js` | Daily de treinadores e monitor de contas, cada um no próprio escopo. O daily só usa `MARKET_GUIDE.types` de fora. |
+| `pokeafk-market-filtros.user.js`, `pokeafk-monitor.user.js` | Avisos de migração para quem tem os scripts antigos (veja acima). |
 | `collect-pokepedia.mjs` | Baixa o catálogo do jogo (módulo `selectStyle-*.js` da Poképédia) e gera `pokepedia-data.json`: espécies (`id`, `key`, stats, tipos, evoluções, golpes por nível com parâmetros de combate), formas Mega, HMs e TMs. |
 | `collect-competitive.mjs` | Baixa referências da Gen 3 (sets da Smogon via data.pkmn.cc, tiers e random battles do Pokémon Showdown) e gera `competitive-data.json`. |
 | `rank-pokemon.mjs` | Motor do ranking (`buildGuide`). Simula PvE e duelo, escolhe loadout, natureza e IVs, calcula tiers. |
-| `build-userscript.mjs` | Roda `buildGuide` (com HMs) e reescreve o bloco de dados do userscript, mantendo só os campos que a interface usa. |
+| `build-data.mjs` | Roda `buildGuide` (com HMs) e escreve `src/data/guide.js` (só os campos que a interface usa) e `src/data/dex.js`. |
+| `build-userscript.mjs` | Junta `src/` em `poke-tools.user.js` (rápido; rode depois de qualquer mudança em `src/`). |
 | `build-tierlist-page.mjs` | Gera `tierlist.html` (página autônoma com dados embutidos, imagens do jogo e links para a Poképédia), com as abas PvE, Competitivo e Farms early game. |
 | `farms.mjs` | `buildFarms`: hunts de Kanto com Pokémon de primeiro estágio cuja evolução final é S ou A, com o preço de captura estimado. |
 | `pokepedia-data.json`, `competitive-data.json` | Dados coletados (gerados; não edite à mão). |
@@ -43,13 +50,13 @@ O projeto é um repositório git público: [keter45/pokeafk-tools](https://githu
 ```powershell
 node collect-pokepedia.mjs        # atualiza pokepedia-data.json a partir do site
 node collect-competitive.mjs      # atualiza competitive-data.json (Smogon/Showdown)
-node build-userscript.mjs         # recompila o bloco de dados do userscript (~5 s)
-node build-monitor.mjs            # recompila a tabela de espécies do monitor
+node build-data.mjs               # recompila src/data/ a partir dos dados (~5 s)
+node build-userscript.mjs         # junta src/ em poke-tools.user.js
 node build-tierlist-page.mjs      # regenera tierlist.html
-node --check pokeafk-market-filtros.user.js
+node --check poke-tools.user.js
 ```
 
-Sempre que mudar `rank-pokemon.mjs` ou os dados: rode `build-userscript.mjs`, `build-tierlist-page.mjs`, `build-monitor.mjs` e `node --check`. Ao mudar o userscript, suba `// @version` no cabeçalho para o Tampermonkey atualizar. O Tampermonkey busca a versão nova em `@updateURL` (arquivo bruto da branch `main` no GitHub), então a atualização só chega ao usuário depois do push.
+Sempre que mudar `rank-pokemon.mjs` ou os dados: rode `build-data.mjs`, `build-userscript.mjs`, `build-tierlist-page.mjs` e `node --check`. Ao mudar qualquer arquivo de `src/`, rode `build-userscript.mjs`, suba `@version` em `src/meta.js` e faça commit de `src/` e de `poke-tools.user.js` juntos. O Tampermonkey busca a versão nova em `@updateURL` (arquivo bruto da branch `main` no GitHub), então a atualização só chega ao usuário depois do push.
 
 ## Regras decididas com o usuário (não mude sem perguntar)
 
@@ -86,12 +93,12 @@ Mecânicas tiradas do código e do guia "Mecânicas" do jogo:
 - Um único `MutationObserver` em `document.body` observa `.mk` e `.modal` e chama `syncAll()` por `requestAnimationFrame`. Elementos inseridos pelo script levam `data-pafk` e são ignorados pelo observador; não remova isso, ou o script entra em loop.
 - Links úteis: Poképédia de espécie `https://pokeafk.io/pokepedia/pokemon/{key}` (key com `_`, ex.: `mr_mime`); sprites `https://pokeafk.io/assets/mon/front/{id}.png` (Megas: `3-mega.png`). Cores dos tipos e mecânicas ficam nos módulos `shell-*.js` e `selectStyle-*.js` da Poképédia.
 
-## Fazer daily (módulo no fim do userscript)
+## Fazer daily (`src/daily.js`)
 
-Independente do resto (tem CSS, helpers e listeners próprios); para testar no jogo dá para enviar só esse trecho (de `// ---- Fazer daily` até o fim).
+Independente do resto (tem CSS, helpers e listeners próprios; de fora só usa `MARKET_GUIDE.types`). Para testar no jogo dá para enviar só `src/data/guide.js` + `src/daily.js`.
 
 - **Rota:** abre MAPA → aba `[data-list="npcs"]`, passa por todas as regiões liberadas (`.mx-tab[data-region]` sem `.locked`/`.soon`), ordena por XP (`[data-npcsort="xp"]`, que separa os capítulos `BLOQUEADOS` e `VENCIDOS HOJE`) e lê `.mx-list > .mx-row.npc[data-npc]` (nome em `.mx-row-main strong`, lugar em `.mx-row-place`, nível em `.mx-row-lv`). Filtra nível `[principal − N, principal]` (N escolhido no card, campo `[data-daily-levels]`, 0–99, sugerido 10, salvo em `pokeafk-market-filtros:daily-range`; travado durante a execução), não vencidos e não bloqueados; ordena do **nível mais baixo ao mais alto** (no mesmo nível, treinadores do mesmo lugar ficam juntos). Depois devolve a ordenação e a região que o jogador usava.
-- **Times e vantagem de tipo (pedido do usuário):** o cliente não recebe o time do treinador antes da luta (vem do servidor; `npcs.json` e os mapas não têm). Por isso cada luta grava os Pokémon do oponente lidos do cartão vermelho da arena (`.ah-card` com `.ah-name.red`, ícone `.ah-mon-ic` → `/assets/mon/icon/{dex}.png`) em `localStorage` `pokeafk-market-filtros:npc-teams` (`{npcId: {name, dex[], at}}`). Na rota, se a opção "Evitar times com vantagem de tipo" estiver ligada (`pokeafk-market-filtros:daily-avoid`), um treinador cujo time conhecido tem algum tipo super efetivo (≥2×, tabela da Gen 3) contra o principal fica como "Evitado" e sai da contagem. Treinador desconhecido é enfrentado (e aprendido). Tipos por dex vêm do campo `types` do bloco de dados (gerado por `build-userscript.mjs`); o dex do principal vem de `.hud-active-button img.front`.
+- **Times e vantagem de tipo (pedido do usuário):** o cliente não recebe o time do treinador antes da luta (vem do servidor; `npcs.json` e os mapas não têm). Por isso cada luta grava os Pokémon do oponente lidos do cartão vermelho da arena (`.ah-card` com `.ah-name.red`, ícone `.ah-mon-ic` → `/assets/mon/icon/{dex}.png`) em `localStorage` `pokeafk-market-filtros:npc-teams` (`{npcId: {name, dex[], at}}`). Na rota, se a opção "Evitar times com vantagem de tipo" estiver ligada (`pokeafk-market-filtros:daily-avoid`), um treinador cujo time conhecido tem algum tipo super efetivo (≥2×, tabela da Gen 3) contra o principal fica como "Evitado" e sai da contagem. Treinador desconhecido é enfrentado (e aprendido). Tipos por dex vêm do campo `types` de `MARKET_GUIDE` (gerado por `build-data.mjs`); o dex do principal vem de `.hud-active-button img.front`.
 - **Luta:** clica na linha → cartão `.mx-card` (status "Disponível hoje"/"Vencido hoje"/"Bloqueado") → `.mx-acts [data-act="tp"]` → espera o MAPA fechar → envia `keydown` da tecla de interagir na `window` (`pokeafk.ui.keys`.talk, padrão `Z`; o jogo fala com o NPC à frente) → `.b5-challenge` (classe em `.b5-ch-cls`, nome em `.b5-ch-name`; confere com o nome da lista) → `[data-fight]` → arena (`.in-arena` na raiz) → `.ah-result[data-result="win|loss|draw"]` → `[data-ah="ok"]` (CONTINUAR).
 - **Cura:** HP do principal em `.hud-hp-numbers` ("33/ 50"). Abaixo de 50% antes de uma luta, ou depois de uma derrota (se o jogo não levou ao Centro), clica `.hud-act.center[data-act="center"]` e espera o HP encher. Derrota pula o treinador.
 - **Treinador que anda (pedido do usuário):** se o desafio não abre depois de 2 tentativas de falar, o script procura o sprite do treinador no canvas do mundo e clica nele; o próprio jogo anda até o NPC e fala (handler `pointerdown` do canvas → `Sg`). O sprite vem da lista do MAPA (`.mx-npc-face i`, `background-image: /assets/npcs/{gfx}.png`) e o tamanho do quadro de `/assets/npcs/npcs.json` (`{w, h, frames, hd}`). O canvas desenha 1:1 (`canvas.width` = largura lógica; o CSS amplia), então a busca compara pixels de todos os quadros (e espelhados) com ajuste de ganho e deslocamento por canal (tolera filtros de dia e noite) e escolhe o mais perto do centro. Sprites `hd` ficam em outra camada e não são buscados. Não use ganchos internos do jogo: o cliente detecta automação (`pokeafk-piloto.gancho`, rede num Worker).
@@ -100,9 +107,9 @@ Independente do resto (tem CSS, helpers e listeners próprios); para testar no j
 - **Posição:** o card fica abaixo de `.hud-quick` até ser arrastado (pelo botão "Daily" ou pelo cabeçalho); a posição arrastada fica em `pokeafk-market-filtros:daily-pos` (`{right, top}`) e duplo clique no cabeçalho volta ao lugar padrão.
 - **Segurança:** qualquer clique ou tecla real (`isTrusted`) fora do widget para o loop; tempo esgotado em qualquer etapa também. Cliques no painel do monitor (`#pafk-monitor`) também não contam. Pausas aleatórias curtas entre ações (padrão 0,3–0,8 s; o usuário pediu para acelerar a partir de 1–3 s). Os cliques do script são `element.click()` (não confiáveis), por isso não disparam a parada.
 
-## Monitor de contas (`pokeafk-monitor.user.js`)
+## Monitor de contas (`src/monitor.js`)
 
-Script separado para não tirar o principal do modo `@grant none` (o contexto muda e pode afetar os `keydown` sintéticos do daily). Lê só o DOM; nada de ganchos internos do jogo.
+Lê só o DOM; nada de ganchos internos do jogo. Antes era um script separado para o principal ficar em `@grant none`; no PokeAFK Tools tudo roda com os grants `GM_*` e `@sandbox JavaScript` (contexto da página, como o `@grant none`), para os `keydown` sintéticos do daily continuarem chegando ao jogo. Se o daily parar de falar com os NPCs no Tampermonkey, suspeite disso primeiro. Os apelidos e contas gravados pelo monitor antigo ficaram no armazenamento do script antigo (o `GM_*` é por script); o `localStorage` (filtros, daily, XP) continua valendo.
 
 - **Por que GM_*:** os contêineres do Firefox isolam `localStorage` e `BroadcastChannel` por contêiner. O armazenamento do Tampermonkey (`GM_setValue`/`GM_getValue`/`GM_listValues`/`GM_addValueChangeListener`) é um só para todas as abas. Cada conta grava a chave `acct:<nome>` (uma chave por conta, para as abas não sobrescreverem umas às outras); apelidos ficam em `nicks` (`{nome: apelido}`). Sem grants, cai para `localStorage` (só o contêiner da aba).
 - **O que lê do HUD:** nome em `.hud-trainer-name [translate="no"]`; bolas em `.capture-ball[data-capture-ball]` (`<span>` com a contagem, `title` com o nome; ficam no DOM com a captura fechada). Pedido do usuário: o total de bolas (`ballsTotal`, título, alerta) soma `poke-ball`, `great-ball`, `net-ball` (Super Ball) e `ultra-ball`; a `afk-ball` (shinies) fica em `afkBalls`, com ícone próprio `/assets/items/afk-ball.png` no painel; poções em `.ax-pick[data-heal]` (`berry`, `potion`, `super-potion`, `hyper-potion`; `<b>` com a contagem) do painel AUTOMAÇÕES, que fica no DOM e é atualizado mesmo recolhido; se não existir, usa os cartões `.bag-card[data-card$="potion"]` da Bolsa quando ela é aberta; bolas permitidas na captura automática em `.ax-pick[data-ball].on`; dinheiro em `.hud-wallet .hud-amt`; Pokémon principal em `button.hud-active-button` (`aria-label` "Resumo de X, nível N"), `.hud-hp-numbers` e `.hud-mon-portrait` (sprite `img.front`, fundo do tipo `img.hud-mon-bg` = `/assets/ui/v5/fundos/{tipo}.webp`, cor do tipo em `--tc`); selvagem na tela em `.gba-healthbox.opponent` (`.name` com `title`, `.lv`), só com nome: o dex vem da tabela `DEX`, e o último fica guardado enquanto a conta caça. Frutas e reviver não aparecem (pedido do usuário).
@@ -129,7 +136,7 @@ Para testar só a interface sem o jogo, uma página local com as mesmas classes 
 
 ## Cuidados
 
-- O bloco de dados do userscript tem ~200 KB; mantenha só campos usados (`build-userscript.mjs` corta o resto).
+- O bloco de dados (`src/data/guide.js`) tem ~200 KB; mantenha só campos usados (`build-data.mjs` corta o resto).
 - `normalizeName` (em `collect-competitive.mjs`) casa nomes da Smogon com os do jogo (aliases `High Jump Kick`, `Feint Attack`; Nidoran♀/♂).
 - Se o jogo mudar o catálogo, o hash em `pokepedia-data.json` muda; recolete e compare antes de recompilar.
 - Depois de mudanças no ranking, confira anomalias: Mega abaixo da forma base (só é aceitável se a Mega perde Velocidade) e golpes recomendados que não sejam de nível ou HM compatível.
