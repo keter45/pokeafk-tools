@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.3.4
+// @version      1.3.5
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -3563,6 +3563,16 @@
         #pafk-daily .pafk-daily-go:hover { background: #194985; }
         #pafk-daily .pafk-daily-stop { background: #fff0f0; color: #a02735; border-color: #f0bac1; }
         #pafk-daily .pafk-daily-stop:hover { background: #fce0e4; }
+        /* Phones on their side (the game asks for landscape): the button sits under the Contas chip,
+           the open card takes the full height on the right, and both stay under the game's windows. */
+        @media (max-height: 500px) {
+          #pafk-daily .pafk-daily-toggle { min-height: 34px; }
+          #pafk-daily .pafk-daily-body { position: fixed; top: 8px; right: 8px; max-height: calc(100vh - 16px); }
+          #pafk-daily:has(.pafk-daily-body:not([hidden])) { z-index: 42; }
+          #pafk-daily .pafk-daily-content { gap: 8px; padding: 8px 10px; }
+          #pafk-daily .pafk-daily-actions { padding: 8px 10px; }
+          body:has(.hud .modal.open) #pafk-daily:not([data-running]) { display: none; }
+        }
         @media (prefers-reduced-motion: no-preference) {
           #pafk-daily .pafk-daily-actions button { transition: scale .12s ease-out; }
           #pafk-daily .pafk-daily-actions button:active { scale: .96; }
@@ -3573,33 +3583,47 @@
       document.body.append(box);
 
       // Until the player drags it, it sits under the game's quick actions column (CAÇAR, Poke
-      // Center, Poke Market). A dragged position is kept, anchored by the top right corner.
+      // Center, Poke Market). On a phone on its side that column is full (XP boost, Mecânicas,
+      // Analisador, CAPTURA), so it goes under the Contas chip instead.
+      // A dragged position is kept, anchored by the top right corner.
       const POSITION_STORAGE = 'pokeafk-market-filtros:daily-pos';
+      const SHORT_SCREEN = matchMedia('(max-height: 500px)');
       let saved = null;
       try {
         saved = JSON.parse(localStorage.getItem(POSITION_STORAGE) ?? 'null');
       } catch {
         saved = null;
       }
+      // On short screens the open card is pinned to the viewport, so only the button needs room.
+      const onlyButton = () => body.hidden || getComputedStyle(body).position === 'fixed';
       function clampPosition({ right, top }) {
-        const width = (body.hidden ? toggleButton.offsetWidth : body.offsetWidth) || 80;
+        const width = (onlyButton() ? toggleButton.offsetWidth : body.offsetWidth) || 80;
         return {
           right: Math.min(Math.max(0, right), Math.max(0, innerWidth - width)),
-          top: Math.min(Math.max(0, top), Math.max(0, innerHeight - (body.hidden ? 40 : 230))),
+          top: Math.min(Math.max(0, top), Math.max(0, innerHeight - (onlyButton() ? 40 : 230))),
         };
       }
-      function placeBox() {
-        let position;
-        if (saved) {
-          position = saved;
-        } else {
-          const rect = document.querySelector('.hud.world-hud .hud-quick')?.getBoundingClientRect();
-          const visible = rect && rect.width > 0;
-          position = {
-            top: visible ? Math.round(rect.bottom + 6) : 96,
-            right: visible ? Math.max(8, Math.round(innerWidth - rect.right)) : 8,
-          };
+      function defaultPosition() {
+        const rect = selector => {
+          const found = document.querySelector(selector)?.getBoundingClientRect();
+          return found && found.width > 0 ? found : null;
+        };
+        if (SHORT_SCREEN.matches) {
+          // Under the Contas chip, left edges lined up (the wild Pokémon's box is to its left and
+          // the quick actions below AUTO); without the monitor, left of AUTO.
+          const chip = rect('#pafk-monitor .pafk-mon-chip');
+          const auto = rect('.hud.world-hud .hud-auto-toggle');
+          const width = toggleButton.offsetWidth || 80;
+          if (chip) return { top: Math.round(chip.bottom + 6), right: Math.round(innerWidth - chip.left - width) };
+          if (auto) return { top: Math.round(auto.top), right: Math.round(innerWidth - auto.left + 8) };
         }
+        const quick = rect('.hud.world-hud .hud-quick');
+        return quick
+          ? { top: Math.round(quick.bottom + 6), right: Math.max(8, Math.round(innerWidth - quick.right)) }
+          : { top: 96, right: 8 };
+      }
+      function placeBox() {
+        const position = saved ?? defaultPosition();
         const { right, top } = clampPosition(position);
         box.style.top = `${top}px`;
         box.style.right = `${right}px`;
@@ -4530,6 +4554,8 @@
     const POSITION_STORAGE = 'pokeafk-monitor:pos';
     const OPEN_STORAGE = 'pokeafk-monitor:open';
     const COMPACT_KEY = 'ui:compact';   // shared by every tab, like the records
+    // A phone on its side (the game asks for landscape) fits the four accounts only in the compact list.
+    const SHORT_SCREEN = matchMedia('(max-height: 500px)');
 
     // Game images (same origin as the game).
     const IMG = {
@@ -4992,7 +5018,7 @@
         </header>
         <ul class="pafk-mon-list" data-mon-list></ul>
         <p class="pafk-mon-empty" hidden data-mon-empty>Nenhuma conta ainda. Abra o jogo em outras abas com este script ligado.</p>
-        <p class="pafk-mon-foot">⚠ com menos de ${LOW_BALLS} bolas ou ${LOW_POTIONS} poções. Passe o mouse nos números para ver cada tipo.</p>
+        <p class="pafk-mon-foot">⚠ com menos de ${LOW_BALLS} bolas ou ${LOW_POTIONS} poções.<span class="pafk-mon-hover-hint"> Passe o mouse nos números para ver cada tipo.</span></p>
       </div>`;
     const body = $('[data-mon-body]', box);
     const list = $('[data-mon-list]', box);
@@ -5083,6 +5109,10 @@
       }
       @keyframes pafk-mon-bob { 0%, 49.9% { background-position: 0 0; } 50%, 100% { background-position: 0 calc(var(--s) * -1); } }
       @media (prefers-reduced-motion: reduce) { #pafk-monitor .pafk-mon-foe-ic { animation: none; } }
+      /* Touch screens have no hover, so the per-type tooltips never show. */
+      @media (hover: none) { #pafk-monitor .pafk-mon-hover-hint { display: none; } }
+      /* On a phone the game's windows (market, MAPA, ficha) fill the screen; stay under them. */
+      @media (max-height: 500px) { body:has(.hud .modal.open) #pafk-monitor { display: none; } }
       #pafk-monitor .pafk-mon-hp {
         position: relative; flex: 1; min-width: 40px; height: 6px; border-radius: 99px;
         background: #e6edf6; box-shadow: inset 0 0 0 1px #b7c6db; overflow: hidden;
@@ -5303,7 +5333,7 @@
     const rows = new Map();
     let shownMode = null;
     let editing = null;
-    const mode = () => (store.get(COMPACT_KEY, false) ? 'compact' : 'full');
+    const mode = () => (store.get(COMPACT_KEY, SHORT_SCREEN.matches) ? 'compact' : 'full');
 
     function makeRow(name, compact) {
       const item = document.createElement('li');

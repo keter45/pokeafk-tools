@@ -193,6 +193,16 @@
     #pafk-daily .pafk-daily-go:hover { background: #194985; }
     #pafk-daily .pafk-daily-stop { background: #fff0f0; color: #a02735; border-color: #f0bac1; }
     #pafk-daily .pafk-daily-stop:hover { background: #fce0e4; }
+    /* Phones on their side (the game asks for landscape): the button sits under the Contas chip,
+       the open card takes the full height on the right, and both stay under the game's windows. */
+    @media (max-height: 500px) {
+      #pafk-daily .pafk-daily-toggle { min-height: 34px; }
+      #pafk-daily .pafk-daily-body { position: fixed; top: 8px; right: 8px; max-height: calc(100vh - 16px); }
+      #pafk-daily:has(.pafk-daily-body:not([hidden])) { z-index: 42; }
+      #pafk-daily .pafk-daily-content { gap: 8px; padding: 8px 10px; }
+      #pafk-daily .pafk-daily-actions { padding: 8px 10px; }
+      body:has(.hud .modal.open) #pafk-daily:not([data-running]) { display: none; }
+    }
     @media (prefers-reduced-motion: no-preference) {
       #pafk-daily .pafk-daily-actions button { transition: scale .12s ease-out; }
       #pafk-daily .pafk-daily-actions button:active { scale: .96; }
@@ -203,33 +213,47 @@
   document.body.append(box);
 
   // Until the player drags it, it sits under the game's quick actions column (CAÇAR, Poke
-  // Center, Poke Market). A dragged position is kept, anchored by the top right corner.
+  // Center, Poke Market). On a phone on its side that column is full (XP boost, Mecânicas,
+  // Analisador, CAPTURA), so it goes under the Contas chip instead.
+  // A dragged position is kept, anchored by the top right corner.
   const POSITION_STORAGE = 'pokeafk-market-filtros:daily-pos';
+  const SHORT_SCREEN = matchMedia('(max-height: 500px)');
   let saved = null;
   try {
     saved = JSON.parse(localStorage.getItem(POSITION_STORAGE) ?? 'null');
   } catch {
     saved = null;
   }
+  // On short screens the open card is pinned to the viewport, so only the button needs room.
+  const onlyButton = () => body.hidden || getComputedStyle(body).position === 'fixed';
   function clampPosition({ right, top }) {
-    const width = (body.hidden ? toggleButton.offsetWidth : body.offsetWidth) || 80;
+    const width = (onlyButton() ? toggleButton.offsetWidth : body.offsetWidth) || 80;
     return {
       right: Math.min(Math.max(0, right), Math.max(0, innerWidth - width)),
-      top: Math.min(Math.max(0, top), Math.max(0, innerHeight - (body.hidden ? 40 : 230))),
+      top: Math.min(Math.max(0, top), Math.max(0, innerHeight - (onlyButton() ? 40 : 230))),
     };
   }
-  function placeBox() {
-    let position;
-    if (saved) {
-      position = saved;
-    } else {
-      const rect = document.querySelector('.hud.world-hud .hud-quick')?.getBoundingClientRect();
-      const visible = rect && rect.width > 0;
-      position = {
-        top: visible ? Math.round(rect.bottom + 6) : 96,
-        right: visible ? Math.max(8, Math.round(innerWidth - rect.right)) : 8,
-      };
+  function defaultPosition() {
+    const rect = selector => {
+      const found = document.querySelector(selector)?.getBoundingClientRect();
+      return found && found.width > 0 ? found : null;
+    };
+    if (SHORT_SCREEN.matches) {
+      // Under the Contas chip, left edges lined up (the wild Pokémon's box is to its left and
+      // the quick actions below AUTO); without the monitor, left of AUTO.
+      const chip = rect('#pafk-monitor .pafk-mon-chip');
+      const auto = rect('.hud.world-hud .hud-auto-toggle');
+      const width = toggleButton.offsetWidth || 80;
+      if (chip) return { top: Math.round(chip.bottom + 6), right: Math.round(innerWidth - chip.left - width) };
+      if (auto) return { top: Math.round(auto.top), right: Math.round(innerWidth - auto.left + 8) };
     }
+    const quick = rect('.hud.world-hud .hud-quick');
+    return quick
+      ? { top: Math.round(quick.bottom + 6), right: Math.max(8, Math.round(innerWidth - quick.right)) }
+      : { top: 96, right: 8 };
+  }
+  function placeBox() {
+    const position = saved ?? defaultPosition();
     const { right, top } = clampPosition(position);
     box.style.top = `${top}px`;
     box.style.right = `${right}px`;

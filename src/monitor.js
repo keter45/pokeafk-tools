@@ -15,6 +15,8 @@ const LOW_POTIONS = 20;
 const POSITION_STORAGE = 'pokeafk-monitor:pos';
 const OPEN_STORAGE = 'pokeafk-monitor:open';
 const COMPACT_KEY = 'ui:compact';   // shared by every tab, like the records
+// A phone on its side (the game asks for landscape) fits the four accounts only in the compact list.
+const SHORT_SCREEN = matchMedia('(max-height: 500px)');
 
 // Game images (same origin as the game).
 const IMG = {
@@ -477,7 +479,7 @@ box.innerHTML = `
     </header>
     <ul class="pafk-mon-list" data-mon-list></ul>
     <p class="pafk-mon-empty" hidden data-mon-empty>Nenhuma conta ainda. Abra o jogo em outras abas com este script ligado.</p>
-    <p class="pafk-mon-foot">⚠ com menos de ${LOW_BALLS} bolas ou ${LOW_POTIONS} poções. Passe o mouse nos números para ver cada tipo.</p>
+    <p class="pafk-mon-foot">⚠ com menos de ${LOW_BALLS} bolas ou ${LOW_POTIONS} poções.<span class="pafk-mon-hover-hint"> Passe o mouse nos números para ver cada tipo.</span></p>
   </div>`;
 const body = $('[data-mon-body]', box);
 const list = $('[data-mon-list]', box);
@@ -568,6 +570,10 @@ style.textContent = `
   }
   @keyframes pafk-mon-bob { 0%, 49.9% { background-position: 0 0; } 50%, 100% { background-position: 0 calc(var(--s) * -1); } }
   @media (prefers-reduced-motion: reduce) { #pafk-monitor .pafk-mon-foe-ic { animation: none; } }
+  /* Touch screens have no hover, so the per-type tooltips never show. */
+  @media (hover: none) { #pafk-monitor .pafk-mon-hover-hint { display: none; } }
+  /* On a phone the game's windows (market, MAPA, ficha) fill the screen; stay under them. */
+  @media (max-height: 500px) { body:has(.hud .modal.open) #pafk-monitor { display: none; } }
   #pafk-monitor .pafk-mon-hp {
     position: relative; flex: 1; min-width: 40px; height: 6px; border-radius: 99px;
     background: #e6edf6; box-shadow: inset 0 0 0 1px #b7c6db; overflow: hidden;
@@ -788,7 +794,7 @@ function setHtml(element, html) {
 const rows = new Map();
 let shownMode = null;
 let editing = null;
-const mode = () => (store.get(COMPACT_KEY, false) ? 'compact' : 'full');
+const mode = () => (store.get(COMPACT_KEY, SHORT_SCREEN.matches) ? 'compact' : 'full');
 
 function makeRow(name, compact) {
   const item = document.createElement('li');
