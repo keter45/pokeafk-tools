@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK — Monitor de contas
 // @namespace    pokeafk-market-filtros
-// @version      0.2.0
+// @version      0.3.0
 // @description  Dá a cada aba do jogo um título e um ícone com a conta, o que ela está fazendo e quantas bolas e poções tem, e mostra um painel com todas as contas abertas (também entre contêineres do Firefox).
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -40,7 +40,9 @@
   // Game images (same origin as the game).
   const IMG = {
     ball: '/assets/ui/hud-icons/24-poke-ball.png',
+    afk: '/assets/items/afk-ball.png',
     potion: '/assets/ui/hud-icons/29-super-pocao.png',
+    xp: '/assets/ui/v5/icones/experiencia.png',
     frame: '/assets/ui/hud-frame-a1.svg',
     front: dex => `/assets/mon/front/${dex}.png`,
     icon: dex => `/assets/mon/icon/${dex}.png`, // two 32×32 frames, one above the other
@@ -128,6 +130,7 @@
   }
 
   // Potions last seen in the Bag, for accounts whose HUD has no automation panel.
+  const AFK_BALL = 'afk-ball';
   let bagPotions = null;
   let lastFoe = null;
 
@@ -195,7 +198,9 @@
       state,
       daily: state === 'daily' && dailyDone ? { done: Number(dailyDone[1]), total: Number(dailyDone[2]) } : null,
       balls,
-      ballsTotal: balls.reduce((sum, ball) => sum + ball.n, 0),
+      // Poké, Great, Super and Ultra Ball count as balls; the AFK Ball (kept for shinies) apart.
+      ballsTotal: balls.filter(ball => ball.id !== AFK_BALL).reduce((sum, ball) => sum + ball.n, 0),
+      afkBalls: balls.find(ball => ball.id === AFK_BALL)?.n ?? null,
       potions: heal.length ? potions : null,
       potionsTotal: heal.length ? potions.reduce((sum, item) => sum + item.n, 0) : null,
       potionsFrom,
@@ -211,7 +216,72 @@
         color: portrait?.style.getPropertyValue('--tc').trim() || null,
       } : null,
       foe: lastFoe,
+      xp: {
+        trainer: readXp($('.hud-trainer-xp')),
+        mon: readXp($('.hud-xp-line')),
+      },
     };
+  }
+
+  // Exact XP from the HUD bars' tooltips, e.g. "511.795 / 549.646 XP de treinador neste nível.
+  // XP total: 6.681.268." The total keeps growing across level-ups, so rates use it.
+  function readXp(bar) {
+    const title = bar?.getAttribute('title') ?? '';
+    const level = title.match(/([\d.]+)\s*\/\s*([\d.]+)/);
+    const total = title.match(/XP total:\s*([\d.]+)/i);
+    if (!total) return null;
+    return {
+      total: count(total[1]),
+      cur: level ? count(level[1]) : null,
+      max: level ? count(level[2]) : null,
+      rate: null,
+    };
+  }
+
+  // ---- XP per hour ----
+  // Like the game's hunt analyzer ("ritmo atual"): XP gained over the last 10 minutes. Samples
+  // stay in sessionStorage, so a reload of the tab does not start over.
+  const XP_WINDOW = 10 * 60 * 1000;
+  // Less history than this: still measuring. XP also arrives in bursts (mission rewards, +20 mil
+  // at once), which would swing a one-minute rate.
+  const XP_MIN_SPAN = 3 * 60 * 1000;
+  const XP_SAMPLE_EVERY = 10 * 1000;
+  const XP_STORAGE = 'pokeafk-monitor:xp';
+  let xpSeries = {};
+  try {
+    xpSeries = JSON.parse(sessionStorage.getItem(XP_STORAGE) ?? '{}') ?? {};
+  } catch {
+    xpSeries = {};
+  }
+
+  // Adds a sample and returns XP per hour, or null while there is not enough history.
+  function xpRate(name, key, total) {
+    const now = Date.now();
+    let series = xpSeries[name];
+    const last = series?.samples.at(-1);
+    // Another account, another main Pokémon or a total that went down: start over.
+    if (!series || series.key !== key || (last && total < last[1])) {
+      series = xpSeries[name] = { key, samples: [] };
+    }
+    const samples = series.samples;
+    if (!samples.length || now - samples.at(-1)[0] >= XP_SAMPLE_EVERY) samples.push([now, total]);
+    // Keep one sample at or just before the window start.
+    while (samples.length > 2 && now - samples[1][0] >= XP_WINDOW) samples.shift();
+    const first = samples[0];
+    const span = now - first[0];
+    if (span < XP_MIN_SPAN) return null;
+    return Math.max(0, Math.round((total - first[1]) / span * 3600 * 1000));
+  }
+
+  function trackXp(record) {
+    const { trainer, mon } = record.xp;
+    if (trainer) trainer.rate = xpRate('trainer', record.name, trainer.total);
+    if (mon) mon.rate = xpRate('mon', `${record.name}|${record.main?.name}|${record.main?.front}`, mon.total);
+    try {
+      sessionStorage.setItem(XP_STORAGE, JSON.stringify(xpSeries));
+    } catch {
+      // The rate starts over after a reload.
+    }
   }
 
   // ---- Formatting ----
@@ -258,7 +328,8 @@
     // every hit; the heartbeat carries the exact value.
     const hpStep = record.main?.hpMax ? Math.round(record.main.hp / record.main.hpMax * 10) : null;
     return JSON.stringify([record.state, record.daily, record.ballsTotal, record.potionsTotal,
-      record.money, record.main?.level, record.main?.name, record.main?.front, hpStep, record.foe?.name]);
+      record.afkBalls, record.money, record.main?.level, record.main?.name, record.main?.front, hpStep, record.foe?.name,
+      Math.round((record.xp?.trainer?.rate ?? -1) / 5000), Math.round((record.xp?.mon?.rate ?? -1) / 5000)]);
   }
 
   function save(record, force = false) {
@@ -320,6 +391,7 @@
       } else if (me.state !== record.state) {
         stateSince = Date.now();
       }
+      trackXp(record);
       me = record;
       if (myName && myName !== record.name) {
         // Another account logged in on this tab.
@@ -474,7 +546,7 @@
       box-shadow: 2px 3px 0 rgb(7 26 63 / .33); padding: 6px 6px 8px; display: grid; gap: 8px;
       max-height: calc(100vh - 130px); overflow: auto; overscroll-behavior: contain;
     }
-    #pafk-monitor[data-mode="compact"] .pafk-mon-body { width: min(330px, calc(100vw - 24px)); }
+    #pafk-monitor[data-mode="compact"] .pafk-mon-body { width: min(350px, calc(100vw - 24px)); }
     #pafk-monitor header { display: flex; align-items: center; gap: 8px; padding: 0 2px; }
     #pafk-monitor header strong { font-size: 16px; font-weight: 400; margin-right: auto; letter-spacing: .02em; }
     #pafk-monitor header strong small { font-size: 13px; color: ${MUTED}; }
@@ -550,13 +622,20 @@
     #pafk-monitor .pafk-mon-status { grid-column: 2 / 4; display: flex; align-items: center; gap: 6px; min-width: 0; }
     #pafk-monitor .pafk-mon-status small { color: ${MUTED}; font-size: 11px; white-space: nowrap; }
     #pafk-monitor .pafk-mon-mon { grid-column: 2 / 4; display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 11px; color: ${MUTED}; }
+    #pafk-monitor .pafk-mon-xp { grid-column: 2 / 4; display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 11px; color: ${MUTED}; }
+    #pafk-monitor .pafk-mon-xp:empty { display: none; }
+    #pafk-monitor .pafk-mon-xp img { width: 16px; height: 16px; }
+    #pafk-monitor .pafk-mon-xplbl { font-weight: 700; color: ${NAVY}; }
+    #pafk-monitor .pafk-mon-xpcell { display: inline-flex; align-items: baseline; gap: 4px; min-width: 0; white-space: nowrap; }
+    #pafk-monitor .pafk-mon-xpcell + .pafk-mon-xpcell::before { content: "·"; margin-right: 2px; }
+    #pafk-monitor .pafk-mon-xpcell b { font-weight: 400; font-size: 13px; color: ${NAVY}; }
     #pafk-monitor .pafk-mon-monname { font-size: 13px; color: ${NAVY}; white-space: nowrap; }
     #pafk-monitor .pafk-mon-cardfoot {
       grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 6px 10px; flex-wrap: wrap;
       margin-top: 4px; padding-top: 6px; border-top: 1px dashed #d5deee; min-height: 24px;
     }
     #pafk-monitor .pafk-mon-doing { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 140px; }
-    #pafk-monitor .pafk-mon-counts { display: flex; align-items: center; gap: 10px; }
+    #pafk-monitor .pafk-mon-counts { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 
     /* Compact mode: one line per account */
     #pafk-monitor .pafk-mon-row {
@@ -574,7 +653,10 @@
     #pafk-monitor .pafk-mon-line b { font-weight: 600; color: var(--c); }
     #pafk-monitor .pafk-mon-row .pafk-mon-foe-ic { --s: 22px; margin: -3px -1px; }
     #pafk-monitor .pafk-mon-row .pafk-mon-foe-n { font-size: 12px; color: ${NAVY}; }
-    #pafk-monitor .pafk-mon-row .pafk-mon-counts { flex-direction: column; align-items: flex-end; gap: 0; }
+    #pafk-monitor .pafk-mon-row .pafk-mon-counts { display: grid; grid-template-columns: auto auto; justify-items: end; gap: 0 8px; }
+    #pafk-monitor .pafk-mon-row .pafk-mon-xpn { font-size: 12px; }
+    #pafk-monitor .pafk-mon-afk[data-zero] { color: ${MUTED}; }
+    #pafk-monitor .pafk-mon-afk[data-zero] img { opacity: .55; }
     #pafk-monitor .pafk-mon-row .pafk-mon-n { font-size: 13px; }
     #pafk-monitor .pafk-mon-row .pafk-mon-n img { width: 15px; height: 15px; }
   `;
@@ -651,7 +733,7 @@
   }
 
   function countsHtml(record, withMoney) {
-    const ballList = (record.balls ?? []).filter(ball => ball.n > 0 || ball.auto)
+    const ballList = (record.balls ?? []).filter(ball => ball.id !== AFK_BALL && (ball.n > 0 || ball.auto))
       .map(ball => `${ball.label}: ${fmt(ball.n)}${ball.auto ? ' (captura automática)' : ''}`).join('\n');
     const potionList = (record.potions ?? []).map(potion => `${potion.label}: ${fmt(potion.n)}`).join('\n');
     const cell = (img, n, unit, title, low) => `<span class="pafk-mon-n" title="${esc(title)}"${low ? ' data-low' : ''}>`
@@ -661,7 +743,48 @@
       ? cell(IMG.potion, '?', 'poções', 'O HUD desta conta não mostra as poções; abra a Bolsa uma vez.', false)
       : cell(IMG.potion, fmt(record.potionsTotal), 'poções', potionList, lowPotions(record));
     const money = withMoney && record.money ? `<span class="pafk-mon-money pafk-mon-pixel" title="Dinheiro">₽${fmt(record.money)}</span>` : '';
-    return `${balls}${potions}${money}`;
+    const afk = record.afkBalls === null || record.afkBalls === undefined ? ''
+      : cell(IMG.afk, fmt(record.afkBalls), 'AFK Balls', 'AFK Ball (separada das outras bolas; costuma ser usada nos shinies)', false)
+        .replace('class="pafk-mon-n"', `class="pafk-mon-n pafk-mon-afk"${record.afkBalls ? '' : ' data-zero'}`);
+    return `${balls}${potions}${afk}${money}`;
+  }
+
+  const nfc = new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 });
+  function eta(xp) {
+    if (!xp?.rate || xp.max === null || xp.cur === null) return '';
+    const minutes = Math.ceil((xp.max - xp.cur) / xp.rate * 60);
+    if (minutes > 99 * 60) return '';
+    const time = minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)}h${String(minutes % 60).padStart(2, '0')}`;
+    return `próximo nível em ~${time}`;
+  }
+  // One XP rate: "348 mil/h", "medindo…" or "—" (old record).
+  function rateText(xp, live) {
+    if (!xp) return '—';
+    if (!live) return '—';
+    return xp.rate === null ? 'medindo…' : `${nfc.format(xp.rate)}/h`;
+  }
+  function rateTitle(label, xp, live) {
+    if (!xp) return `${label}: sem dados`;
+    const parts = [`${label}: ${live && xp.rate !== null ? `${fmt(xp.rate)} XP/h nos últimos 10 min` : 'XP/h ainda sem medida'}`];
+    if (xp.max !== null) parts.push(`${fmt(xp.cur)} / ${fmt(xp.max)} XP neste nível`);
+    const next = live ? eta(xp) : '';
+    if (next) parts.push(next);
+    return parts.join('\n');
+  }
+
+  function xpHtml(record, state, compact) {
+    const live = state !== 'stale' && state !== 'closed' && state !== 'out';
+    const trainer = record.xp?.trainer;
+    const mon = record.xp?.mon;
+    if (!trainer && !mon) return '';
+    const icon = `<img src="${IMG.xp}" alt="" draggable="false">`;
+    if (compact) {
+      const title = [rateTitle('Treinador', trainer, live), rateTitle(record.main?.name ?? 'Pokémon', mon, live)].join('\n\n');
+      return `<span class="pafk-mon-n pafk-mon-xpn" title="${esc(title)}">${icon}${esc(rateText(trainer, live))}<span class="pafk-mon-sr"> XP do treinador</span></span>`;
+    }
+    const cell = (label, xp) => `<span class="pafk-mon-xpcell" title="${esc(rateTitle(label, xp, live))}">`
+      + `<span>${esc(label)}</span><b class="pafk-mon-pixel">${esc(rateText(xp, live))}</b></span>`;
+    return `${icon}<span class="pafk-mon-xplbl">XP/h</span>${cell('Treinador', trainer)}${cell(record.main?.name ?? 'Pokémon', mon)}`;
   }
 
   function hpHtml(main) {
@@ -704,7 +827,7 @@
     }
     item.className = 'pafk-mon-card';
     item.innerHTML = `
-      <span data-f="pic" style="grid-row: 1 / 4"></span>
+      <span data-f="pic" style="grid-row: 1 / 5; align-self: start"></span>
       <div class="pafk-mon-name"><b data-f="name"></b><small data-f="sub"></small></div>
       <div class="pafk-mon-meta">
         <span class="pafk-mon-age" data-f="age"></span>
@@ -713,6 +836,7 @@
       </div>
       <div class="pafk-mon-status" data-f="status"></div>
       <div class="pafk-mon-mon" data-f="mon"></div>
+      <div class="pafk-mon-xp" data-f="xp"></div>
       <div class="pafk-mon-cardfoot">
         <div class="pafk-mon-doing" data-f="doing"></div>
         <div class="pafk-mon-counts" data-f="counts"></div>
@@ -769,7 +893,7 @@
       age.textContent = ago(now - record.at);
       age.title = `Última leitura: ${new Date(record.at).toLocaleString('pt-BR')}`;
       const since = state !== 'closed' && state !== 'stale' && record.since ? ago(now - record.since) : '';
-      setHtml($('[data-f="counts"]', item), countsHtml(record, !compact));
+      setHtml($('[data-f="counts"]', item), countsHtml(record, !compact) + (compact ? xpHtml(record, state, true) : ''));
 
       if (compact) {
         const doing = doingHtml(record, state, true);
@@ -780,6 +904,7 @@
       setHtml($('[data-f="status"]', item), `<span class="pafk-mon-pill"><i></i>${esc(info.label)}</span>`
         + (since ? `<small>${esc(since)}</small>` : ''));
       setHtml($('[data-f="mon"]', item), hpHtml(record.main));
+      setHtml($('[data-f="xp"]', item), xpHtml(record, state, false));
       setHtml($('[data-f="doing"]', item), doingHtml(record, state, false));
     });
     for (const [name, item] of rows) {

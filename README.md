@@ -56,11 +56,13 @@ https://raw.githubusercontent.com/keter45/pokeafk-tools/main/pokeafk-monitor.use
 | 🟡 amarelo (laranja no ícone) | Parado |
 | ⚪ cinza | Fora do jogo, sem sinal ou aba fechada |
 
-`◓` é o total de Poké Bolas de todos os tipos; `✚` é a soma de Poção, Superpoção e Hiperpoção. Com menos de 50 bolas ou 20 poções, aparece um `⚠` depois da bolinha de estado.
+`◓` é o total de Poké Ball, Great Ball, Super Ball e Ultra Ball (a AFK Ball, usada nos shinies, fica fora e aparece separada no painel); `✚` é a soma de Poção, Superpoção e Hiperpoção. Com menos de 50 bolas ou 20 poções, aparece um `⚠` depois da bolinha de estado.
 
 **Painel Contas.** O botão **Contas**, à esquerda do botão AUTO, mostra um quadradinho colorido por conta. Clique para abrir o painel, que usa a moldura e a fonte do HUD do jogo e tem dois modos:
-- **Completo:** um cartão por conta, com o sprite do Pokémon principal sobre o fundo do tipo dele, o estado e há quanto tempo, a barra de HP, o Pokémon selvagem que está sendo caçado (ícone animado, nome e nível) ou o progresso do daily, as bolas, as poções, o dinheiro e a hora da última leitura.
-- **Compacto:** uma linha por conta, com o sprite, o estado, o selvagem que está sendo caçado, as bolas e as poções.
+- **Completo:** um cartão por conta, com o sprite do Pokémon principal sobre o fundo do tipo dele, o estado e há quanto tempo, a barra de HP, a **XP por hora** do treinador e do Pokémon principal, o Pokémon selvagem que está sendo caçado (ícone animado, nome e nível) ou o progresso do daily, as bolas, as poções, o dinheiro e a hora da última leitura.
+- **Compacto:** uma linha por conta, com o sprite, o estado, o selvagem que está sendo caçado, as bolas, as poções e a XP por hora do treinador.
+
+**XP por hora.** É o ganho de XP nos últimos 10 minutos, como o "ritmo atual" do Analisador de caça do jogo, e aparece depois de 3 minutos de medida (antes disso, "medindo…"). Passe o mouse sobre o número para ver a XP do nível e quanto falta para o próximo nível. Recarregar a aba não zera a medida; trocar o Pokémon principal zera a dele.
 
 Passe o mouse em cima dos números para ver cada tipo de bola e de poção. O modo escolhido vale para todas as abas. O painel pode ser arrastado; um duplo clique no título volta ele ao lugar.
 
