@@ -1,4 +1,6 @@
 // Generates tierlist.html: a standalone personal page with both tier lists (PvE and competitive).
+// Two move sets: the original one (level-up moves + Celadon HMs) and a separate list that also counts
+// the TMs (they only drop at random from the TM Box, so the original list leaves them out).
 // Sprites load from pokeafk.io; each card links to the species page on the Poképédia.
 import { readFile, writeFile } from 'node:fs/promises';
 import { buildGuide } from './rank-pokemon.mjs';
@@ -7,10 +9,13 @@ import { buildFarms } from './farms.mjs';
 const snapshot = JSON.parse(await readFile(new URL('./pokepedia-data.json', import.meta.url), 'utf8'));
 const competitive = JSON.parse(await readFile(new URL('./competitive-data.json', import.meta.url), 'utf8'));
 const guide = buildGuide(snapshot.species, { megaForms: snapshot.megaForms, competitive, machines: snapshot.hms ?? [] });
+const tmGuide = buildGuide(snapshot.species, { megaForms: snapshot.megaForms, competitive,
+  machines: [...(snapshot.hms ?? []), ...(snapshot.tms ?? [])], focusPunchFails: true });
 
 const LEGENDARY = new Set([144, 145, 146, 150, 151, 243, 244, 245, 249, 250, 251, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386]);
 const byId = new Map(snapshot.species.map(species => [species.id, species]));
 const hmNames = new Set((snapshot.hms ?? []).map(hm => hm.move.name));
+const tmNames = new Set((snapshot.tms ?? []).map(tm => tm.move.name));
 
 const entries = Object.values(guide.profiles).map(profile => {
   const dex = profile.baseId ?? profile.id;
@@ -26,6 +31,7 @@ const entries = Object.values(guide.profiles).map(profile => {
     sprite: `https://pokeafk.io/assets/mon/front/${profile.id}.png`,
     wiki: `https://pokeafk.io/pokepedia/pokemon/${key}`,
     pve: mode(profile.pve), pvp: mode(profile.pvp),
+    tm: { pve: mode(tmGuide.profiles[profile.id].pve), pvp: mode(tmGuide.profiles[profile.id].pvp) },
   };
 });
 
@@ -34,7 +40,10 @@ const farms = buildFarms(snapshot, guide).map(farm => ({
   sprite: `https://pokeafk.io/assets/mon/front/${farm.dex}.png`,
   wiki: `https://pokeafk.io/pokepedia/pokemon/${byId.get(farm.dex)?.key ?? farm.dex}`,
 }));
-const data = { generated: new Date().toISOString().slice(0, 10), thresholds: guide.tierThresholds, hms: [...hmNames], entries, farms };
+const data = {
+  generated: new Date().toISOString().slice(0, 10), thresholds: guide.tierThresholds, tmThresholds: tmGuide.tierThresholds,
+  hms: [...hmNames], tms: [...tmNames], entries, farms,
+};
 
 const html = `<!doctype html>
 <html lang="pt-BR">
@@ -45,14 +54,14 @@ const html = `<!doctype html>
 <style>
   :root {
     --bg: #eef3fb; --panel: #ffffff; --ink: #152964; --muted: #4c5d84; --line: #d4e0f2; --accent: #1958b8;
-    --card: #f8fbff; --hm-bg: #e9f1ff; --hm-ink: #1d4f9c;
+    --card: #f8fbff; --hm-bg: #e9f1ff; --hm-ink: #1d4f9c; --tm-bg: #e6f6ea; --tm-ink: #1f6b35;
     --S: #ff8a8a; --A: #ffbf7f; --B: #ffdf7f; --C: #bfe8a0; --D: #9fc6f5;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0f1625; --panel: #172238; --ink: #e5ecfa; --muted: #9fb0d0; --line: #2b3a57; --accent: #6ea2ff;
-      --card: #1b2840; --hm-bg: #1f3358; --hm-ink: #b7cfff;
+      --card: #1b2840; --hm-bg: #1f3358; --hm-ink: #b7cfff; --tm-bg: #1c3a2a; --tm-ink: #a9e2b8;
       --S: #d9605f; --A: #d08a4c; --B: #c9a945; --C: #6fa257; --D: #4f7fbf;
       color-scheme: dark;
     }
@@ -92,6 +101,10 @@ const html = `<!doctype html>
   .moves { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; font-size: 12px; }
   .moves span { padding: 2px 6px; border-radius: 5px; background: color-mix(in srgb, var(--line) 55%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .moves span.hm { background: var(--hm-bg); color: var(--hm-ink); font-weight: 700; }
+  .moves span.tm { background: var(--tm-bg); color: var(--tm-ink); font-weight: 700; }
+  .moves span.tm::after { content: " TM"; font-size: 9px; font-weight: 800; opacity: .75; }
+  .was { border-radius: 4px; padding: 0 6px; font-size: 10px; font-weight: 800; color: #1b1b1b; background: var(--tier); }
+  .notice { margin: 0 0 14px; padding: 8px 12px; max-width: 900px; border-radius: 8px; background: var(--tm-bg); color: var(--tm-ink); font-weight: 600; }
   .meta { grid-column: 1 / -1; font-size: 11.5px; color: var(--muted); }
   .meta b { color: var(--ink); }
   .evo { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px; font-size: 12px; }
@@ -119,6 +132,10 @@ const html = `<!doctype html>
       <button type="button" data-mode="pvp" aria-pressed="false">Competitivo</button>
       <button type="button" data-mode="farm" aria-pressed="false">Farms early game</button>
     </div>
+    <div class="seg" role="group" aria-label="Golpes considerados" id="moveset">
+      <button type="button" data-moves="base" aria-pressed="true" title="Lista original: golpes por nível e HMs da Loja de Celadon">Sem TMs</button>
+      <button type="button" data-moves="tm" aria-pressed="false" title="Lista à parte: também conta as TMs">Com TMs</button>
+    </div>
     <select id="category" aria-label="Categoria">
       <option value="normal">Espécies normais</option>
       <option value="special">Lendários e Megas</option>
@@ -136,10 +153,11 @@ const html = `<!doctype html>
   <div class="types" id="types" aria-label="Filtrar por tipo"></div>
 </header>
 <main>
+  <p class="notice" id="notice" hidden>Lista à parte, com as TMs: os movesets também contam as TMs que cada espécie aprende (em verde), que só saem ao acaso da TM Box. Notas e tiers são calculados só entre as builds com TMs; o selo "sem TMs" mostra a tier da lista original quando ela muda.</p>
   <p class="help" id="help"></p>
   <div id="rows"></div>
 </main>
-<footer>Gerado em ${data.generated} com dados da Poképédia e referências da Smogon (Gen 3). Golpes por nível da linha evolutiva e HMs da Loja de Celadon (destacadas em azul); TMs ficam de fora. Clique num Pokémon para abrir a página dele na Poképédia.</footer>
+<footer>Gerado em ${data.generated} com dados da Poképédia e referências da Smogon (Gen 3). Sem TMs (lista original): golpes por nível da linha evolutiva e HMs da Loja de Celadon (em azul). Com TMs (lista à parte): também as TMs compatíveis (em verde). Uma HM ou TM só entra no moveset quando ganha mais de 3% do melhor golpe gratuito. Clique num Pokémon para abrir a página dele na Poképédia.</footer>
 <script>
 const DATA = ${JSON.stringify(data)};
 const TYPE_COLORS = { normal: '#9a9a6e', fighting: '#c63129', flying: '#8e78e8', poison: '#a542a5', ground: '#d4ad4c', rock: '#a8922e', bug: '#93a51a', ghost: '#735a9c', steel: '#8f8fb3', fire: '#ef7a28', water: '#4f7fee', grass: '#5fb53c', electric: '#e7b800', psychic: '#f0507f', ice: '#5fc4c4', dragon: '#6a35f0', dark: '#6b5444' };
@@ -155,10 +173,16 @@ const PVP_NAME = { pve: 'PvE', pvp: 'Comp' };
 const ON = { land: '', surf: 'Surf', old: 'Vara velha', good: 'Vara boa', super: 'Super vara' };
 const money = new Intl.NumberFormat('pt-BR');
 const HM = new Set(DATA.hms);
+const TM = new Set(DATA.tms);
 const number = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
-const state = { mode: 'pve', category: 'normal', role: '', query: '', types: new Set() };
+const state = { mode: 'pve', moves: 'base', category: 'normal', role: '', query: '', types: new Set() };
 try { Object.assign(state, JSON.parse(localStorage.getItem('pafk-tierlist') || '{}'), { types: new Set() }); } catch {}
 if (!HELP[state.mode]) state.mode = 'pve';
+if (state.moves !== 'tm') state.moves = 'base';
+const buildOf = entry => (state.moves === 'tm' ? entry.tm : entry)[state.mode];
+const save = () => {
+  try { localStorage.setItem('pafk-tierlist', JSON.stringify({ mode: state.mode, moves: state.moves, category: state.category, role: state.role })); } catch {}
+};
 
 const typesBox = document.getElementById('types');
 for (const [type, color] of Object.entries(TYPE_COLORS)) {
@@ -174,7 +198,7 @@ for (const [type, color] of Object.entries(TYPE_COLORS)) {
 const key = text => text.normalize('NFD').replace(/\\p{Diacritic}/gu, '').toLowerCase();
 
 function card(entry) {
-  const build = entry[state.mode];
+  const build = buildOf(entry);
   const link = document.createElement('a');
   link.className = 'card'; link.href = entry.wiki; link.target = '_blank'; link.rel = 'noopener noreferrer';
   link.title = build.note;
@@ -193,13 +217,21 @@ function card(entry) {
   if (entry.mega || entry.legendary) {
     const t = document.createElement('span'); t.className = 'tag'; t.textContent = entry.mega ? 'Mega' : 'Lendário'; tags.append(t);
   }
+  const original = entry[state.mode];
+  if (state.moves === 'tm' && original.tier !== build.tier) {
+    const t = document.createElement('span'); t.className = 'was'; t.style.setProperty('--tier', 'var(--' + original.tier + ')');
+    t.textContent = 'sem TMs ' + original.tier;
+    t.title = 'Na lista original (sem TMs): tier ' + original.tier + ', nota ' + number.format(original.score);
+    tags.append(t);
+  }
   const role = document.createElement('div'); role.className = 'tags';
   role.innerHTML = '<span class="dex"></span>';
   role.firstChild.textContent = (ROLES[build.role] || build.role) + (state.mode === 'pvp' && build.gen3 ? ' · Gen 3 ' + build.gen3 + (build.slots ? ' ' + build.covered + '/' + build.slots : '') : '');
   const moves = document.createElement('div'); moves.className = 'moves';
   for (const name of build.moves) {
-    const m = document.createElement('span'); m.textContent = name; m.title = HM.has(name) ? name + ' (HM)' : name;
-    if (HM.has(name)) m.className = 'hm';
+    const machine = HM.has(name) ? 'hm' : state.moves === 'tm' && TM.has(name) ? 'tm' : '';
+    const m = document.createElement('span'); m.textContent = name; m.title = machine ? name + ' (' + machine.toUpperCase() + ')' : name;
+    if (machine) m.className = machine;
     moves.append(m);
   }
   const meta = document.createElement('div'); meta.className = 'meta';
@@ -276,6 +308,7 @@ function renderFarms() {
 
 function render() {
   for (const button of document.querySelectorAll('[data-mode]')) button.setAttribute('aria-pressed', String(button.dataset.mode === state.mode));
+  for (const button of document.querySelectorAll('[data-moves]')) button.setAttribute('aria-pressed', String(button.dataset.moves === state.moves));
   for (const chip of typesBox.children) chip.setAttribute('aria-pressed', String(state.types.has(chip.dataset.type)));
   document.getElementById('category').value = state.category;
   document.getElementById('role').value = state.role;
@@ -283,10 +316,12 @@ function render() {
   const farm = state.mode === 'farm';
   document.getElementById('category').hidden = farm;
   document.getElementById('role').hidden = farm;
+  document.getElementById('moveset').hidden = farm;
+  document.getElementById('notice').hidden = farm || state.moves !== 'tm';
   document.getElementById('search').placeholder = farm ? 'Buscar Pokémon ou lugar' : 'Buscar Pokémon';
   if (farm) {
     renderFarms();
-    try { localStorage.setItem('pafk-tierlist', JSON.stringify({ mode: state.mode, category: state.category, role: state.role })); } catch {}
+    save();
     return;
   }
   const query = key(state.query.trim());
@@ -294,12 +329,12 @@ function render() {
     const special = entry.mega || entry.legendary;
     if (state.category === 'normal' && special) return false;
     if (state.category === 'special' && !special) return false;
-    if (state.role && entry[state.mode].role !== state.role) return false;
+    if (state.role && buildOf(entry).role !== state.role) return false;
     if (state.types.size && !entry.types.some(type => state.types.has(type))) return false;
     return !query || key(entry.name).includes(query);
-  }).sort((a, b) => b[state.mode].score - a[state.mode].score || a.name.localeCompare(b.name, 'pt-BR'));
-  document.getElementById('count').textContent = list.length + ' Pokémon';
-  const thresholds = DATA.thresholds[state.mode];
+  }).sort((a, b) => buildOf(b).score - buildOf(a).score || a.name.localeCompare(b.name, 'pt-BR'));
+  document.getElementById('count').textContent = list.length + ' Pokémon' + (state.moves === 'tm' ? ' · com TMs' : '');
+  const thresholds = (state.moves === 'tm' ? DATA.tmThresholds : DATA.thresholds)[state.mode];
   const rows = document.getElementById('rows');
   rows.replaceChildren(...['S', 'A', 'B', 'C', 'D'].map(tier => {
     const row = document.createElement('section'); row.className = 'row'; row.setAttribute('aria-label', 'Tier ' + tier);
@@ -308,16 +343,17 @@ function render() {
     label.firstChild.textContent = tier;
     label.lastChild.textContent = tier === 'D' ? 'abaixo de ' + number.format(thresholds.C) : 'nota ' + number.format(thresholds[tier]) + '+';
     const cards = document.createElement('div'); cards.className = 'cards';
-    const members = list.filter(entry => entry[state.mode].tier === tier);
+    const members = list.filter(entry => buildOf(entry).tier === tier);
     if (members.length) cards.append(...members.map(card));
     else cards.innerHTML = '<p class="empty">Nenhum Pokémon com esses filtros.</p>';
     row.append(label, cards);
     return row;
   }));
-  try { localStorage.setItem('pafk-tierlist', JSON.stringify({ mode: state.mode, category: state.category, role: state.role })); } catch {}
+  save();
 }
 
 for (const button of document.querySelectorAll('[data-mode]')) button.addEventListener('click', () => { state.mode = button.dataset.mode; render(); });
+for (const button of document.querySelectorAll('[data-moves]')) button.addEventListener('click', () => { state.moves = button.dataset.moves; render(); });
 document.getElementById('category').addEventListener('change', event => { state.category = event.target.value; render(); });
 document.getElementById('role').addEventListener('change', event => { state.role = event.target.value; render(); });
 document.getElementById('search').addEventListener('input', event => { state.query = event.target.value; render(); });
@@ -328,4 +364,4 @@ render();
 `;
 
 await writeFile(new URL('./tierlist.html', import.meta.url), html, 'utf8');
-console.log(`tierlist.html gerado com ${entries.length} Pokémon e ${farms.length} farms.`);
+console.log(`tierlist.html gerado com ${entries.length} Pokémon (sem TMs e com TMs) e ${farms.length} farms.`);

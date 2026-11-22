@@ -41,6 +41,11 @@ const DODGE_MAX = 0.7;
 // The reference opponents also throw dodgeable moves: this share of their hits is dodged, except
 // while our Pokémon is casting (it cannot move) or asleep. Long casts are doubly bad in PvP.
 const INCOMING_DODGE = 0.25;
+// Focus Punch "falha se o seu Pokémon levar um golpe enquanto se concentra" (1 s, game text). In a
+// duel it fails when the opponent acts during the concentration; in a hunt the wild Pokémon attack
+// back, and one of them at the base interval (combat.gcd.base, 1.2 s) lets it land 1 − cast/1.2 of
+// the time. Only the TM list models this for now (buildGuide option focusPunchFails).
+const WILD_ATTACK_SECONDS = 1.2;
 const BATTLE_COOLDOWN = {
   RECOVER: 30, SOFT_BOILED: 30, MILK_DRINK: 30, SLACK_OFF: 30, MOONLIGHT: 30, MORNING_SUN: 30,
   SYNTHESIS: 30, REST: 45, HYPNOSIS: 20, SLEEP_POWDER: 20, SPORE: 20, SING: 20, LOVELY_KISS: 20, GRASS_WHISTLE: 20,
@@ -197,7 +202,7 @@ function rng(seed) {
 }
 
 // Turns raw Poképédia move data into what the simulators need, or null when the move cannot be modelled.
-function classify(move, types) {
+function classify(move, types, rules = {}) {
   if (!move?.name || move.implemented === false || move.manualOnly || EXCLUDED_EFFECTS.has(move.effect)) return null;
   const key = moveKey(move);
   const accuracy = move.alwaysHits || !move.accuracy ? 1 : clamp(0, 1, move.accuracy / 100);
@@ -226,6 +231,8 @@ function classify(move, types) {
       recoil: move.effect === 'EFFECT_DOUBLE_EDGE' ? 1 / 3 : move.effect === 'EFFECT_RECOIL' ? 1 / 4 : 0,
       drain: move.effect === 'EFFECT_ABSORB' ? 0.5 : move.effect === 'EFFECT_DREAM_EATER' ? 0.5 : 0,
       needsSleep: move.effect === 'EFFECT_DREAM_EATER',
+      ...(rules.focusPunchFails && move.effect === 'EFFECT_FOCUS_PUNCH'
+        ? { focus: true, land: clamp(0, 1, 1 - base.cast / WILD_ATTACK_SECONDS) } : {}),
     };
   }
   if (move.category !== 'status') return null;
@@ -395,7 +402,7 @@ function huntRun(stats, moves, types, random) {
     uses[pick]++;
     user.ready[pick] = now + Math.max(gcd, move.cooldown);
     if (move.kind === 'damage') {
-      const damage = hitDamage(move, user, dummy, now) * move.accuracy * move.pveMult;
+      const damage = hitDamage(move, user, dummy, now) * move.accuracy * move.pveMult * (move.land ?? 1);
       total += damage;
       byCategory[move.category] += damage;
       for (const effect of move.effects) if (effect.on === 'self') applyEffect(effect, user, dummy, now, random, 'pve');
@@ -535,6 +542,8 @@ function duel(stats, moves, types, opponent, seed) {
     }
     const failed = (paralyzed && random() < STATUS.par.fail) || (user.attract > now && random() < STATUS.attract.fail);
     if (failed) return;
+    // Focus Punch: an opponent action during the concentration breaks it.
+    if (move.focus && foeNext < castUntil && !sleeping(foe, now)) return;
     if (move.hpCost) user.hp -= user.maxHp * move.hpCost;
     if (user.conf > now && random() < STATUS.conf.selfHit) {
       user.hp -= hitDamage({ ...move, category: 'physical', power: 40, stab: 1, hits: 1, fixed: null, superFang: false, type: '' }, user, user, now);
@@ -633,7 +642,7 @@ function bestLoadout(mode, stats, pool, types) {
   const damage = pool.filter(move => move.kind === 'damage' && (mode === 'pvp' || (!move.fixed && !move.superFang && !move.needsSleep)));
   const gcd = gcdFor(stats.spe);
   const standalone = move => (move.fixed ?? move.power) * move.stab * move.accuracy * move.hits
-    * (mode === 'pve' ? move.pveMult : 1 - move.dodge)
+    * (mode === 'pve' ? move.pveMult : 1 - move.dodge) * (move.land ?? 1)
     * (move.fixed ? 1 : stats[move.category === 'physical' ? 'atk' : 'spa'] / 100)
     / Math.max(gcd, move.cast, mode === 'pve' ? move.cooldown : move.battleCooldown);
   const ranked = [...damage].sort((a, b) => standalone(b) - standalone(a));
@@ -840,12 +849,12 @@ function competitiveReference(dex, pool, competitive) {
   };
 }
 
-function speciesProfile(species, pool, competitiveDex, competitive) {
+function speciesProfile(species, pool, competitiveDex, competitive, rules = {}) {
   if (!STATS.every(stat => Number.isFinite(species.stats?.[stat]) && species.stats[stat] > 0)
       || !Array.isArray(species.types) || !species.types.length || !pool.length) return null;
   const types = species.types.map(typeKey);
   const typeSet = new Set(types);
-  const moves = pool.map(move => classify(move, typeSet)).filter(Boolean);
+  const moves = pool.map(move => classify(move, typeSet, rules)).filter(Boolean);
   const reference = competitiveReference(competitiveDex, pool, competitive);
   if (!moves.some(move => move.kind === 'damage' && !move.fixed && !move.superFang)) {
     // Transform, Sketch, Counter or Present only: nothing the simulators can measure.
@@ -931,7 +940,9 @@ function finishScores(profiles) {
 }
 
 // machines: optional HM/TM entries ({ move, dex }) whose moves join the pool of compatible species.
-export function buildGuide(rows, { megaForms = [], competitive = null, machines = [] } = {}) {
+// focusPunchFails: Focus Punch fails when hit during its concentration (used by the TM list).
+export function buildGuide(rows, { megaForms = [], competitive = null, machines = [], focusPunchFails = false } = {}) {
+  const rules = { focusPunchFails };
   const machineMoves = dex => machines.filter(entry => entry.dex.includes(Number(dex)))
     .map(entry => ({ ...entry.move, level: 0, machine: true }));
   const poolFor = (dex, byIdMap, predecessorMap) => {
@@ -972,7 +983,7 @@ export function buildGuide(rows, { megaForms = [], competitive = null, machines 
   const missingProfiles = [];
   for (const id of finalDex) {
     const row = byId.get(id);
-    const profile = row && speciesProfile(row, poolFor(id, byId, predecessors), id, competitive);
+    const profile = row && speciesProfile(row, poolFor(id, byId, predecessors), id, competitive, rules);
     if (profile) profiles[id] = profile;
     else missingProfiles.push(id);
   }
@@ -980,7 +991,7 @@ export function buildGuide(rows, { megaForms = [], competitive = null, machines 
   const variantsByBase = new Map();
   for (const mega of megaForms) {
     const profile = mega.movesFromBase && byId.has(mega.baseId)
-      && speciesProfile(mega, poolFor(mega.baseId, byId, predecessors), mega.baseId, competitive);
+      && speciesProfile(mega, poolFor(mega.baseId, byId, predecessors), mega.baseId, competitive, rules);
     if (!profile) {
       missingProfiles.push(mega.id);
       continue;
