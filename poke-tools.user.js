@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.5.0
+// @version      1.6.1
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -3449,16 +3449,12 @@
   if (moduleEnabled('daily')) (() => {
     // ==== src/daily.js ====
     // ---- Fazer daily ---------------------------------------------------------------------------
-    // Fights the trainers of the day whose level sits between the main Pokémon's level and 10 below.
-    // The route comes from the MAPA's NPC list (sorted by XP, which also marks the locked ones),
-    // grouped by place. Each fight: open MAPA → NPCs → pick the trainer → "Teleportar até lá" →
+    // Fights the trainers of the day in the order of the MAPA's NPC list sorted by XP ("Mais XP
+    // primeiro", which leaves out the locked and the beaten ones), whatever their level.
+    // Each fight: open MAPA → NPCs → pick the trainer → "Teleportar até lá" →
     // talk to the trainer → LUTAR → wait for the result → CONTINUAR. Input from the player stops
     // the loop, as do failures where it would be unsafe to continue.
     (() => {
-      // Levels below the main Pokémon; the player can change it in the card.
-      const DEFAULT_RANGE = 10;
-      const MAX_RANGE = 99;
-      const RANGE_STORAGE = 'pokeafk-market-filtros:daily-range';
       const FIGHT_TIMEOUT = 10 * 60 * 1000;
       const KEYS_STORAGE = 'pokeafk.ui.keys';
       const HEAL_BELOW = 0.5;
@@ -3493,7 +3489,7 @@
               <img alt="" hidden data-daily-sprite>
               <div>
                 <strong data-daily-main>Pokémon principal</strong>
-                <p class="pafk-daily-range" data-daily-range></p>
+                <p class="pafk-daily-note" data-daily-note></p>
               </div>
             </div>
             <div class="pafk-daily-progress" hidden data-daily-progress>
@@ -3503,10 +3499,6 @@
             <p class="pafk-daily-status" role="status" aria-live="polite" data-daily-status></p>
             <ol class="pafk-daily-route" aria-label="Rota de treinadores" hidden data-daily-route></ol>
             <div class="pafk-daily-options">
-              <label class="pafk-daily-levels">
-                <span><strong>Níveis abaixo do principal</strong><small>Sugerido: ${DEFAULT_RANGE}</small></span>
-                <input type="number" min="0" max="${MAX_RANGE}" step="1" value="${DEFAULT_RANGE}" inputmode="numeric" data-daily-levels>
-              </label>
               <label class="pafk-daily-avoid">
                 <input type="checkbox" aria-describedby="pafk-daily-avoid-help" data-daily-avoid checked>
                 <span><strong>Evitar vantagem de tipo</strong><small id="pafk-daily-avoid-help">O Daily aprende o time de cada treinador na primeira luta.</small></span>
@@ -3523,13 +3515,12 @@
       const goButton = box.querySelector('[data-daily-go]');
       const stopButton = box.querySelector('[data-daily-stop]');
       const statusEl = box.querySelector('[data-daily-status]');
-      const rangeEl = box.querySelector('[data-daily-range]');
+      const noteEl = box.querySelector('[data-daily-note]');
       const mainEl = box.querySelector('[data-daily-main]');
       const spriteEl = box.querySelector('[data-daily-sprite]');
       const progressEl = box.querySelector('[data-daily-progress]');
       const routeEl = box.querySelector('[data-daily-route]');
       const avoidBox = box.querySelector('[data-daily-avoid]');
-      const levelsInput = box.querySelector('[data-daily-levels]');
 
       const style = document.createElement('style');
       style.dataset.pafk = '';
@@ -3584,21 +3575,14 @@
           width: 48px; height: 48px; flex: none; object-fit: contain; image-rendering: pixelated;
         }
         #pafk-daily .pafk-daily-main strong { font-size: 14px; }
-        #pafk-daily :is(.pafk-daily-range, .pafk-daily-options small) {
+        #pafk-daily :is(.pafk-daily-note, .pafk-daily-options small) {
           color: var(--daily-muted); font-size: 12px; text-wrap: pretty;
         }
         #pafk-daily .pafk-daily-options { border: 1px solid var(--daily-line); border-radius: 9px; }
         #pafk-daily[data-running] .pafk-daily-options { display: none; }
         #pafk-daily .pafk-daily-options label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
         #pafk-daily .pafk-daily-options small { display: block; margin-top: 2px; }
-        #pafk-daily .pafk-daily-levels { justify-content: space-between; }
-        #pafk-daily .pafk-daily-levels input {
-          box-sizing: border-box; flex: 0 0 58px; width: 58px; min-height: 40px; padding: 4px 6px;
-          font: inherit; font-weight: 800; color: var(--daily-ink);
-          border: 1px solid #aabfdf; border-radius: 6px; background: #f6f9ff;
-        }
-        #pafk-daily .pafk-daily-levels input:disabled { color: var(--daily-muted); }
-        #pafk-daily .pafk-daily-avoid { border-top: 1px solid var(--daily-line); cursor: pointer; }
+        #pafk-daily .pafk-daily-avoid { cursor: pointer; }
         #pafk-daily .pafk-daily-avoid:has(input:disabled) { cursor: default; }
         #pafk-daily .pafk-daily-avoid input { width: 17px; height: 17px; flex: none; margin: 0; accent-color: var(--daily-blue); }
         #pafk-daily .pafk-daily-count { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; }
@@ -3770,7 +3754,7 @@
           body.hidden = !body.hidden;
           toggleButton.setAttribute('aria-expanded', String(!body.hidden));
           if (body.hidden && toggle !== toggleButton) toggleButton.focus();
-          if (!body.hidden && !run) showRange();
+          if (!body.hidden && !run) showMain();
           placeBox();
         });
       }
@@ -3833,10 +3817,15 @@
           return {};
         }
       }
-      function saveTeam(npc, dexes) {
-        if (!dexes.length) return;
+      // Saves what a fight showed: the opposing team and, after a win, the XP it gave
+      // (`xp` for the trainer, `monXp` for the main Pokémon). Keeps what is already known.
+      function saveFight(npc, dexes, gain) {
         const teams = readTeams();
-        teams[npc.id] = { name: npc.name, dex: [...dexes], at: new Date().toISOString().slice(0, 10) };
+        const entry = { ...teams[npc.id], name: npc.name, at: new Date().toISOString().slice(0, 10) };
+        if (dexes.length) entry.dex = [...dexes];
+        if (gain) Object.assign(entry, gain);
+        if (!entry.dex && !entry.xp) return;
+        teams[npc.id] = entry;
         try {
           localStorage.setItem(TEAMS_STORAGE, JSON.stringify(teams));
         } catch {
@@ -3854,7 +3843,15 @@
         }
         return null;
       }
-      // Dex of the opposing Pokémon in play, from the arena's red card icon.
+      // Exact XP total from the HUD bars' tooltips ("… XP total: 6.681.268."). It keeps growing
+      // across level-ups, so the difference around a fight is the XP that fight gave.
+      function xpTotal(selector) {
+        const total = ($(selector)?.getAttribute('title') ?? '').match(/XP total:\s*([\d.]+)/i);
+        return total ? Number(total[1].replace(/\./g, '')) : null;
+      }
+      const xpNow = () => ({ trainer: xpTotal('.hud-trainer-xp'), mon: xpTotal('.hud-xp-line') });
+      const formatXp = value => value.toLocaleString('pt-BR');
+
       try {
         avoidBox.checked = localStorage.getItem(AVOID_STORAGE) !== 'off';
       } catch {
@@ -3868,35 +3865,8 @@
         }
       });
 
-      // How many levels below the main Pokémon to fight (whole number, 0–MAX_RANGE).
-      function cleanRange(value) {
-        const number = Math.round(Number(value));
-        return Number.isFinite(number) && String(value).trim() !== ''
-          ? Math.min(MAX_RANGE, Math.max(0, number))
-          : DEFAULT_RANGE;
-      }
-      const levelRange = () => cleanRange(levelsInput.value);
-      try {
-        const saved = localStorage.getItem(RANGE_STORAGE);
-        if (saved !== null) levelsInput.value = String(cleanRange(saved));
-      } catch {
-        // Defaults to the suggested range.
-      }
-      levelsInput.addEventListener('input', () => showRange());
-      // Typing a number must not reach the game's hotkeys.
-      for (const type of ['keydown', 'keyup', 'keypress']) {
-        levelsInput.addEventListener(type, event => event.stopPropagation());
-      }
-      levelsInput.addEventListener('change', () => {
-        levelsInput.value = String(levelRange());
-        showRange();
-        try {
-          localStorage.setItem(RANGE_STORAGE, levelsInput.value);
-        } catch {
-          // The choice lasts only for this page.
-        }
-      });
 
+      // Dex of the opposing Pokémon in play, from the arena's red card icon.
       function foeInPlay() {
         const card = $$('.ah-card').find(element => element.querySelector('.ah-name.red'));
         const icon = card?.querySelector('.ah-mon-ic')?.getAttribute('style') ?? '';
@@ -4039,7 +4009,7 @@
         return rows;
       }
 
-      async function buildRoute(level) {
+      async function buildRoute() {
         const map = await openNpcList();
         const regions = $$('.mx-tab[data-region]', map)
           .filter(tab => !tab.classList.contains('locked') && !tab.classList.contains('soon'));
@@ -4056,23 +4026,12 @@
         if (startSort) await sortNpcs(startSort);
         if (startRegion) await chooseRegion(startRegion);
 
-        const inRange = all.filter(npc => npc.level <= level && npc.level >= level - levelRange());
-        const todo = inRange.filter(npc => !npc.beaten && !npc.locked);
-        // Lowest level first; within a level, trainers of the same place stay together (the list
-        // is by XP, so the first trainer of each place sets that place's turn).
-        const placeOrder = new Map();
-        for (const npc of todo) {
-          const key = `${npc.region}|${npc.place}`;
-          if (!placeOrder.has(key)) placeOrder.set(key, placeOrder.size);
-        }
-        const route = todo
-          .map((npc, index) => ({ npc, index, place: placeOrder.get(`${npc.region}|${npc.place}`) }))
-          .sort((a, b) => a.npc.level - b.npc.level || a.place - b.place || a.index - b.index)
-          .map(({ npc }) => npc);
+        // Same order as the list ("Mais XP primeiro"), whatever the level. The list has no XP
+        // numbers, so with several regions each region's list comes after the previous one.
         return {
-          route,
-          beatenInRange: inRange.filter(npc => npc.beaten).length,
-          lockedInRange: inRange.filter(npc => npc.locked).length,
+          route: all.filter(npc => !npc.beaten && !npc.locked),
+          beaten: all.filter(npc => npc.beaten).length,
+          locked: all.filter(npc => npc.locked).length,
         };
       }
 
@@ -4409,6 +4368,7 @@
         if (outcome) return outcome;
         await pause(200, 500);
         if (challenge()?.querySelector('[data-fight]') !== fight) return 'skipped';
+        const before = xpNow();
         fight.click();
         await until(() => inArena() || resultWindow(), 15000, 'começar a batalha');
         setStatus(`Lutando contra ${npc.name}...`);
@@ -4418,13 +4378,34 @@
           if (dex) seen.add(dex);
           return resultWindow();
         }, FIGHT_TIMEOUT, 'terminar a batalha');
-        saveTeam(npc, [...seen]);
         const battleResult = result.dataset.result;
         const sentToCenter = /Centro Pokémon/i.test(text(result));
         await pause();
         result.querySelector('[data-ah="ok"]')?.click();
         await until(() => !resultWindow(), 8000, 'fechar o resultado');
+        const gain = battleResult === 'win' ? await xpGain(before) : null;
+        saveFight(npc, [...seen], gain);
+        if (gain) {
+          npc.gain = gain.xp;
+          run.xp += gain.xp;
+        }
         return battleResult === 'win' ? 'won' : (sentToCenter ? 'lost-healed' : 'lost');
+      }
+
+      // XP a won fight gave, from the HUD totals. The HUD can update a moment after the result,
+      // so it waits up to 3 s; with no change (trainer at the level cap) there is nothing to save.
+      async function xpGain(before) {
+        if (before.trainer === null) return null;
+        let after = xpNow();
+        for (let waited = 0; after.trainer === before.trainer && waited < 3000; waited += 250) {
+          await sleep(250);
+          alive();
+          after = xpNow();
+        }
+        const xp = after.trainer - before.trainer;
+        if (!(xp > 0)) return null;
+        const monXp = before.mon !== null && after.mon !== null ? after.mon - before.mon : 0;
+        return monXp > 0 ? { xp, monXp } : { xp };
       }
 
       // HP of the main Pokémon from the HUD ("33/ 50").
@@ -4468,7 +4449,9 @@
           item.innerHTML = '<div><strong></strong><small></small></div><b></b>';
           item.querySelector('strong').textContent = `${npc.name} · Nv. ${npc.level}`;
           const edge = npc.edge ? `time com ${TYPE_NAMES[npc.edge] ?? npc.edge}` : '';
-          item.querySelector('small').textContent = [npc.place, edge, npc.failure].filter(Boolean).join(' · ');
+          // XP measured in this run, or the one saved from an earlier win.
+          const xp = npc.gain ? `+${formatXp(npc.gain)} XP` : npc.knownXp ? `~${formatXp(npc.knownXp)} XP` : '';
+          item.querySelector('small').textContent = [npc.place, xp, edge, npc.failure].filter(Boolean).join(' · ');
           item.querySelector('b').textContent = LABELS[npc.state] ?? '';
           return item;
         }));
@@ -4481,25 +4464,20 @@
         }
       }
 
-      function showRange() {
+      function showMain() {
         const main = mainPokemon();
-        const below = levelRange();
-        const lowest = Math.max(1, (main?.level ?? 1) - below);
         mainEl.textContent = main ? `${main.name} · Nv. ${main.level}` : 'Pokémon principal';
         spriteEl.hidden = !main?.sprite;
         if (main?.sprite && spriteEl.getAttribute('src') !== main.sprite) spriteEl.src = main.sprite;
-        rangeEl.textContent = main
-          ? (lowest === main.level
-            ? `Treinadores de nível ${main.level}`
-            : `Treinadores do nível ${lowest} ao ${main.level}`)
-          : 'Entre no jogo para ver a faixa de níveis.';
+        noteEl.textContent = main
+          ? 'Todos os treinadores do dia, na ordem do MAPA: mais XP primeiro.'
+          : 'Entre no jogo para ver o Pokémon principal.';
       }
 
       function setRunning(on) {
         const restoreFocus = document.activeElement === (on ? goButton : stopButton);
         goButton.hidden = on;
         stopButton.hidden = !on;
-        levelsInput.disabled = on;
         avoidBox.disabled = on;
         box.toggleAttribute('data-running', on);
         if (restoreFocus) (on ? stopButton : goButton).focus({ preventScroll: true });
@@ -4510,12 +4488,12 @@
       goButton.addEventListener('click', async () => {
         if (run) return;
         const main = mainPokemon();
-        showRange();
+        showMain();
         if (!main) {
           setStatus('Não achei o Pokémon principal no HUD.', 'stop');
           return;
         }
-        run = { stopped: false, reason: '', route: [], done: 0, total: 0 };
+        run = { stopped: false, reason: '', route: [], done: 0, total: 0, xp: 0 };
         setRunning(true);
         routeEl.hidden = true;
         progressEl.hidden = true;
@@ -4528,14 +4506,15 @@
             await pause();
           }
           setStatus('Calculando a rota...');
-          const { route, beatenInRange, lockedInRange } = await buildRoute(main.level);
+          const { route, beaten, locked } = await buildRoute();
+          const known = readTeams();
           run.route = route.map(npc => {
             const edge = avoidBox.checked ? typeEdge(npc, main.dex) : null;
-            return { ...npc, edge, state: edge ? 'avoided' : 'todo' };
+            return { ...npc, edge, knownXp: known[npc.id]?.xp, state: edge ? 'avoided' : 'todo' };
           });
           const avoided = run.route.filter(npc => npc.state === 'avoided').length;
-          run.total = route.length - avoided + beatenInRange;
-          run.done = beatenInRange;
+          run.total = route.length - avoided + beaten;
+          run.done = beaten;
           renderProgress();
           if (!run.route.some(npc => npc.state === 'todo')) {
             if (avoided) {
@@ -4544,9 +4523,9 @@
               return;
             }
             await closeMap();
-            setStatus(lockedInRange
-              ? `Nada a fazer: ${lockedInRange} treinador(es) da faixa ainda bloqueado(s).`
-              : 'Nada a fazer: todos os treinadores da faixa já foram vencidos hoje.');
+            setStatus(locked
+              ? `Nada a fazer: ${locked} treinador(es) ainda bloqueado(s).`
+              : 'Nada a fazer: todos os treinadores já foram vencidos hoje.');
             return;
           }
           let unreachableStreak = 0;
@@ -4590,7 +4569,8 @@
           const skipped = run.route.filter(npc => npc.state === 'skipped' || npc.state === 'locked').length;
           const unreachable = run.route.filter(npc => npc.state === 'unreachable').length;
           const closed = run.route.filter(npc => npc.state === 'closed').length;
-          setStatus(['Daily concluído.', lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
+          setStatus(['Daily concluído.', run.xp && `+${formatXp(run.xp)} XP de treinador.`,
+            lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
             unreachable && `${unreachable} sem resposta do jogo.`,
             closed && `${closed} em lugar fechado (falta insígnia).`,
             avoided && `${avoided} evitado(s) por vantagem de tipo.`]
