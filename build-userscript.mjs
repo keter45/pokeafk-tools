@@ -13,7 +13,7 @@ const GROUPS = [
     'market/price-book.js', 'market/price-book-styles.js', 'tiers/observer.js',
   ] },
   { id: 'daily', files: ['daily.js'] },
-  { id: 'monitor', files: ['data/dex.js', 'monitor.js'] },
+  { id: 'monitor', files: ['data/dex.js', 'monitor.js', 'trade.js'] },
   { id: 'dodge', files: ['dodge.js'] },
 ];
 

@@ -185,6 +185,8 @@ function readHud() {
     potionsTotal: heal.length ? potions.reduce((sum, item) => sum + item.n, 0) : null,
     potionsFrom,
     money: count(text($('.hud-wallet .hud-amt'))) || null,
+    // Channel ("Canal 1"): trades only work between trainers on the same channel.
+    canal: text($('.hud-canal .hud-canal-t')) || null,
     main: active ? {
       name: active[1].charAt(0) + active[1].slice(1).toLowerCase(),
       level: Number(active[2]),
@@ -308,7 +310,7 @@ function compare(record) {
   // every hit; the heartbeat carries the exact value.
   const hpStep = record.main?.hpMax ? Math.round(record.main.hp / record.main.hpMax * 10) : null;
   return JSON.stringify([record.state, record.daily, record.ballsTotal, record.potionsTotal,
-    record.afkBalls, record.money, record.main?.level, record.main?.name, record.main?.front, hpStep, record.foe?.name,
+    record.afkBalls, record.money, record.canal, record.main?.level, record.main?.name, record.main?.front, hpStep, record.foe?.name,
     Math.round((record.xp?.trainer?.rate ?? -1) / 5000), Math.round((record.xp?.mon?.rate ?? -1) / 5000)]);
 }
 
@@ -824,8 +826,45 @@ async function waitFor(test, timeout, what) {
   }
 }
 
+// Sends a trade invite to `name` through the game's own screens. Throws when the game does not
+// react (the message says why).
+async function sendInvite(name) {
+  if ($('.in-arena') || $('.ah-result[data-result]')) throw new Error('termine a batalha antes');
+  // Amigos window, from the trainer menu.
+  let dmName = $('.friends-window:not([hidden]) [data-friends-dm-name]');
+  if (!visible(dmName)) {
+    const menuItem = $('.hud-pm-item[data-act="friends"]');
+    if (!menuItem) throw new Error('não achei Amigos no menu do treinador');
+    if (menuItem.closest('[inert]')) {
+      $('[data-act="playerMenu"]')?.click();
+      await waitFor(() => !menuItem.closest('[inert]'), 3000, 'abrir o menu');
+    }
+    menuItem.click();
+    dmName = await waitFor(() => {
+      const input = $('.friends-window:not([hidden]) [data-friends-dm-name]');
+      return visible(input) ? input : null;
+    }, 5000, 'abrir Amigos');
+  }
+  // "Buscar jogador" opens the profile and closes the Amigos window.
+  const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+  setValue.call(dmName, name);
+  dmName.dispatchEvent(new Event('input', { bubbles: true }));
+  const search = dmName.form?.querySelector('[data-friends-action="dm"]');
+  if (!search) throw new Error('não achei Buscar jogador em Amigos');
+  search.click();
+  const tradeButton = await waitFor(() => {
+    const profile = $$('.pa1-trainer').find(element => visible(element)
+      && nameKey($('.pa1-name', element)?.textContent) === nameKey(name));
+    const found = profile && $('.pa1-act[data-tr]', profile);
+    return found && !found.disabled ? found : null;
+  }, 8000, 'abrir o perfil');
+  tradeButton.click();
+}
+// Only the game not reacting is expected; anything else is a bug and goes to the console too.
+const INVITE_EXPECTED = /o jogo não respondeu|não achei|termine a batalha/;
+
 async function startTrade(name, button) {
-  if (trading) return;
+  if (trading || autoTradeBusy()) return;
   trading = true;
   button.dataset.busy = '';
   button.disabled = true;
@@ -833,40 +872,10 @@ async function startTrade(name, button) {
   button.textContent = '⇄ Abrindo...';
   let message = '';
   try {
-    if ($('.in-arena') || $('.ah-result[data-result]')) throw new Error('termine a batalha antes');
-    // Amigos window, from the trainer menu.
-    let dmName = $('.friends-window:not([hidden]) [data-friends-dm-name]');
-    if (!visible(dmName)) {
-      const menuItem = $('.hud-pm-item[data-act="friends"]');
-      if (!menuItem) throw new Error('não achei Amigos no menu do treinador');
-      if (menuItem.closest('[inert]')) {
-        $('[data-act="playerMenu"]')?.click();
-        await waitFor(() => !menuItem.closest('[inert]'), 3000, 'abrir o menu');
-      }
-      menuItem.click();
-      dmName = await waitFor(() => {
-        const input = $('.friends-window:not([hidden]) [data-friends-dm-name]');
-        return visible(input) ? input : null;
-      }, 5000, 'abrir Amigos');
-    }
-    // "Buscar jogador" opens the profile and closes the Amigos window.
-    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-    setValue.call(dmName, name);
-    dmName.dispatchEvent(new Event('input', { bubbles: true }));
-    const search = dmName.form?.querySelector('[data-friends-action="dm"]');
-    if (!search) throw new Error('não achei Buscar jogador em Amigos');
-    search.click();
-    const tradeButton = await waitFor(() => {
-      const profile = $$('.pa1-trainer').find(element => visible(element)
-        && nameKey($('.pa1-name', element)?.textContent) === nameKey(name));
-      const found = profile && $('.pa1-act[data-tr]', profile);
-      return found && !found.disabled ? found : null;
-    }, 8000, 'abrir o perfil');
-    tradeButton.click();
+    await sendInvite(name);
     message = '⇄ Convite enviado';
   } catch (error) {
-    // Only the game not reacting is expected here; anything else is a bug and must show.
-    if (!/o jogo não respondeu|não achei|termine a batalha/.test(error.message)) console.error(error);
+    if (!INVITE_EXPECTED.test(error.message)) console.error(error);
     message = '⇄ Não abriu';
     button.title = `Trocar com ${name}: ${error.message}. Tente pelo menu do jogo.`;
   } finally {

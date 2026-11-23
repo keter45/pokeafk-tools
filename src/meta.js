@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.8.0
+// @version      1.9.0
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
