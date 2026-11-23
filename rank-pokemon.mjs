@@ -3,7 +3,9 @@
 //   strongest ready move) plus area hits on packs and self setup kept up during continuous hunts.
 // - pvp: an event-driven 1v1 against reference opponents using the documented combat rules
 //   (stages, statuses, battle cooldowns, heals), blended with Smogon's Gen 3 references.
-// Only natural (level-up) moves of the evolution line count: TMs do not work in the game.
+// Moves: level-up moves of the evolution line plus the machines passed to buildGuide (HMs; the
+// separate TM list also passes the TMs). Damage moves follow the main attack stat (mainStat).
+// The rules and their sources are summarised in referencia/mecanicas.md.
 import { normalizeName } from './collect-competitive.mjs';
 
 export const sourceUrl = 'https://pokeafk.io/pokepedia/';
@@ -41,6 +43,23 @@ const DODGE_MAX = 0.7;
 // The reference opponents also throw dodgeable moves: this share of their hits is dodged, except
 // while our Pokémon is casting (it cannot move) or asleep. Long casts are doubly bad in PvP.
 const INCOMING_DODGE = 0.25;
+// Movement (client code, player step): 267 ms per tile, 133 ms with a positive Speed stage
+// (Agility, Dragon Dance…), 445 ms when paralysed. The Speed stat itself only shortens the time
+// between moves. Dodging scales with how fast the Pokémon walks: ×2 boosted, ×0.6 paralysed.
+const STEP_SECONDS = { normal: 0.267, boosted: 0.133, paralyzed: 0.445 };
+// Area makes a move harder to dodge: leaving it takes extra steps (escapeTiles − 1) of 267 ms on top
+// of the reaction time. A target-centred area (area, leap) needs about its radius in steps; a cone,
+// circle or field around the user catches the target anywhere inside, about half the radius.
+// Range (PvP): attacking from afar keeps the melee reference (physical) out of reach part of the time.
+// Its extra miss chance is KITE_MAX × clamp((reach − 2) / 3): 2 tiles or less (melee, the game's
+// manual.meleeReach) gives nothing, 5 tiles or more give the whole bonus. Estimated, not measured.
+const KITE_MAX = 0.15;
+// Main attack stat: damage moves follow the higher of Atk and Sp. Atk (base stats); within 15% the
+// Pokémon is mixed and both count. Fixed-damage moves (Night Shade, Seismic Toss) always count.
+const MAIN_STAT_RATIO = 1.15;
+// PvP score: the 1v1 duel weighs 80% and the Gen 3 reference 20%. There is no switching in a fight
+// here, so a Pokémon must win alone; Smogon tiers also reward walls and support that rely on a team.
+const PVP_DUEL_WEIGHT = 0.8;
 // Focus Punch "falha se o seu Pokémon levar um golpe enquanto se concentra" (1 s, game text). In a
 // duel it fails when the opponent acts during the concentration; in a hunt the wild Pokémon attack
 // back, and one of them at the base interval (combat.gcd.base, 1.2 s) lets it land 1 − cast/1.2 of
@@ -68,7 +87,7 @@ function discTiles(radius) {
   return tiles;
 }
 // Expected wild Pokémon hit by one use during a hunt, from the move's shape and size.
-function huntTargets(move) {
+export function huntTargets(move) {
   const radius = Math.max(1, Math.round(move.radius ?? 1));
   let extraTiles;
   switch (move.target) {
@@ -81,12 +100,29 @@ function huntTargets(move) {
   return 1 + (PACK_SIZE - 1) * clamp(0, 1, extraTiles / PACK_SPREAD_TILES);
 }
 // Damage multiplier for that many targets: up to 2 targets it grows from 100% (alone) to 2 × 75%.
-function areaMultiplier(targets) {
+export function areaMultiplier(targets) {
   return targets <= 2 ? 1 + (targets - 1) * (2 * AREA_FACTOR - 1) : targets * AREA_FACTOR;
 }
-function dodgeChance(move) {
+export function escapeTiles(move) {
+  const radius = Math.max(1, Math.round(move.radius ?? 1));
+  if (move.target === 'area' || move.target === 'leap') return radius;
+  if (move.target === 'cone' || move.target === 'circle' || move.target === 'field') return Math.max(1, Math.round(radius / 2));
+  return 1;
+}
+export function dodgeChance(move) {
   if (!TELEGRAPH_SHAPES.has(move.target)) return 0;
-  return clamp(0, DODGE_MAX, ((move.cast ?? 0) - DODGE_MIN_CAST) * DODGE_PER_SECOND);
+  const cast = (move.cast ?? 0) + (move.hitSpan ?? 0);
+  return clamp(0, DODGE_MAX, (cast - DODGE_MIN_CAST - (escapeTiles(move) - 1) * STEP_SECONDS.normal) * DODGE_PER_SECOND);
+}
+// How far the move reaches from the user, in tiles (melee and self moves: 1).
+export function moveReach(move) {
+  if (['melee', 'rampage', 'self', 'borrow', 'trap'].includes(move.target)) return 1;
+  return Math.max(1, move.range ?? 1, move.radius ?? 0);
+}
+export function mainStat(stats) {
+  if (stats.atk >= stats.spa * MAIN_STAT_RATIO) return 'physical';
+  if (stats.spa >= stats.atk * MAIN_STAT_RATIO) return 'special';
+  return 'mixed';
 }
 const MAJOR = new Set(['slp', 'par', 'frz', 'brn', 'psn', 'tox']);
 const FIXED_DAMAGE = { EFFECT_LEVEL_DAMAGE: () => LEVEL, EFFECT_DRAGON_RAGE: () => 40, EFFECT_SONICBOOM: () => 20 };
@@ -174,7 +210,7 @@ function accuracyMult(stage) {
   const value = clamp(-6, 6, Math.round(stage));
   return value >= 0 ? (3 + value) / 3 : 3 / (3 - value);
 }
-function battleStats(base, nature) {
+export function battleStats(base, nature) {
   const stats = {};
   for (const stat of STATS) {
     const raw = Math.floor((2 * base[stat] + 31) * LEVEL / 100);
@@ -186,7 +222,7 @@ function battleStats(base, nature) {
   }
   return stats;
 }
-function gcdFor(speed, paralyzed = false) {
+export function gcdFor(speed, paralyzed = false) {
   const value = clamp(GCD.min, GCD.max, GCD.base * Math.sqrt((1.75 * LEVEL + 5) / Math.max(1, speed)));
   return paralyzed ? value * STATUS.par.gcdMult : value;
 }
@@ -211,7 +247,7 @@ function classify(move, types, rules = {}) {
     cooldown: Math.max(0.1, move.cooldown ?? 0), battleCooldown: BATTLE_COOLDOWN[key] ?? Math.max(0.1, move.cooldown ?? 0),
     offGcd: Boolean(move.offGcd), machine: Boolean(move.machine), cast: (move.cast ?? 0) + (move.hitSpan ?? 0),
     effects: (move.effects ?? []).filter(effect => effect && effect.kind),
-    dodge: dodgeChance(move),
+    dodge: dodgeChance(move), reach: moveReach(move),
   };
   if (move.category === 'physical' || move.category === 'special') {
     const fixed = FIXED_DAMAGE[move.effect];
@@ -440,6 +476,7 @@ function duel(stats, moves, types, opponent, seed) {
   const incoming = defenseFactor(types);
   let userNext = 0;
   let castUntil = 0;
+  let lastReach = 1;
   let foeNext = 0.5;
   let nextTick = TICK_SECONDS;
   let now = 0;
@@ -463,6 +500,11 @@ function duel(stats, moves, types, opponent, seed) {
       if (fighter.major.kind === 'frz') fighter.freezeImmune = fighter.major.until + STATUS.immuneSeconds;
       if (['slp', 'frz'].includes(fighter.major.kind)) fighter.major = null;
     }
+  }
+  // Walking speed: a positive Speed stage doubles it, paralysis slows it (see STEP_SECONDS).
+  function walk(fighter, at) {
+    if (majorActive(fighter, at)?.kind === 'par') return STEP_SECONDS.normal / STEP_SECONDS.paralyzed;
+    return stage(fighter, 'spe', at) > 0 ? STEP_SECONDS.normal / STEP_SECONDS.boosted : 1;
   }
   function damageFoe(amount, category) {
     foe.hp -= amount;
@@ -549,7 +591,9 @@ function duel(stats, moves, types, opponent, seed) {
       user.hp -= hitDamage({ ...move, category: 'physical', power: 40, stab: 1, hits: 1, fixed: null, superFang: false, type: '' }, user, user, now);
       return;
     }
-    const hits = random() < move.accuracy * accuracyMult(stage(user, 'acc', now) - stage(foe, 'eva', now)) * (1 - move.dodge);
+    if (move.kind === 'damage') lastReach = move.reach;
+    const dodged = clamp(0, 1, move.dodge * walk(foe, now));
+    const hits = random() < move.accuracy * accuracyMult(stage(user, 'acc', now) - stage(foe, 'eva', now)) * (1 - dodged);
     if (!hits) return;
     if (move.kind === 'damage') {
       const damage = foe.shield > now ? 0 : hitDamage(move, user, foe, now, coverage);
@@ -581,7 +625,10 @@ function duel(stats, moves, types, opponent, seed) {
       return;
     }
     if (random() >= accuracyMult(stage(foe, 'acc', now) - stage(user, 'eva', now))) return;
-    if (now >= castUntil && !sleeping(user, now) && random() < INCOMING_DODGE) return;
+    if (now >= castUntil && !sleeping(user, now)) {
+      if (random() < clamp(0, 1, INCOMING_DODGE * walk(user, now))) return;
+      if (opponent.category === 'physical' && random() < KITE_MAX * clamp(0, 1, (lastReach - 2) / 3)) return;
+    }
     if (user.shield > now) return;
     user.hp -= hitDamage(move, foe, user, now, incoming);
   }
@@ -854,7 +901,13 @@ function speciesProfile(species, pool, competitiveDex, competitive, rules = {}) 
       || !Array.isArray(species.types) || !species.types.length || !pool.length) return null;
   const types = species.types.map(typeKey);
   const typeSet = new Set(types);
-  const moves = pool.map(move => classify(move, typeSet, rules)).filter(Boolean);
+  let moves = pool.map(move => classify(move, typeSet, rules)).filter(Boolean);
+  const main = mainStat(species.stats);
+  if (main !== 'mixed') {
+    const follows = moves.filter(move => move.kind !== 'damage' || move.fixed || move.superFang || move.category === main);
+    // Keep the off-stat attacks only when the main stat has nothing to use.
+    if (follows.some(move => move.kind === 'damage' && !move.fixed && !move.superFang)) moves = follows;
+  }
   const reference = competitiveReference(competitiveDex, pool, competitive);
   if (!moves.some(move => move.kind === 'damage' && !move.fixed && !move.superFang)) {
     // Transform, Sketch, Counter or Present only: nothing the simulators can measure.
@@ -893,7 +946,8 @@ function finishScores(profiles) {
   for (const profile of profiles) {
     profile.pve.score = Math.round(1000 * profile.pve.dps / topDps) / 10;
     const smogon = profile.pvp.smogon?.points;
-    profile.pvp.score = Math.round((smogon === undefined ? profile.pvp.duel : 0.7 * profile.pvp.duel + 0.3 * smogon) * 10) / 10;
+    profile.pvp.score = Math.round((smogon === undefined ? profile.pvp.duel
+      : PVP_DUEL_WEIGHT * profile.pvp.duel + (1 - PVP_DUEL_WEIGHT) * smogon) * 10) / 10;
   }
   const thresholds = {};
   for (const mode of ['pve', 'pvp']) {
@@ -1012,3 +1066,11 @@ export function buildGuide(rows, { megaForms = [], competitive = null, machines 
     tierThresholds, species, profiles, missingProfiles,
   };
 }
+
+// Model constants, listed in referencia/ by build-reference.mjs.
+export const MODEL = {
+  GCD, RECHARGE_SECONDS, AREA_FACTOR, PACK_SIZE, PACK_SPREAD_TILES,
+  DODGE_MIN_CAST, DODGE_PER_SECOND, DODGE_MAX, INCOMING_DODGE, STEP_SECONDS, KITE_MAX,
+  MAIN_STAT_RATIO, PVP_DUEL_WEIGHT, WILD_ATTACK_SECONDS, HM_MIN_GAIN, NEW_TYPE_BONUS,
+  PVE_SECONDS, DUEL_SECONDS, OPPONENT_POWER, tierShares,
+};

@@ -157,7 +157,7 @@ const html = `<!doctype html>
   <p class="help" id="help"></p>
   <div id="rows"></div>
 </main>
-<footer>Gerado em ${data.generated} com dados da Poképédia e referências da Smogon (Gen 3). Sem TMs (lista original): golpes por nível da linha evolutiva e HMs da Loja de Celadon (em azul). Com TMs (lista à parte): também as TMs compatíveis (em verde). Uma HM ou TM só entra no moveset quando ganha mais de 3% do melhor golpe gratuito. Clique num Pokémon para abrir a página dele na Poképédia.</footer>
+<footer>Gerado em ${data.generated} com dados da Poképédia e referências da Smogon (Gen 3). Sem TMs (lista original): golpes por nível da linha evolutiva e HMs da Loja de Celadon (em azul). Com TMs (lista à parte): também as TMs compatíveis (em verde). Uma HM ou TM só entra no moveset quando ganha mais de 3% do melhor golpe gratuito. Regras e dados do modelo na pasta referencia/ do repositório. Clique num Pokémon para abrir a página dele na Poképédia.</footer>
 <script>
 const DATA = ${JSON.stringify(data)};
 const TYPE_COLORS = { normal: '#9a9a6e', fighting: '#c63129', flying: '#8e78e8', poison: '#a542a5', ground: '#d4ad4c', rock: '#a8922e', bug: '#93a51a', ghost: '#735a9c', steel: '#8f8fb3', fire: '#ef7a28', water: '#4f7fee', grass: '#5fb53c', electric: '#e7b800', psychic: '#f0507f', ice: '#5fc4c4', dragon: '#6a35f0', dark: '#6b5444' };
@@ -165,8 +165,8 @@ const TYPE_NAMES = { normal: 'Normal', fighting: 'Lutador', flying: 'Voador', po
 const ROLES = { physical: 'Físico', special: 'Especial', mixed: 'Misto', support: 'Suporte' };
 const STATS = { hp: 'HP', atk: 'Atq', def: 'Def', spa: 'Atq. Esp.', spd: 'Def. Esp.', spe: 'Vel' };
 const HELP = {
-  pve: 'Dano por segundo numa caça de 60 s, como o AUTO joga: golpe pronto mais forte, área pelo tamanho (quantos do bando de 3 cada forma alcança, 75% em cada) e reforços renovados quando acabam. Nota 100 = espécie normal com mais dano.',
-  pvp: 'Duelos de até 180 s com desvio, contra atacantes físico e especial de referência (70%): golpes com tempo de preparo maior erram mais, corpo a corpo e golpes que seguem o alvo sempre acertam, e quem prepara um golpe não desvia. Somada a isso, a referência competitiva da Gen 3 ajustada ao que a espécie aprende (30%).',
+  pve: 'Dano por segundo numa caça de 60 s, como o AUTO joga: golpe pronto mais forte, recargas e preparo, área pelo tamanho (quantos do bando de 3 cada forma alcança, 75% em cada) e reforços renovados quando acabam. Os golpes de dano seguem o ataque principal do Pokémon (Atq ou Atq. Esp.; com menos de 15% de diferença, os dois). Nota 100 = espécie normal com mais dano.',
+  pvp: 'Duelos 1 contra 1 de até 180 s, sem troca, contra atacantes físico e especial de referência (80%): o Pokémon precisa ganhar sozinho. Golpe com preparo longo é desviado com mais facilidade, área grande quase não, e corpo a corpo e golpes que seguem o alvo sempre acertam. Atacar de longe afasta o atacante corpo a corpo, estágio de Velocidade (Agility, Dragon Dance) dobra a velocidade do passo e a esquiva, e quem prepara um golpe não desvia. Os golpes seguem o ataque principal. Somada a isso, a referência competitiva da Gen 3 ajustada ao que a espécie aprende (20%).',
   farm: 'Hunts de Kanto onde aparece um Pokémon de primeiro estágio cuja evolução final é tier S ou A (PvE ou Competitivo). A fileira mostra a melhor tier entre as evoluções. Captura = preço do nível em que ele chega (70% a 80% do nível do selvagem) × fator do Tier de captura da espécie, como no guia Captura do jogo; os de primeiro estágio têm o fator mais baixo. Ordem: menos insígnias, nível recomendado e preço.',
 };
 const PVP_NAME = { pve: 'PvE', pvp: 'Comp' };
