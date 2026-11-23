@@ -4,6 +4,7 @@ function syncAll() {
   decorateMap();
   decorateSheet();
   decorateNatures();
+  decoratePc();
   syncMarket();
 }
 
