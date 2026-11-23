@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import {
   MODEL, areaMultiplier, battleStats, dodgeChance, escapeTiles, gcdFor, huntTargets, mainStat, moveReach,
 } from './rank-pokemon.mjs';
+import { describeMove, moveMetrics, moveTiers } from './moves-info.mjs';
 
 const root = new URL('./referencia/', import.meta.url);
 const snapshot = JSON.parse(await readFile(new URL('./pokepedia-data.json', import.meta.url), 'utf8'));
@@ -39,9 +40,10 @@ for (const machine of snapshot.hms ?? []) add(machine.move, { machine: 'HM' });
 for (const machine of snapshot.tms ?? []) add(machine.move, { machine: 'TM' });
 
 const moveRows = [...moves.values()].map(({ move, levelUp, machines }) => {
-  const cast = (move.cast ?? 0) + (move.hitSpan ?? 0);
+  const metrics = moveMetrics(move);
+  const cast = metrics.cast;
   const damaging = move.category !== 'status' && move.power > 1;
-  const hits = move.hits ?? move.estimatedHits ?? 1;
+  const hits = metrics.hits;
   const targets = damaging ? huntTargets(move) : null;
   return {
     key: move.key, name: move.name, type: move.type, category: move.category, shape: move.target,
@@ -50,12 +52,17 @@ const moveRows = [...moves.values()].map(({ move, levelUp, machines }) => {
     huntTargets: targets && Math.round(targets * 100) / 100,
     huntDamage: targets && Math.round(areaMultiplier(targets) * 100) / 100,
     escapeTiles: escapeTiles(move), pvpDodge: Math.round(dodgeChance(move) * 100) / 100,
-    // Power per second at the base interval (1.2 s): no stats, STAB or area, only for comparing.
-    powerPerSecond: damaging ? Math.round(move.power * hits * (move.accuracy ? move.accuracy / 100 : 1)
-      / Math.max(MODEL.GCD.base, move.cooldown ?? 0, cast) * 10) / 10 : null,
+    // Power per second (moves-info.mjs): no stats, STAB or area, only for comparing moves.
+    powerPerSecond: metrics.dps === undefined ? null : Math.round(metrics.dps * 10) / 10,
+    hunt: metrics.hunt ?? null, pvp: metrics.pvp ?? null, kind: metrics.kind,
     effect: move.effect, levelUp: levelUp.size, machine: [...machines].join('/') || null,
+    description: describeMove(move),
   };
 }).sort((a, b) => a.name.localeCompare(b.name, 'en'));
+for (const field of ['hunt', 'pvp']) {
+  const tierOf = moveTiers(moveRows, field);
+  for (const row of moveRows) row[field + 'Tier'] = tierOf(row[field]);
+}
 
 const speciesRows = [...snapshot.species, ...(snapshot.megaForms ?? [])].map(species => {
   const stats = battleStats(species.stats);
@@ -69,12 +76,13 @@ const speciesRows = [...snapshot.species, ...(snapshot.megaForms ?? [])].map(spe
 
 // Markdown: moves grouped by shape.
 const moveTable = rows => [
-  '| Golpe | Tipo | Cat. | Poder | Prec. | Recarga | Preparo | Alcance | Raio | Alvos na caça | Dano na caça | Desvio PvP | Poder/s | Origem |',
-  '|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|',
+  '| Golpe | Tipo | Cat. | Poder | Prec. | Recarga | Preparo | Alcance | Raio | Alvos na caça | Dano na caça | Desvio PvP | Poder/s | Caça | PvP | Origem | Descrição do jogo |',
+  '|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:-:|:-:|---|---|',
   ...rows.map(row => `| ${row.name} | ${row.type} | ${CATEGORY[row.category] ?? row.category} | ${fmt(row.power, 0)}${row.hits > 1 ? `×${fmt(row.hits)}` : ''} `
     + `| ${row.accuracy ? row.accuracy + '%' : 'sempre'} | ${fmt(row.cooldown)} s | ${row.cast ? fmt(row.cast, 2) + ' s' : '—'} `
     + `| ${fmt(row.range, 0)} | ${fmt(row.radius, 0)} | ${fmt(row.huntTargets, 2)} | ${row.huntDamage ? fmt(row.huntDamage * 100, 0) + '%' : '—'} `
-    + `| ${pct(row.pvpDodge)} | ${fmt(row.powerPerSecond)} | ${[row.levelUp ? `nível (${row.levelUp})` : '', row.machine ?? ''].filter(Boolean).join(' + ')} |`),
+    + `| ${pct(row.pvpDodge)} | ${fmt(row.powerPerSecond)} | ${row.huntTier ?? '—'} | ${row.pvpTier ?? '—'} `
+    + `| ${[row.levelUp ? `nível (${row.levelUp})` : '', row.machine ?? ''].filter(Boolean).join(' + ')} | ${row.description.replace(/\|/g, '/')} |`),
 ];
 const golpes = [
   '# Golpes por forma',
@@ -86,7 +94,9 @@ const golpes = [
   '- **Alcance / Raio**: em quadrados (1 passo = 1 quadrado).',
   '- **Alvos na caça**: quantos do bando de 3 a forma alcança, em média; **Dano na caça**: dano total em relação a um alvo (75% em cada com 2 ou mais).',
   '- **Desvio PvP**: chance estimada de o alvo sair da marca a tempo (só formas que marcam o chão; corpo a corpo e "segue o alvo" nunca).',
-  '- **Poder/s**: poder × acertos × precisão ÷ max(1,2 s, recarga, preparo). Só para comparar golpes; não conta atributos, mesmo tipo nem área.',
+  '- **Poder/s**: poder × acertos × precisão ÷ max(1,2 s, recarga, preparo + travamento). Só para comparar golpes; não conta atributos, mesmo tipo nem área. Thrash e parecidos perdem 15% pela confusão; Focus Punch conta só as vezes que acerta.',
+  '- **Caça / PvP**: letra por percentil entre os golpes com nota (mesmos cortes das espécies: S = 8% melhores). Caça = poder/s × dano na caça; PvP = poder/s × (1 − desvio) × bônus de alcance. Dano fixo, poder variável e Dream Eater ficam sem nota. Mesmas regras da aba Golpes da página (`moves-info.mjs`).',
+  '- **Descrição do jogo**: o texto do cartão do golpe, gerado como o jogo gera (`describeMove`).',
   '- **Origem**: nível (quantas espécies aprendem), HM (Loja de Celadon) ou TM (TM Box; entra só na lista com TMs).',
   '',
 ];
@@ -98,7 +108,7 @@ for (const row of moveRows) {
 }
 const shapeOrder = Object.keys(SHAPES);
 for (const shape of [...byShape.keys()].sort((a, b) => shapeOrder.indexOf(a) - shapeOrder.indexOf(b))) {
-  const rows = byShape.get(shape).sort((a, b) => (b.powerPerSecond ?? -1) - (a.powerPerSecond ?? -1) || a.name.localeCompare(b.name, 'en'));
+  const rows = byShape.get(shape).sort((a, b) => (b.hunt ?? -1) - (a.hunt ?? -1) || a.name.localeCompare(b.name, 'en'));
   golpes.push(`## ${SHAPES[shape] ?? shape} (${rows.length})`, '', ...moveTable(rows), '');
 }
 

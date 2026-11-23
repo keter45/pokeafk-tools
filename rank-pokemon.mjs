@@ -81,7 +81,7 @@ const PVE_SECONDS = 60;
 // wears off, so stages never stack past what a single use gives (Swords Dance +2, Howl +1).
 const HEAL_EFFECTS = new Set(['EFFECT_RESTORE_HP', 'EFFECT_SOFTBOILED', 'EFFECT_MORNING_SUN', 'EFFECT_SYNTHESIS', 'EFFECT_MOONLIGHT', 'EFFECT_WISH']);
 // Tiles of a disc of this radius (the game's circles, fields, areas and leaps).
-function discTiles(radius) {
+export function discTiles(radius) {
   let tiles = 0;
   for (let dx = -radius; dx <= radius; dx++) for (let dy = -radius; dy <= radius; dy++) if (dx * dx + dy * dy <= radius * radius) tiles++;
   return tiles;
@@ -125,8 +125,8 @@ export function mainStat(stats) {
   return 'mixed';
 }
 const MAJOR = new Set(['slp', 'par', 'frz', 'brn', 'psn', 'tox']);
-const FIXED_DAMAGE = { EFFECT_LEVEL_DAMAGE: () => LEVEL, EFFECT_DRAGON_RAGE: () => 40, EFFECT_SONICBOOM: () => 20 };
-const EXCLUDED_EFFECTS = new Set([
+export const FIXED_DAMAGE = { EFFECT_LEVEL_DAMAGE: () => LEVEL, EFFECT_DRAGON_RAGE: () => 40, EFFECT_SONICBOOM: () => 20 };
+export const EXCLUDED_EFFECTS = new Set([
   'EFFECT_EXPLOSION', 'EFFECT_OHKO', 'EFFECT_COUNTER', 'EFFECT_MIRROR_COAT', 'EFFECT_BIDE', 'EFFECT_ENDEAVOR',
   'EFFECT_FLAIL', 'EFFECT_SPIT_UP', 'EFFECT_PSYWAVE', 'EFFECT_PRESENT', 'EFFECT_BEAT_UP', 'EFFECT_FUTURE_SIGHT',
   'EFFECT_SNORE', 'EFFECT_HIDDEN_POWER', 'EFFECT_FAKE_OUT', 'EFFECT_REVENGE', 'EFFECT_SMELLINGSALT',

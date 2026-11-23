@@ -2,9 +2,12 @@
 // Two move sets: the original one (level-up moves + Celadon HMs) and a separate list that also counts
 // the TMs (they only drop at random from the TM Box, so the original list leaves them out).
 // Sprites load from pokeafk.io; each card links to the species page on the Poképédia.
+// The "Golpes" tab lists every move of the game with the game's description and a ranking
+// (moves-info.mjs); clicking a move anywhere on the page opens its details.
 import { readFile, writeFile } from 'node:fs/promises';
 import { buildGuide } from './rank-pokemon.mjs';
 import { buildFarms } from './farms.mjs';
+import { describeMove, moveMetrics, moveTiers } from './moves-info.mjs';
 
 const snapshot = JSON.parse(await readFile(new URL('./pokepedia-data.json', import.meta.url), 'utf8'));
 const competitive = JSON.parse(await readFile(new URL('./competitive-data.json', import.meta.url), 'utf8'));
@@ -40,9 +43,49 @@ const farms = buildFarms(snapshot, guide).map(farm => ({
   sprite: `https://pokeafk.io/assets/mon/front/${farm.dex}.png`,
   wiki: `https://pokeafk.io/pokepedia/pokemon/${byId.get(farm.dex)?.key ?? farm.dex}`,
 }));
+// Every move of the game once: level-up (how many species learn it), HM or TM.
+const moveSources = new Map();
+const addMove = (move, { species, machine }) => {
+  const entry = moveSources.get(move.key) ?? { move, learn: new Set(), machine: null };
+  if (species) entry.learn.add(species);
+  if (machine) entry.machine = machine;
+  moveSources.set(move.key, entry);
+};
+for (const species of snapshot.species) {
+  for (const move of species.moves ?? []) {
+    if (move.natural === false || (move.method && !['level', 'level-up'].includes(move.method))) continue;
+    addMove(move, { species: species.id });
+  }
+}
+for (const hm of snapshot.hms ?? []) addMove(hm.move, { machine: 'HM' });
+for (const tm of snapshot.tms ?? []) addMove(tm.move, { machine: 'TM' });
+const round = (value, digits = 2) => (Number.isFinite(value) ? Math.round(value * 10 ** digits) / 10 ** digits : null);
+const moveRows = [...moveSources.values()].map(({ move, learn, machine }) => {
+  const metrics = moveMetrics(move);
+  return {
+    name: move.name, type: move.type, category: move.category, power: move.power ?? null, hits: metrics.hits,
+    accuracy: move.alwaysHits || !move.accuracy ? null : move.accuracy, cooldown: move.cooldown ?? null, cast: round(metrics.cast),
+    shape: move.target, range: move.range ?? null, radius: move.radius ?? null, reach: metrics.reach,
+    tiles: metrics.tiles, targets: round(metrics.targets), huntMult: round(metrics.huntMult), dodge: round(metrics.dodge),
+    damage: metrics.damage ?? null, dps: round(metrics.dps, 1), hunt: metrics.hunt ?? null, pvp: metrics.pvp ?? null,
+    kind: metrics.kind, fixed: metrics.fixed, variable: move.powerMode === 'variable',
+    learn: learn.size, machine, desc: describeMove(move),
+  };
+});
+// Hunt and PvP: tier letter by percentile and a note where 100 = the best move.
+for (const field of ['hunt', 'pvp']) {
+  const tierOf = moveTiers(moveRows, field);
+  const top = Math.max(...moveRows.map(row => row[field] ?? 0));
+  for (const row of moveRows) {
+    row[field + 'Tier'] = tierOf(row[field]);
+    row[field] = row[field] === null ? null : round(100 * row[field] / top, 1);
+  }
+}
+moveRows.sort((a, b) => a.name.localeCompare(b.name, 'en'));
+
 const data = {
   generated: new Date().toISOString().slice(0, 10), thresholds: guide.tierThresholds, tmThresholds: tmGuide.tierThresholds,
-  hms: [...hmNames], tms: [...tmNames], entries, farms,
+  hms: [...hmNames], tms: [...tmNames], entries, farms, moves: moveRows,
 };
 
 const html = `<!doctype html>
@@ -88,9 +131,12 @@ const html = `<!doctype html>
   .label span { font-size: 11px; font-weight: 700; opacity: .8; text-align: center; }
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; padding: 10px; align-content: start; }
   .empty { padding: 18px; color: var(--muted); }
-  a.card { display: grid; grid-template-columns: 68px 1fr; gap: 4px 10px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; text-decoration: none; min-width: 0; }
-  a.card:hover, a.card:focus-visible { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .card { display: grid; grid-template-columns: 68px 1fr; gap: 4px 10px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; text-decoration: none; min-width: 0; }
+  a.card:hover, a.card:focus-visible, article.card:hover { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
   .sprite { grid-row: span 3; width: 68px; height: 68px; image-rendering: pixelated; object-fit: contain; align-self: start; }
+  .sprite img { display: block; width: 68px; height: 68px; image-rendering: pixelated; object-fit: contain; }
+  a.name { color: inherit; text-decoration: none; }
+  a.name:hover, a.name:focus-visible { text-decoration: underline; }
   .top { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
   .name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dex { color: var(--muted); font-size: 11px; }
@@ -99,10 +145,39 @@ const html = `<!doctype html>
   .type { border-radius: 4px; padding: 0 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; background: var(--t); }
   .tag { border-radius: 4px; padding: 0 6px; font-size: 10px; font-weight: 800; background: #ece6fb; color: #4d2d93; }
   .moves { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; font-size: 12px; }
-  .moves span { padding: 2px 6px; border-radius: 5px; background: color-mix(in srgb, var(--line) 55%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .moves span.hm { background: var(--hm-bg); color: var(--hm-ink); font-weight: 700; }
-  .moves span.tm { background: var(--tm-bg); color: var(--tm-ink); font-weight: 700; }
-  .moves span.tm::after { content: " TM"; font-size: 9px; font-weight: 800; opacity: .75; }
+  .mv { font: inherit; color: inherit; text-align: left; border: 0; cursor: pointer; min-width: 0; padding: 2px 6px; border-radius: 5px; background: color-mix(in srgb, var(--line) 55%, transparent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mv:hover { box-shadow: inset 0 0 0 1px var(--accent); }
+  .mv:focus-visible, .sort:focus-visible, .x:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .mv.hm { background: var(--hm-bg); color: var(--hm-ink); font-weight: 700; }
+  .mv.tm { background: var(--tm-bg); color: var(--tm-ink); font-weight: 700; }
+  .mv.tm::after { content: " TM"; font-size: 9px; font-weight: 800; opacity: .75; }
+  .tablewrap { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow-x: auto; }
+  table.mvt { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .mvt th, .mvt td { padding: 6px 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+  .mvt th:first-child, .mvt td:first-child, .mvt th:last-child, .mvt td:last-child { text-align: left; }
+  .mvt th { font-size: 11px; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+  .mvt tbody tr:nth-child(even) { background: color-mix(in srgb, var(--line) 22%, transparent); }
+  .sort { font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; background: none; border: 0; padding: 4px 0; cursor: pointer; }
+  .sort::after { content: " ↕"; opacity: .35; }
+  th[aria-sort="ascending"] .sort, th[aria-sort="descending"] .sort { color: var(--accent); }
+  th[aria-sort="ascending"] .sort::after { content: " ↑"; opacity: 1; }
+  th[aria-sort="descending"] .sort::after { content: " ↓"; opacity: 1; }
+  .mvt .mv { font-weight: 800; padding: 2px 6px; margin-right: 4px; }
+  .mvt .cat { color: var(--muted); font-size: 11px; }
+  .tier { display: inline-block; min-width: 1.6em; margin-right: 4px; padding: 0 4px; border-radius: 4px; text-align: center; font-weight: 900; color: #1b1b1b; background: var(--tier); }
+  .muted { color: var(--muted); }
+  dialog { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); }
+  dialog::backdrop { background: rgb(5 10 25 / .5); }
+  .dlg-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .dlg-head h2 { margin: 0 auto 0 0; font-size: 18px; }
+  .x { font: inherit; font-size: 20px; line-height: 1; color: inherit; background: none; border: 1px solid var(--line); border-radius: 8px; min-width: 36px; min-height: 36px; cursor: pointer; }
+  .dlg-body { padding: 12px 14px 16px; }
+  .dlg-body p { margin: 0 0 12px; }
+  .facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 0 0 12px; font-size: 13px; }
+  .facts dt { color: var(--muted); }
+  .facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .users { font-size: 13px; }
+  .users b { display: block; margin-top: 6px; }
   .was { border-radius: 4px; padding: 0 6px; font-size: 10px; font-weight: 800; color: #1b1b1b; background: var(--tier); }
   .notice { margin: 0 0 14px; padding: 8px 12px; max-width: 900px; border-radius: 8px; background: var(--tm-bg); color: var(--tm-ink); font-weight: 600; }
   .meta { grid-column: 1 / -1; font-size: 11.5px; color: var(--muted); }
@@ -114,8 +189,19 @@ const html = `<!doctype html>
   .price { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .price b { color: var(--ink); font-size: 13px; }
   [hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   footer { color: var(--muted); font-size: 12px; padding: 4px 16px 24px; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 760px) {
+    .mvt thead { display: none; }
+    .mvt, .mvt tbody, .mvt tr, .mvt td { display: block; }
+    .mvt tr { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    .mvt td { padding: 0; border: 0; text-align: left; white-space: normal; }
+    .mvt td::before { content: attr(data-label) " "; color: var(--muted); font-size: 11px; }
+    .mvt td:first-child { grid-column: 1 / -1; margin-bottom: 4px; }
+    .mvt td:first-child::before { content: none; }
+  }
   @media (max-width: 600px) {
+    header { position: static; }
     .row { grid-template-columns: 1fr; }
     .label { flex-direction: row; gap: 10px; justify-content: flex-start; padding: 6px 12px; }
     .label b { font-size: 24px; }
@@ -131,6 +217,7 @@ const html = `<!doctype html>
       <button type="button" data-mode="pve" aria-pressed="true">PvE (caça)</button>
       <button type="button" data-mode="pvp" aria-pressed="false">Competitivo</button>
       <button type="button" data-mode="farm" aria-pressed="false">Farms early game</button>
+      <button type="button" data-mode="moves" aria-pressed="false">Golpes</button>
     </div>
     <div class="seg" role="group" aria-label="Golpes considerados" id="moveset">
       <button type="button" data-moves="base" aria-pressed="true" title="Lista original: golpes por nível e HMs da Loja de Celadon">Sem TMs</button>
@@ -148,7 +235,29 @@ const html = `<!doctype html>
       <option value="mixed">Misto</option>
       <option value="support">Suporte</option>
     </select>
-    <input type="search" id="search" placeholder="Buscar Pokémon" aria-label="Buscar Pokémon">
+    <select id="mvsort" aria-label="Ordenar golpes" hidden>
+      <option value="hunt">Melhor para caçar</option>
+      <option value="pvp">Melhor no PvP</option>
+      <option value="tiles">Maior área</option>
+      <option value="reach">Maior alcance</option>
+      <option value="damage">Maior dano</option>
+      <option value="dps">Maior DPS</option>
+      <option value="name">Nome</option>
+    </select>
+    <select id="mvkind" aria-label="Categoria do golpe" hidden>
+      <option value="">Todos os golpes</option>
+      <option value="damage">Golpes de dano</option>
+      <option value="physical">Físicos</option>
+      <option value="special">Especiais</option>
+      <option value="status">Status</option>
+    </select>
+    <select id="mvorigin" aria-label="Origem do golpe" hidden>
+      <option value="">Qualquer origem</option>
+      <option value="level">Por nível</option>
+      <option value="HM">HM</option>
+      <option value="TM">TM</option>
+    </select>
+    <input type="search" id="search" placeholder="Buscar Pokémon" aria-label="Buscar">
   </div>
   <div class="types" id="types" aria-label="Filtrar por tipo"></div>
 </header>
@@ -157,7 +266,11 @@ const html = `<!doctype html>
   <p class="help" id="help"></p>
   <div id="rows"></div>
 </main>
-<footer>Gerado em ${data.generated} com dados da Poképédia e referências da Smogon (Gen 3). Sem TMs (lista original): golpes por nível da linha evolutiva e HMs da Loja de Celadon (em azul). Com TMs (lista à parte): também as TMs compatíveis (em verde). Uma HM ou TM só entra no moveset quando ganha mais de 3% do melhor golpe gratuito. Regras e dados do modelo na pasta referencia/ do repositório. Clique num Pokémon para abrir a página dele na Poképédia.</footer>
+<dialog id="move-dialog" aria-labelledby="move-title">
+  <div class="dlg-head"><h2 id="move-title"></h2><button type="button" class="x" data-close aria-label="Fechar">×</button></div>
+  <div class="dlg-body" id="move-body"></div>
+</dialog>
+<footer>Gerado em ${data.generated} com dados da Poképédia e referências da Smogon (Gen 3). Sem TMs (lista original): golpes por nível da linha evolutiva e HMs da Loja de Celadon (em azul). Com TMs (lista à parte): também as TMs compatíveis (em verde). Uma HM ou TM só entra no moveset quando ganha mais de 3% do melhor golpe gratuito. Regras e dados do modelo na pasta referencia/ do repositório. Clique no nome de um Pokémon para abrir a página dele na Poképédia e num golpe para ver a descrição.</footer>
 <script>
 const DATA = ${JSON.stringify(data)};
 const TYPE_COLORS = { normal: '#9a9a6e', fighting: '#c63129', flying: '#8e78e8', poison: '#a542a5', ground: '#d4ad4c', rock: '#a8922e', bug: '#93a51a', ghost: '#735a9c', steel: '#8f8fb3', fire: '#ef7a28', water: '#4f7fee', grass: '#5fb53c', electric: '#e7b800', psychic: '#f0507f', ice: '#5fc4c4', dragon: '#6a35f0', dark: '#6b5444' };
@@ -167,6 +280,7 @@ const STATS = { hp: 'HP', atk: 'Atq', def: 'Def', spa: 'Atq. Esp.', spd: 'Def. E
 const HELP = {
   pve: 'Dano por segundo numa caça de 60 s, como o AUTO joga: golpe pronto mais forte, recargas e preparo, área pelo tamanho (quantos do bando de 3 cada forma alcança, 75% em cada) e reforços renovados quando acabam. Os golpes de dano seguem o ataque principal do Pokémon (Atq ou Atq. Esp.; com menos de 15% de diferença, os dois). Nota 100 = espécie normal com mais dano.',
   pvp: 'Duelos 1 contra 1 de até 180 s, sem troca, contra atacantes físico e especial de referência (80%): o Pokémon precisa ganhar sozinho. Golpe com preparo longo é desviado com mais facilidade, área grande quase não, e corpo a corpo e golpes que seguem o alvo sempre acertam. Atacar de longe afasta o atacante corpo a corpo, estágio de Velocidade (Agility, Dragon Dance) dobra a velocidade do passo e a esquiva, e quem prepara um golpe não desvia. Os golpes seguem o ataque principal. Somada a isso, a referência competitiva da Gen 3 ajustada ao que a espécie aprende (20%).',
+  moves: 'Todos os golpes do jogo (por nível, HM e TM), com a descrição do próprio jogo: clique num golpe. Caça = poder por segundo × área (quantos do bando de 3 a forma alcança, 75% em cada). PvP = poder por segundo × chance de não ser desviado × alcance (de longe, o atacante corpo a corpo não chega). Poder por segundo = poder × acertos × precisão ÷ o maior entre 1,2 s, recarga e preparo. Nota 100 = o melhor golpe; as letras usam os cortes das espécies (S = 8% melhores). Não contam atributos nem mesmo tipo: servem para comparar golpes. Dano fixo e poder variável ficam sem nota.',
   farm: 'Hunts de Kanto onde aparece um Pokémon de primeiro estágio cuja evolução final é tier S ou A (PvE ou Competitivo). A fileira mostra a melhor tier entre as evoluções. Captura = preço do nível em que ele chega (70% a 80% do nível do selvagem) × fator do Tier de captura da espécie, como no guia Captura do jogo; os de primeiro estágio têm o fator mais baixo. Ordem: menos insígnias, nível recomendado e preço.',
 };
 const PVP_NAME = { pve: 'PvE', pvp: 'Comp' };
@@ -175,14 +289,123 @@ const money = new Intl.NumberFormat('pt-BR');
 const HM = new Set(DATA.hms);
 const TM = new Set(DATA.tms);
 const number = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
-const state = { mode: 'pve', moves: 'base', category: 'normal', role: '', query: '', types: new Set() };
+const state = { mode: 'pve', moves: 'base', category: 'normal', role: '', query: '', types: new Set(), mvSort: 'hunt', mvDir: 'desc', mvKind: '', mvOrigin: '' };
 try { Object.assign(state, JSON.parse(localStorage.getItem('pafk-tierlist') || '{}'), { types: new Set() }); } catch {}
 if (!HELP[state.mode]) state.mode = 'pve';
 if (state.moves !== 'tm') state.moves = 'base';
 const buildOf = entry => (state.moves === 'tm' ? entry.tm : entry)[state.mode];
 const save = () => {
-  try { localStorage.setItem('pafk-tierlist', JSON.stringify({ mode: state.mode, moves: state.moves, category: state.category, role: state.role })); } catch {}
+  try {
+    localStorage.setItem('pafk-tierlist', JSON.stringify({ mode: state.mode, moves: state.moves, category: state.category, role: state.role,
+      mvSort: state.mvSort, mvDir: state.mvDir, mvKind: state.mvKind, mvOrigin: state.mvOrigin }));
+  } catch {}
 };
+const MOVES = new Map(DATA.moves.map(move => [move.name, move]));
+const SHAPES = { cone: 'Cone', circle: 'Círculo em volta', field: 'Campo em volta', area: 'Área no alvo', leap: 'Salto', beam: 'Feixe', projectile: 'Projétil', dash: 'Investida', melee: 'Corpo a corpo', homing: 'Segue o alvo', rampage: 'Fúria', self: 'No próprio', borrow: 'Usa outro golpe', trap: 'Armadilha' };
+const CATEGORIES = { physical: 'Físico', special: 'Especial', status: 'Status' };
+const KINDS = { boost: 'Reforço', debuff: 'Enfraquece o alvo', ailment: 'Estado no alvo', heal: 'Cura', protect: 'Proteção', weather: 'Clima', control: 'Controle', none: 'Sem efeito no jogo' };
+const seconds = value => number.format(value) + ' s';
+const percent = value => Math.round(value * 100) + '%';
+// Shape and size in words: "Cone de 4 passos", "Área de raio 1 a até 6 passos"...
+function shapeText(move) {
+  const steps = value => value + (value === 1 ? ' passo' : ' passos');
+  switch (move.shape) {
+    case 'cone': return 'Cone de ' + steps(move.radius || move.range || 1) + ' à frente';
+    case 'circle': case 'field': return (move.shape === 'field' ? 'Campo' : 'Círculo') + ' de raio ' + (move.radius || 1) + ' em volta do usuário';
+    case 'area': return 'Área de raio ' + (move.radius || 1) + ' a até ' + steps(move.range || 1);
+    case 'leap': return 'Salto de até ' + steps(move.range || 1) + ', área de raio ' + (move.radius || 1) + ' onde cai';
+    case 'beam': return 'Feixe de ' + steps(move.range || 1) + ' em linha reta';
+    case 'projectile': return 'Projétil até ' + steps(move.range || 1);
+    case 'dash': return 'Investida de até ' + steps(move.range || 1);
+    case 'homing': return 'Segue o alvo até ' + steps(move.range || 1);
+    case 'melee': return 'Corpo a corpo';
+    case 'rampage': return 'Fúria: vários golpes corpo a corpo seguidos';
+    default: return SHAPES[move.shape] || move.shape;
+  }
+}
+function damageText(move) {
+  if (move.category === 'status') return '—';
+  if (move.fixed) return 'fixo';
+  if (move.variable || !move.power) return 'varia';
+  return move.hits > 1 ? move.power + '×' + number.format(move.hits) : String(move.power);
+}
+function originText(move) {
+  return [move.learn ? 'nível (' + move.learn + (move.learn === 1 ? ' espécie' : ' espécies') + ')' : '', move.machine || ''].filter(Boolean).join(' + ');
+}
+function tierBadge(tier, value, label) {
+  const span = document.createElement('span');
+  if (!tier) { span.className = 'muted'; span.textContent = '—'; return span; }
+  const chip = document.createElement('span'); chip.className = 'tier'; chip.style.setProperty('--tier', 'var(--' + tier + ')');
+  chip.textContent = tier; chip.title = label + ' ' + tier;
+  span.append(chip, number.format(value));
+  return span;
+}
+function moveButton(name, extraClass) {
+  const button = document.createElement('button');
+  button.type = 'button'; button.className = 'mv' + (extraClass ? ' ' + extraClass : ''); button.dataset.move = name; button.textContent = name;
+  const info = MOVES.get(name);
+  button.title = name + (extraClass ? ' (' + extraClass.toUpperCase() + ')' : '') + (info && info.desc ? ': ' + info.desc : '') + ' Clique para ver os detalhes.';
+  return button;
+}
+
+const dialog = document.getElementById('move-dialog');
+function openMove(name) {
+  const move = MOVES.get(name);
+  if (!move) return;
+  document.getElementById('move-title').textContent = move.name;
+  const body = document.getElementById('move-body');
+  body.replaceChildren();
+  const tags = document.createElement('div'); tags.className = 'tags';
+  const type = document.createElement('span'); type.className = 'type'; type.style.setProperty('--t', TYPE_COLORS[move.type] || '#888');
+  type.textContent = TYPE_NAMES[move.type] || move.type;
+  const category = document.createElement('span'); category.className = 'tag'; category.textContent = CATEGORIES[move.category] || move.category;
+  tags.append(type, category);
+  if (move.kind !== 'damage') { const kind = document.createElement('span'); kind.className = 'tag'; kind.textContent = KINDS[move.kind] || move.kind; tags.append(kind); }
+  const desc = document.createElement('p');
+  desc.textContent = move.desc || (move.category === 'status' ? shapeText(move) + '.' : 'Só causa dano, sem efeito extra.');
+  tags.style.marginBottom = '10px';
+  const facts = document.createElement('dl'); facts.className = 'facts';
+  const fact = (label, value) => {
+    if (value === null || value === undefined || value === '') return;
+    const dt = document.createElement('dt'); dt.textContent = label;
+    const dd = document.createElement('dd');
+    if (value instanceof Node) dd.append(value); else dd.textContent = value;
+    facts.append(dt, dd);
+  };
+  fact('Poder', damageText(move));
+  fact('Precisão', move.accuracy ? move.accuracy + '%' : 'sempre acerta');
+  fact('Recarga', move.cooldown ? seconds(move.cooldown) : null);
+  fact('Preparo', move.cast ? seconds(move.cast) : 'sai na hora');
+  fact('Forma', shapeText(move));
+  if (move.category !== 'status') {
+    fact('Área', move.tiles + (move.tiles === 1 ? ' quadrado' : ' quadrados') + ' · na caça acerta ' + number.format(move.targets) + ' do bando de 3 (dano total ' + percent(move.huntMult) + ')');
+    fact('Desvio no PvP', move.dodge ? percent(move.dodge) + ' de chance de o alvo sair a tempo' : 'não dá para desviar');
+    if (move.dps) fact('Poder por segundo', number.format(move.dps));
+    fact('Para caçar', tierBadge(move.huntTier, move.hunt, 'Caça'));
+    fact('No PvP', tierBadge(move.pvpTier, move.pvp, 'PvP'));
+  }
+  fact('Origem', originText(move));
+  const users = document.createElement('div'); users.className = 'users';
+  const list = state.moves === 'tm' ? 'tm' : 'base';
+  for (const mode of ['pve', 'pvp']) {
+    const names = DATA.entries.filter(entry => (list === 'tm' ? entry.tm : entry)[mode].moves.includes(move.name))
+      .sort((a, b) => (list === 'tm' ? b.tm : b)[mode].score - (list === 'tm' ? a.tm : a)[mode].score).map(entry => entry.name);
+    const title = document.createElement('b');
+    title.textContent = 'Nos movesets recomendados ' + (mode === 'pve' ? 'de PvE' : 'do Competitivo') + (list === 'tm' ? ' (com TMs)' : ' (sem TMs)') + ': ' + names.length;
+    const text = document.createElement('span'); text.className = 'muted';
+    text.textContent = names.length ? names.slice(0, 12).join(', ') + (names.length > 12 ? ' e mais ' + (names.length - 12) : '') : 'nenhum';
+    users.append(title, text);
+  }
+  body.append(tags, desc, facts, users);
+  if (!dialog.open) dialog.showModal();
+}
+dialog.addEventListener('click', event => {
+  if (event.target === dialog || event.target.closest('[data-close]')) dialog.close();
+});
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-move]');
+  if (button) openMove(button.dataset.move);
+});
 
 const typesBox = document.getElementById('types');
 for (const [type, color] of Object.entries(TYPE_COLORS)) {
@@ -199,14 +422,19 @@ const key = text => text.normalize('NFD').replace(/\\p{Diacritic}/gu, '').toLowe
 
 function card(entry) {
   const build = buildOf(entry);
-  const link = document.createElement('a');
-  link.className = 'card'; link.href = entry.wiki; link.target = '_blank'; link.rel = 'noopener noreferrer';
+  const link = document.createElement('article');
+  link.className = 'card';
   link.title = build.note;
+  const pic = document.createElement('a');
+  pic.className = 'sprite'; pic.href = entry.wiki; pic.target = '_blank'; pic.rel = 'noopener noreferrer'; pic.tabIndex = -1; pic.setAttribute('aria-hidden', 'true');
   const img = document.createElement('img');
-  img.className = 'sprite'; img.src = entry.sprite; img.alt = ''; img.loading = 'lazy'; img.width = 68; img.height = 68;
+  img.src = entry.sprite; img.alt = ''; img.loading = 'lazy'; img.width = 68; img.height = 68;
+  pic.append(img);
   const top = document.createElement('div'); top.className = 'top';
-  top.innerHTML = '<span class="name"></span><span class="dex"></span><span class="score"></span>';
+  top.innerHTML = '<a class="name" target="_blank" rel="noopener noreferrer"></a><span class="dex"></span><span class="score"></span>';
   top.querySelector('.name').textContent = entry.name;
+  top.querySelector('.name').href = entry.wiki;
+  top.querySelector('.name').title = 'Abrir ' + entry.name + ' na Poképédia';
   top.querySelector('.dex').textContent = '#' + String(entry.dex).padStart(3, '0');
   top.querySelector('.score').textContent = number.format(build.score);
   const tags = document.createElement('div'); tags.className = 'tags';
@@ -230,17 +458,101 @@ function card(entry) {
   const moves = document.createElement('div'); moves.className = 'moves';
   for (const name of build.moves) {
     const machine = HM.has(name) ? 'hm' : state.moves === 'tm' && TM.has(name) ? 'tm' : '';
-    const m = document.createElement('span'); m.textContent = name; m.title = machine ? name + ' (' + machine.toUpperCase() + ')' : name;
-    if (machine) m.className = machine;
-    moves.append(m);
+    moves.append(moveButton(name, machine));
   }
   const meta = document.createElement('div'); meta.className = 'meta';
   meta.innerHTML = 'Natureza <b></b> · IVs <b></b>';
   const [nature] = build.natures || [];
   meta.children[0].textContent = nature || '—';
   meta.children[1].textContent = (build.priority || []).map(stat => STATS[stat] || stat).join(' → ') || '—';
-  link.append(img, top, tags, role, moves, meta);
+  link.append(pic, top, tags, role, moves, meta);
   return link;
+}
+
+// The "Golpes" tab: a sortable table (cards on narrow screens).
+const MOVE_COLUMNS = [
+  { key: 'name', label: 'Golpe', dir: 'asc' },
+  { key: 'hunt', label: 'Caça', dir: 'desc' },
+  { key: 'pvp', label: 'PvP', dir: 'desc' },
+  { key: 'damage', label: 'Dano', dir: 'desc' },
+  { key: 'dps', label: 'Poder/s', dir: 'desc' },
+  { key: 'tiles', label: 'Área', dir: 'desc' },
+  { key: 'reach', label: 'Alcance', dir: 'desc' },
+  { key: 'cooldown', label: 'Recarga', dir: 'asc' },
+  { key: 'cast', label: 'Preparo', dir: 'asc' },
+  { key: 'dodge', label: 'Desvio PvP', dir: 'asc' },
+  { key: 'origin', label: 'Origem', dir: null },
+];
+function moveCell(row, label, content) {
+  const td = document.createElement('td'); td.dataset.label = label;
+  if (content instanceof Node) td.append(content); else td.textContent = content;
+  row.append(td);
+}
+function renderMoves() {
+  const query = key(state.query.trim());
+  const list = DATA.moves.filter(move => {
+    if (state.types.size && !state.types.has(move.type)) return false;
+    if (state.mvKind === 'damage' && move.category === 'status') return false;
+    if (['physical', 'special', 'status'].includes(state.mvKind) && move.category !== state.mvKind) return false;
+    if (state.mvOrigin === 'level' && !move.learn) return false;
+    if ((state.mvOrigin === 'HM' || state.mvOrigin === 'TM') && move.machine !== state.mvOrigin) return false;
+    return !query || key(move.name).includes(query) || key(move.desc).includes(query);
+  });
+  const sortKey = state.mvSort;
+  const sign = state.mvDir === 'asc' ? 1 : -1;
+  list.sort((a, b) => {
+    if (sortKey === 'name') return sign * a.name.localeCompare(b.name, 'en');
+    const x = a[sortKey], y = b[sortKey];
+    const missingX = x === null || x === undefined, missingY = y === null || y === undefined;
+    if (missingX !== missingY) return missingX ? 1 : -1;
+    return (missingX ? 0 : sign * (x - y)) || a.name.localeCompare(b.name, 'en');
+  });
+  document.getElementById('count').textContent = list.length + ' golpes';
+  const table = document.createElement('table'); table.className = 'mvt';
+  const caption = document.createElement('caption'); caption.className = 'sr-only'; caption.textContent = 'Golpes do jogo';
+  const head = document.createElement('thead'); const headRow = document.createElement('tr');
+  for (const column of MOVE_COLUMNS) {
+    const th = document.createElement('th'); th.scope = 'col';
+    if (column.dir) {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'sort'; button.textContent = column.label;
+      button.addEventListener('click', () => {
+        state.mvDir = state.mvSort === column.key ? (state.mvDir === 'asc' ? 'desc' : 'asc') : column.dir;
+        state.mvSort = column.key;
+        render();
+      });
+      if (state.mvSort === column.key) th.setAttribute('aria-sort', state.mvDir === 'asc' ? 'ascending' : 'descending');
+      th.append(button);
+    } else th.textContent = column.label;
+    headRow.append(th);
+  }
+  head.append(headRow);
+  const body = document.createElement('tbody');
+  for (const move of list) {
+    const row = document.createElement('tr');
+    const name = document.createElement('span');
+    const type = document.createElement('span'); type.className = 'type'; type.style.setProperty('--t', TYPE_COLORS[move.type] || '#888');
+    type.textContent = TYPE_NAMES[move.type] || move.type;
+    const cat = document.createElement('span'); cat.className = 'cat';
+    cat.textContent = ' ' + (move.kind === 'damage' ? CATEGORIES[move.category] : KINDS[move.kind] || CATEGORIES[move.category]);
+    name.append(moveButton(move.name, ''), type, cat);
+    moveCell(row, '', name);
+    moveCell(row, 'Caça', tierBadge(move.huntTier, move.hunt, 'Caça'));
+    moveCell(row, 'PvP', tierBadge(move.pvpTier, move.pvp, 'PvP'));
+    moveCell(row, 'Dano', damageText(move));
+    moveCell(row, 'Poder/s', move.dps ? number.format(move.dps) : '—');
+    moveCell(row, 'Área', move.category === 'status' ? '—' : move.tiles + (move.targets > 1 ? ' (' + number.format(move.targets) + ' na caça)' : ''));
+    moveCell(row, 'Alcance', String(move.reach));
+    moveCell(row, 'Recarga', move.cooldown ? seconds(move.cooldown) : '—');
+    moveCell(row, 'Preparo', move.cast ? seconds(move.cast) : '—');
+    moveCell(row, 'Desvio PvP', move.category === 'status' ? '—' : move.dodge ? percent(move.dodge) : '0%');
+    moveCell(row, 'Origem', originText(move));
+    body.append(row);
+  }
+  table.append(caption, head, body);
+  const wrap = document.createElement('div'); wrap.className = 'tablewrap';
+  if (list.length) wrap.append(table);
+  else wrap.innerHTML = '<p class="empty">Nenhum golpe com esses filtros.</p>';
+  document.getElementById('rows').replaceChildren(wrap);
 }
 
 function farmCard(farm) {
@@ -314,11 +626,21 @@ function render() {
   document.getElementById('role').value = state.role;
   document.getElementById('help').textContent = HELP[state.mode];
   const farm = state.mode === 'farm';
-  document.getElementById('category').hidden = farm;
-  document.getElementById('role').hidden = farm;
-  document.getElementById('moveset').hidden = farm;
-  document.getElementById('notice').hidden = farm || state.moves !== 'tm';
-  document.getElementById('search').placeholder = farm ? 'Buscar Pokémon ou lugar' : 'Buscar Pokémon';
+  const movesTab = state.mode === 'moves';
+  document.getElementById('category').hidden = farm || movesTab;
+  document.getElementById('role').hidden = farm || movesTab;
+  document.getElementById('moveset').hidden = farm || movesTab;
+  document.getElementById('notice').hidden = farm || movesTab || state.moves !== 'tm';
+  for (const id of ['mvsort', 'mvkind', 'mvorigin']) document.getElementById(id).hidden = !movesTab;
+  document.getElementById('mvsort').value = MOVE_COLUMNS.some(column => column.key === state.mvSort) && state.mvSort !== 'cooldown' && state.mvSort !== 'cast' && state.mvSort !== 'dodge' ? state.mvSort : '';
+  document.getElementById('mvkind').value = state.mvKind;
+  document.getElementById('mvorigin').value = state.mvOrigin;
+  document.getElementById('search').placeholder = farm ? 'Buscar Pokémon ou lugar' : movesTab ? 'Buscar golpe ou efeito' : 'Buscar Pokémon';
+  if (movesTab) {
+    renderMoves();
+    save();
+    return;
+  }
   if (farm) {
     renderFarms();
     save();
@@ -357,6 +679,13 @@ for (const button of document.querySelectorAll('[data-moves]')) button.addEventL
 document.getElementById('category').addEventListener('change', event => { state.category = event.target.value; render(); });
 document.getElementById('role').addEventListener('change', event => { state.role = event.target.value; render(); });
 document.getElementById('search').addEventListener('input', event => { state.query = event.target.value; render(); });
+document.getElementById('mvsort').addEventListener('change', event => {
+  state.mvSort = event.target.value;
+  state.mvDir = (MOVE_COLUMNS.find(column => column.key === state.mvSort) || {}).dir || 'desc';
+  render();
+});
+document.getElementById('mvkind').addEventListener('change', event => { state.mvKind = event.target.value; render(); });
+document.getElementById('mvorigin').addEventListener('change', event => { state.mvOrigin = event.target.value; render(); });
 render();
 </script>
 </body>

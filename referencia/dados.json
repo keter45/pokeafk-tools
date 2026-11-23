@@ -56,9 +56,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 10,
+   "pvp": 11.5,
+   "kind": "damage",
    "effect": "EFFECT_ABSORB",
    "levelUp": 21,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Recupera metade do dano que causar.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "ACID",
@@ -79,9 +85,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 20,
+   "hunt": 25,
+   "pvp": 18.6,
+   "kind": "damage",
    "effect": "EFFECT_DEFENSE_DOWN_HIT",
    "levelUp": 10,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de baixar a DEFESA do alvo por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "ACID_ARMOR",
@@ -102,9 +114,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_DEFENSE_UP_2",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "AERIAL_ACE",
@@ -125,9 +143,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 30,
+   "hunt": 30,
+   "pvp": 29.295,
+   "kind": "damage",
    "effect": "EFFECT_ALWAYS_HIT",
    "levelUp": 3,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "AEROBLAST",
@@ -148,9 +172,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 7.9,
+   "hunt": 12.864583333333336,
+   "pvp": 4.643125,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico.",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "AGILITY",
@@ -171,9 +201,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_SPEED_UP_2",
    "levelUp": 58,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito a VELOCIDADE do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "AIR_CUTTER",
@@ -194,9 +230,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 21.8,
+   "hunt": 35.37760416666668,
+   "pvp": 22.859375000000004,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico.",
+   "huntTier": "A",
+   "pvpTier": "B"
   },
   {
    "key": "AMNESIA",
@@ -217,9 +259,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_SPECIAL_DEFENSE_UP_2",
    "levelUp": 28,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito a DEF. ESP. do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ANCIENT_POWER",
@@ -240,9 +288,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 7.5,
+   "hunt": 7.5,
+   "pvp": 8.625,
+   "kind": "damage",
    "effect": "EFFECT_ALL_STATS_UP_HIT",
    "levelUp": 24,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de subir o ATAQUE, a DEFESA, o AT. ESP., a DEF. ESP. e a VELOCIDADE do seu Pokémon por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "ARM_THRUST",
@@ -263,9 +317,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 22.5,
+   "hunt": 22.5,
+   "pvp": 22.5,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "AROMATHERAPY",
@@ -286,9 +346,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_HEAL_BELL",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Cura o estado do seu Pokémon (veneno, queimadura, paralisia...).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ASSIST",
@@ -309,9 +375,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_ASSIST",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ASTONISH",
@@ -332,9 +404,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 11.1,
+   "hunt": 11.11111111111111,
+   "pvp": 11.11111111111111,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_MINIMIZE_HIT",
    "levelUp": 26,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "ATTRACT",
@@ -355,9 +433,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_ATTRACT",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Deixa o alvo apaixonado por 5 s: 1 em cada 4 golpes dele falha.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "AURORA_BEAM",
@@ -378,9 +462,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 21.7,
+   "hunt": 32.5,
+   "pvp": 19.684166666666666,
+   "kind": "damage",
    "effect": "EFFECT_ATTACK_DOWN_HIT",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de baixar o ATAQUE do alvo por 10 s.",
+   "huntTier": "A",
+   "pvpTier": "B"
   },
   {
    "key": "BARRAGE",
@@ -401,9 +491,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 19.1,
+   "hunt": 19.125,
+   "pvp": 21.99375,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "BARRIER",
@@ -424,9 +520,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_DEFENSE_UP_2",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "BATON_PASS",
@@ -447,9 +549,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_BATON_PASS",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Não troca Pokémon: durante o combate, o próximo só entra após um desmaio",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "BEAT_UP",
@@ -469,10 +577,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 2.5,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_BEAT_UP",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "BELLY_DRUM",
@@ -493,9 +607,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_BELLY_DRUM",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Gasta metade da vida e leva o ATAQUE do seu Pokémon ao máximo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "BIDE",
@@ -515,10 +635,16 @@
    "huntDamage": 1.25,
    "escapeTiles": 1,
    "pvpDodge": 0.21,
-   "powerPerSecond": 4,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_BIDE",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "BIND",
@@ -539,9 +665,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 5.6,
+   "hunt": 5.625,
+   "pvp": 5.625,
+   "kind": "damage",
    "effect": "EFFECT_TRAP",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Prende o alvo por 3 s: ele não anda e perde vida.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "BITE",
@@ -562,9 +694,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 37.5,
+   "hunt": 37.5,
+   "pvp": 37.5,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_HIT",
    "levelUp": 53,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "A",
+   "pvpTier": "S"
   },
   {
    "key": "BLAZE_KICK",
@@ -585,9 +723,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 19.1,
+   "hunt": 19.125,
+   "pvp": 19.125,
+   "kind": "damage",
    "effect": "EFFECT_BLAZE_KICK",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico. 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "BLIZZARD",
@@ -608,9 +752,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.4,
    "powerPerSecond": 7,
+   "hunt": 15.75,
+   "pvp": 4.86059,
+   "kind": "damage",
    "effect": "EFFECT_FREEZE_HIT",
    "levelUp": 10,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela).",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "BLOCK",
@@ -631,9 +781,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_MEAN_LOOK",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Impede o alvo de andar por 4 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "BODY_SLAM",
@@ -654,9 +810,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 31.5,
+   "hunt": 31.48148148148148,
+   "pvp": 31.48148148148148,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 20,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "BONE_CLUB",
@@ -677,9 +839,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 27.6,
+   "hunt": 27.625,
+   "pvp": 31.768749999999997,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "BONE_RUSH",
@@ -700,9 +868,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 15,
+   "hunt": 15,
+   "pvp": 17.25,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "BONEMERANG",
@@ -723,9 +897,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 22.5,
+   "hunt": 22.5,
+   "pvp": 25.874999999999996,
+   "kind": "damage",
    "effect": "EFFECT_DOUBLE_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Acerta 2 vezes seguidas.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "BOUNCE",
@@ -746,9 +926,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 9,
+   "hunt": 12.041666666666666,
+   "pvp": 3.1157812500000004,
+   "kind": "damage",
    "effect": "EFFECT_SEMI_INVULNERABLE",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "No meio do salto, quase nenhum golpe acerta o seu Pokémon. 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. Demora 1 s para sair.",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "BRICK_BREAK",
@@ -769,9 +955,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 27.8,
+   "hunt": 27.777777777777775,
+   "pvp": 27.777777777777775,
+   "kind": "damage",
    "effect": "EFFECT_BRICK_BREAK",
    "levelUp": 3,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "BUBBLE",
@@ -792,9 +984,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 16.250000000000004,
+   "pvp": 10.5,
+   "kind": "damage",
    "effect": "EFFECT_SPEED_DOWN_HIT",
    "levelUp": 19,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de baixar a VELOCIDADE do alvo por 10 s.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "BUBBLE_BEAM",
@@ -815,9 +1013,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 21.7,
+   "hunt": 32.5,
+   "pvp": 19.684166666666666,
+   "kind": "damage",
    "effect": "EFFECT_SPEED_DOWN_HIT",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de baixar a VELOCIDADE do alvo por 10 s.",
+   "huntTier": "A",
+   "pvpTier": "B"
   },
   {
    "key": "BULK_UP",
@@ -838,9 +1042,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_BULK_UP",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o ATAQUE e a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "BULLET_SEED",
@@ -861,9 +1071,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 23.1,
+   "hunt": 23.076923076923077,
+   "pvp": 26.538461538461537,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "CALM_MIND",
@@ -884,9 +1100,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_CALM_MIND",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o AT. ESP. e a DEF. ESP. do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "CAMOUFLAGE",
@@ -907,9 +1129,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_CAMOUFLAGE",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "CHARGE",
@@ -930,9 +1158,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_CHARGE",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "CHARM",
@@ -953,9 +1187,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_ATTACK_DOWN_2",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito o ATAQUE do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "CLAMP",
@@ -976,9 +1216,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 6.6,
+   "hunt": 6.5625,
+   "pvp": 6.5625,
+   "kind": "damage",
    "effect": "EFFECT_TRAP",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Prende o alvo por 3 s: ele não anda e perde vida.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "COMET_PUNCH",
@@ -999,9 +1245,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 11.5,
+   "hunt": 13.387499999999998,
+   "pvp": 9.518512500000002,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Uma sequência de socos atinge os inimigos numa faixa de 3 passos à frente. Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "CONFUSE_RAY",
@@ -1022,9 +1274,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_CONFUSE",
    "levelUp": 29,
-   "machine": null
+   "machine": null,
+   "description": "Confunde o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "CONFUSION",
@@ -1045,9 +1303,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 12.5,
+   "hunt": 12.5,
+   "pvp": 14.374999999999998,
+   "kind": "damage",
    "effect": "EFFECT_CONFUSE_HIT",
    "levelUp": 37,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "CONSTRICT",
@@ -1068,9 +1332,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 8.3,
+   "hunt": 8.333333333333334,
+   "pvp": 8.333333333333334,
+   "kind": "damage",
    "effect": "EFFECT_SPEED_DOWN_HIT",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de baixar a VELOCIDADE do alvo por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "CONVERSION",
@@ -1091,9 +1361,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_CONVERSION",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "CONVERSION_2",
@@ -1114,9 +1390,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_CONVERSION_2",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "COSMIC_POWER",
@@ -1137,9 +1419,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_COSMIC_POWER",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a DEFESA e a DEF. ESP. do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "COTTON_SPORE",
@@ -1160,9 +1448,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_SPEED_DOWN_2",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito a VELOCIDADE do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "COUNTER",
@@ -1183,9 +1477,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_COUNTER",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "COVET",
@@ -1206,9 +1506,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 33.3,
+   "hunt": 33.333333333333336,
+   "pvp": 33.333333333333336,
+   "kind": "damage",
    "effect": "EFFECT_THIEF",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "CRABHAMMER",
@@ -1229,9 +1535,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 19.1,
+   "hunt": 19.125,
+   "pvp": 19.125,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "CROSS_CHOP",
@@ -1252,9 +1564,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 6.7,
+   "hunt": 10.833333333333336,
+   "pvp": 7.000000000000001,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Dois cortes cruzados acertam os inimigos num X de 3 passos à frente. Mais chance de acerto crítico.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "CRUNCH",
@@ -1275,9 +1593,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 29.6,
+   "hunt": 29.629629629629626,
+   "pvp": 29.629629629629626,
+   "kind": "damage",
    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_HIT",
    "levelUp": 28,
-   "machine": null
+   "machine": null,
+   "description": "20% de chance de baixar a DEF. ESP. do alvo por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "CRUSH_CLAW",
@@ -1298,9 +1622,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 17.8,
+   "hunt": 17.8125,
+   "pvp": 17.8125,
+   "kind": "damage",
    "effect": "EFFECT_DEFENSE_DOWN_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "50% de chance de baixar a DEFESA do alvo por 10 s.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "CURSE",
@@ -1321,9 +1651,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_CURSE",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o ATAQUE e a DEFESA e baixa a VELOCIDADE do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "CUT",
@@ -1344,9 +1680,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 31.7,
+   "hunt": 31.666666666666668,
+   "pvp": 31.666666666666668,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 0,
-   "machine": "HM"
+   "machine": "HM",
+   "description": "",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "DEFENSE_CURL",
@@ -1367,9 +1709,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_DEFENSE_CURL",
    "levelUp": 22,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DESTINY_BOND",
@@ -1390,9 +1738,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_DESTINY_BOND",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Somente no manual: aura azul por 4 s, recarga de 20 s. Devolve ao agressor 50% do HP perdido em cada golpe direto ao qual sobreviver, sem reduzir o dano recebido. Golpes fatais, veneno, recuo e outros reflexos não ativam o efeito. Não funciona contra lendários nem bosses.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DETECT",
@@ -1413,9 +1767,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_PROTECT",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "Sai mesmo logo depois de outro golpe (não espera a vez). Protege o seu Pokémon de todo golpe por 1 s; de novo em menos de 10 s, pode falhar.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DIG",
@@ -1436,9 +1796,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 15,
+   "hunt": 20,
+   "pvp": 5.175000000000001,
+   "kind": "damage",
    "effect": "EFFECT_SEMI_INVULNERABLE",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "No meio do salto, quase nenhum golpe acerta o seu Pokémon. Demora 1 s para sair.",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "DISABLE",
@@ -1459,9 +1825,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "control",
    "effect": "EFFECT_DISABLE",
    "levelUp": 19,
-   "machine": null
+   "machine": null,
+   "description": "Trava por 6 s o último golpe que o alvo usou.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DIVE",
@@ -1482,9 +1854,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 7.5,
+   "hunt": 10,
+   "pvp": 2.5875000000000004,
+   "kind": "damage",
    "effect": "EFFECT_SEMI_INVULNERABLE",
    "levelUp": 0,
-   "machine": "HM"
+   "machine": "HM",
+   "description": "No meio do salto, quase nenhum golpe acerta o seu Pokémon. Demora 1 s para sair.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "DIZZY_PUNCH",
@@ -1505,9 +1883,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 17.5,
+   "hunt": 17.5,
+   "pvp": 17.5,
+   "kind": "damage",
    "effect": "EFFECT_CONFUSE_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "20% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "DOOM_DESIRE",
@@ -1527,10 +1911,16 @@
    "huntDamage": 1.33,
    "escapeTiles": 1,
    "pvpDodge": 0.07,
-   "powerPerSecond": 8.5,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_FUTURE_SIGHT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DOUBLE_KICK",
@@ -1551,9 +1941,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 46.2,
+   "hunt": 46.15384615384615,
+   "pvp": 46.15384615384615,
+   "kind": "damage",
    "effect": "EFFECT_DOUBLE_HIT",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "Acerta 2 vezes seguidas.",
+   "huntTier": "S",
+   "pvpTier": "S"
   },
   {
    "key": "DOUBLE_TEAM",
@@ -1574,9 +1970,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_EVASION_UP",
    "levelUp": 15,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a EVASÃO do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DOUBLE_EDGE",
@@ -1597,9 +1999,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.35,
    "powerPerSecond": 40,
+   "hunt": 40,
+   "pvp": 29.9,
+   "kind": "damage",
    "effect": "EFFECT_DOUBLE_EDGE",
    "levelUp": 34,
-   "machine": null
+   "machine": null,
+   "description": "O seu Pokémon perde 1/3 do dano que causar.",
+   "huntTier": "S",
+   "pvpTier": "A"
   },
   {
    "key": "DOUBLE_SLAP",
@@ -1620,9 +2028,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 9.6,
+   "hunt": 9.5625,
+   "pvp": 9.5625,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "DRAGON_CLAW",
@@ -1643,9 +2057,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 29.6,
+   "hunt": 29.629629629629626,
+   "pvp": 29.629629629629626,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 4,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "DRAGON_DANCE",
@@ -1666,9 +2086,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_DRAGON_DANCE",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o ATAQUE e a VELOCIDADE do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DRAGON_RAGE",
@@ -1689,9 +2115,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_DRAGON_RAGE",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Dano fixo: o mesmo em qualquer alvo, sem contar ATAQUE, DEFESA nem tipo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DRAGON_BREATH",
@@ -1712,9 +2144,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 20,
+   "hunt": 32.50000000000001,
+   "pvp": 21,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "A",
+   "pvpTier": "B"
   },
   {
    "key": "DREAM_EATER",
@@ -1735,9 +2173,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 37,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_DREAM_EATER",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Só acerta um alvo dormindo; recupera metade do dano que causar.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "DRILL_PECK",
@@ -1758,9 +2202,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 40,
+   "hunt": 40,
+   "pvp": 40,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "S",
+   "pvpTier": "S"
   },
   {
    "key": "DYNAMIC_PUNCH",
@@ -1781,9 +2231,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 6.3,
+   "hunt": 6.25,
+   "pvp": 6.25,
+   "kind": "damage",
    "effect": "EFFECT_CONFUSE_HIT",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Confunde o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "EARTHQUAKE",
@@ -1804,9 +2260,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.12,
    "powerPerSecond": 16.7,
+   "hunt": 37.5,
+   "pvp": 15.466500000000003,
+   "kind": "damage",
    "effect": "EFFECT_EARTHQUAKE",
    "levelUp": 20,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "A",
+   "pvpTier": "C"
   },
   {
    "key": "EGG_BOMB",
@@ -1827,9 +2289,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 12.5,
+   "hunt": 16.666666666666664,
+   "pvp": 4.3125,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "EMBER",
@@ -1850,9 +2318,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 25,
+   "hunt": 25,
+   "pvp": 28.749999999999996,
+   "kind": "damage",
    "effect": "EFFECT_BURN_HIT",
    "levelUp": 31,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "ENCORE",
@@ -1873,9 +2347,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "control",
    "effect": "EFFECT_ENCORE",
    "levelUp": 18,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo só repetir o último golpe que usou, por 4 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ENDEAVOR",
@@ -1896,9 +2376,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_ENDEAVOR",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "Deixa a vida do alvo igual à do seu Pokémon (de um chefe ou de um treinador, tira no máximo 10%).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ENDURE",
@@ -1919,9 +2405,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_ENDURE",
    "levelUp": 12,
-   "machine": null
+   "machine": null,
+   "description": "Sai mesmo logo depois de outro golpe (não espera a vez). Aguenta por 1,5 s: nenhum golpe deixa o seu Pokémon com menos de 1 de vida.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ERUPTION",
@@ -1942,9 +2434,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.12,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_ERUPTION",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Mais forte com a vida cheia: 150 com a vida toda, menos conforme ela cai.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "EXPLOSION",
@@ -1964,10 +2462,16 @@
    "huntDamage": 2.25,
    "escapeTiles": 2,
    "pvpDodge": 0.68,
-   "powerPerSecond": 8.3,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_EXPLOSION",
    "levelUp": 17,
-   "machine": null
+   "machine": null,
+   "description": "O seu Pokémon desmaia ao usar; a DEFESA do alvo conta pela metade. Demora 1 s para sair.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "EXTRASENSORY",
@@ -1988,9 +2492,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 40,
+   "hunt": 40,
+   "pvp": 46,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_MINIMIZE_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "S",
+   "pvpTier": "S"
   },
   {
    "key": "EXTREME_SPEED",
@@ -2011,9 +2521,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 10,
+   "pvp": 11.5,
+   "kind": "damage",
    "effect": "EFFECT_QUICK_ATTACK",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Sai mesmo logo depois de outro golpe (não espera a vez).",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "FAINT_ATTACK",
@@ -2034,9 +2550,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 30,
+   "hunt": 30,
+   "pvp": 34.5,
+   "kind": "damage",
    "effect": "EFFECT_ALWAYS_HIT",
    "levelUp": 26,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "FAKE_OUT",
@@ -2056,10 +2578,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 4,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_FAKE_OUT",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Sai mesmo logo depois de outro golpe (não espera a vez). Faz o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FAKE_TEARS",
@@ -2080,9 +2608,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_2",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito a DEF. ESP. do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FALSE_SWIPE",
@@ -2103,9 +2637,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 33.3,
+   "hunt": 33.333333333333336,
+   "pvp": 33.333333333333336,
+   "kind": "damage",
    "effect": "EFFECT_FALSE_SWIPE",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Nunca derruba: deixa o alvo com pelo menos 1 de vida (bom para capturar).",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "FEATHER_DANCE",
@@ -2126,9 +2666,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_ATTACK_DOWN_2",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito o ATAQUE do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FIRE_BLAST",
@@ -2149,9 +2695,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.4,
    "powerPerSecond": 8.5,
+   "hunt": 19.125,
+   "pvp": 5.902144999999999,
+   "kind": "damage",
    "effect": "EFFECT_BURN_HIT",
    "levelUp": 7,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "FIRE_PUNCH",
@@ -2172,9 +2724,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 18.8,
+   "hunt": 18.75,
+   "pvp": 18.75,
+   "kind": "damage",
    "effect": "EFFECT_BURN_HIT",
    "levelUp": 5,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "FIRE_SPIN",
@@ -2195,9 +2753,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 2.6,
+   "hunt": 3.5,
+   "pvp": 1.5395625,
+   "kind": "damage",
    "effect": "EFFECT_TRAP",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Prende o alvo por 3 s: ele não anda e perde vida.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "FISSURE",
@@ -2218,9 +2782,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_OHKO",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Derruba de uma vez um selvagem do nível do seu Pokémon ou menor (acerta 30% mais a diferença de nível); de um chefe ou de um treinador, tira 1/4 da vida.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FLAIL",
@@ -2241,9 +2811,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_FLAIL",
    "levelUp": 15,
-   "machine": null
+   "machine": null,
+   "description": "Mais forte quanto menos vida o seu Pokémon tem (até 200).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FLAME_WHEEL",
@@ -2264,9 +2840,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 37.5,
+   "hunt": 37.5,
+   "pvp": 36.61875,
+   "kind": "damage",
    "effect": "EFFECT_THAW_HIT",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "A",
+   "pvpTier": "S"
   },
   {
    "key": "FLAMETHROWER",
@@ -2287,9 +2869,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 23.8,
+   "hunt": 53.4375,
+   "pvp": 26.125000000000004,
+   "kind": "damage",
    "effect": "EFFECT_BURN_HIT",
    "levelUp": 20,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "S",
+   "pvpTier": "B"
   },
   {
    "key": "FLATTER",
@@ -2310,9 +2898,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_FLATTER",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o AT. ESP. do alvo por 10 s. Confunde o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FLY",
@@ -2333,9 +2927,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 8.3,
+   "hunt": 11.083333333333332,
+   "pvp": 2.8678125000000003,
+   "kind": "damage",
    "effect": "EFFECT_SEMI_INVULNERABLE",
    "levelUp": 2,
-   "machine": "HM"
+   "machine": "HM",
+   "description": "No meio do salto, quase nenhum golpe acerta o seu Pokémon. Demora 1 s para sair.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "FOCUS_ENERGY",
@@ -2356,9 +2956,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_FOCUS_ENERGY",
    "levelUp": 34,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FOCUS_PUNCH",
@@ -2378,10 +2984,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 25,
+   "powerPerSecond": 4.2,
+   "hunt": 4.166666666666665,
+   "pvp": 4.166666666666665,
+   "kind": "damage",
    "effect": "EFFECT_FOCUS_PUNCH",
    "levelUp": 1,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Falha se o seu Pokémon levar um golpe enquanto se concentra. Demora 1 s para sair.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "FOLLOW_ME",
@@ -2402,9 +3014,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_FOLLOW_ME",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FORESIGHT",
@@ -2425,9 +3043,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_FORESIGHT",
    "levelUp": 15,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "FURY_ATTACK",
@@ -2448,9 +3072,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 19.1,
+   "hunt": 19.125,
+   "pvp": 19.125,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 19,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "FURY_CUTTER",
@@ -2471,9 +3101,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 4.8,
+   "hunt": 4.75,
+   "pvp": 4.75,
+   "kind": "damage",
    "effect": "EFFECT_FURY_CUTTER",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "FURY_SWIPES",
@@ -2494,9 +3130,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 16,
+   "hunt": 16,
+   "pvp": 16,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 26,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "FUTURE_SIGHT",
@@ -2516,10 +3158,16 @@
    "huntDamage": 1.33,
    "escapeTiles": 1,
    "pvpDodge": 0.07,
-   "powerPerSecond": 12,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_FUTURE_SIGHT",
    "levelUp": 20,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "GIGA_DRAIN",
@@ -2540,9 +3188,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 7.5,
+   "hunt": 7.5,
+   "pvp": 8.625,
+   "kind": "damage",
    "effect": "EFFECT_ABSORB",
    "levelUp": 7,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Recupera metade do dano que causar.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "GLARE",
@@ -2563,9 +3217,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_PARALYZE",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Paralisa o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "GRASS_WHISTLE",
@@ -2586,9 +3246,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_SLEEP",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo dormir por 2,5 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "GROWL",
@@ -2609,9 +3275,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_ATTACK_DOWN",
    "levelUp": 78,
-   "machine": null
+   "machine": null,
+   "description": "Baixa o ATAQUE do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "GROWTH",
@@ -2632,9 +3304,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_SPECIAL_ATTACK_UP",
    "levelUp": 18,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o ATAQUE e o AT. ESP. do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "GRUDGE",
@@ -2655,9 +3333,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_GRUDGE",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "GUILLOTINE",
@@ -2678,9 +3362,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_OHKO",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Derruba de uma vez um selvagem do nível do seu Pokémon ou menor (acerta 30% mais a diferença de nível); de um chefe ou de um treinador, tira 1/4 da vida.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "GUST",
@@ -2701,9 +3391,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 23.5,
+   "hunt": 38.235294117647065,
+   "pvp": 24.705882352941178,
+   "kind": "damage",
    "effect": "EFFECT_GUST",
    "levelUp": 13,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Acerta até quem está no meio de um salto.",
+   "huntTier": "S",
+   "pvpTier": "B"
   },
   {
    "key": "HAIL",
@@ -2724,9 +3420,15 @@
    "escapeTiles": 3,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "weather",
    "effect": "EFFECT_HAIL",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Faz cair granizo por 15 s em volta (por enquanto, só a WEATHER BALL sente).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HARDEN",
@@ -2747,9 +3449,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_DEFENSE_UP",
    "levelUp": 38,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HAZE",
@@ -2770,9 +3478,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_HAZE",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HEADBUTT",
@@ -2793,9 +3507,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 25.9,
+   "hunt": 25.925925925925924,
+   "pvp": 25.925925925925924,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_HIT",
    "levelUp": 22,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "HEAL_BELL",
@@ -2816,9 +3536,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_HEAL_BELL",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Cura o estado do seu Pokémon (veneno, queimadura, paralisia...).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HEAT_WAVE",
@@ -2839,9 +3565,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 15,
+   "hunt": 33.75,
+   "pvp": 16.5,
+   "kind": "damage",
    "effect": "EFFECT_BURN_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "A",
+   "pvpTier": "C"
   },
   {
    "key": "HELPING_HAND",
@@ -2862,9 +3594,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_HELPING_HAND",
    "levelUp": 20,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HI_JUMP_KICK",
@@ -2885,9 +3623,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 36.4,
+   "hunt": 36.42857142857142,
+   "pvp": 37.26642857142857,
+   "kind": "damage",
    "effect": "EFFECT_RECOIL_IF_MISS",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Se errar, o seu Pokémon perde 1/8 da vida.",
+   "huntTier": "A",
+   "pvpTier": "S"
   },
   {
    "key": "HIDDEN_POWER",
@@ -2908,9 +3652,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_HIDDEN_POWER",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "O tipo e o poder (30 a 70) dependem dos IVs do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HORN_ATTACK",
@@ -2931,9 +3681,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 40.6,
+   "hunt": 40.625,
+   "pvp": 40.625,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "S",
+   "pvpTier": "S"
   },
   {
    "key": "HORN_DRILL",
@@ -2954,9 +3710,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_OHKO",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Derruba de uma vez um selvagem do nível do seu Pokémon ou menor (acerta 30% mais a diferença de nível); de um chefe ou de um treinador, tira 1/4 da vida.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HOWL",
@@ -2977,9 +3739,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_ATTACK_UP",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o ATAQUE do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "HYDRO_PUMP",
@@ -3000,9 +3768,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 8,
+   "hunt": 13.000000000000002,
+   "pvp": 4.691999999999999,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 38,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "HYPER_BEAM",
@@ -3023,9 +3797,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 13.5,
+   "hunt": 21.937500000000004,
+   "pvp": 7.917749999999999,
+   "kind": "damage",
    "effect": "EFFECT_RECHARGE",
    "levelUp": 22,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Depois de acertar, o seu Pokémon fica 1,5 s sem agir.",
+   "huntTier": "B",
+   "pvpTier": "D"
   },
   {
    "key": "HYPER_FANG",
@@ -3046,9 +3826,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 26.7,
+   "hunt": 26.666666666666664,
+   "pvp": 26.666666666666664,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "HYPER_VOICE",
@@ -3069,9 +3855,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 15,
+   "hunt": 33.75,
+   "pvp": 16.5,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "A",
+   "pvpTier": "C"
   },
   {
    "key": "HYPNOSIS",
@@ -3092,9 +3884,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_SLEEP",
    "levelUp": 19,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo dormir por 2,5 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ICE_BALL",
@@ -3115,9 +3913,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 13.5,
+   "hunt": 13.5,
+   "pvp": 13.182750000000002,
+   "kind": "damage",
    "effect": "EFFECT_ROLLOUT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "ICE_BEAM",
@@ -3138,9 +3942,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 15.8,
+   "hunt": 25.72916666666667,
+   "pvp": 14.384583333333333,
+   "kind": "damage",
    "effect": "EFFECT_FREEZE_HIT",
    "levelUp": 10,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela).",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "ICE_PUNCH",
@@ -3161,9 +3971,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 18.8,
+   "hunt": 18.75,
+   "pvp": 18.75,
+   "kind": "damage",
    "effect": "EFFECT_FREEZE_HIT",
    "levelUp": 3,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela).",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "ICY_WIND",
@@ -3184,9 +4000,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 13.1,
+   "hunt": 21.226562500000004,
+   "pvp": 13.715625000000001,
+   "kind": "damage",
    "effect": "EFFECT_SPEED_DOWN_HIT",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a VELOCIDADE do alvo por 10 s.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "IMPRISON",
@@ -3207,9 +4029,15 @@
    "escapeTiles": 3,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "control",
    "effect": "EFFECT_IMPRISON",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "INGRAIN",
@@ -3230,9 +4058,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_INGRAIN",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Enraíza o seu Pokémon por 10 s: não anda, mas recupera vida aos poucos.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "IRON_DEFENSE",
@@ -3253,9 +4087,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_DEFENSE_UP_2",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "IRON_TAIL",
@@ -3276,9 +4116,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 27.8,
+   "hunt": 27.777777777777775,
+   "pvp": 27.777777777777775,
+   "kind": "damage",
    "effect": "EFFECT_DEFENSE_DOWN_HIT",
    "levelUp": 5,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "30% de chance de baixar a DEFESA do alvo por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "JUMP_KICK",
@@ -3299,9 +4145,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 36.9,
+   "hunt": 36.94444444444444,
+   "pvp": 37.79416666666667,
+   "kind": "damage",
    "effect": "EFFECT_RECOIL_IF_MISS",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Se errar, o seu Pokémon perde 1/8 da vida.",
+   "huntTier": "A",
+   "pvpTier": "S"
   },
   {
    "key": "KARATE_CHOP",
@@ -3322,9 +4174,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 31.3,
+   "hunt": 31.25,
+   "pvp": 31.25,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 5,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Mais chance de acerto crítico.",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "KINESIS",
@@ -3345,9 +4203,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_ACCURACY_DOWN",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a PRECISÃO do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "KNOCK_OFF",
@@ -3368,9 +4232,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 10,
+   "pvp": 10,
+   "kind": "damage",
    "effect": "EFFECT_KNOCK_OFF",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "LEAF_BLADE",
@@ -3391,9 +4261,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 25.9,
+   "hunt": 25.925925925925924,
+   "pvp": 25.925925925925924,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "LEECH_LIFE",
@@ -3414,9 +4290,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 7.4,
+   "hunt": 7.4074074074074066,
+   "pvp": 7.4074074074074066,
+   "kind": "damage",
    "effect": "EFFECT_ABSORB",
    "levelUp": 12,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Recupera metade do dano que causar.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "LEECH_SEED",
@@ -3437,9 +4319,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_LEECH_SEED",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Planta uma semente no alvo por 10 s: ela tira vida dele e cura o seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "LEER",
@@ -3460,9 +4348,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_DEFENSE_DOWN",
    "levelUp": 82,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a DEFESA do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "LICK",
@@ -3483,9 +4377,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 15.4,
+   "hunt": 15.384615384615383,
+   "pvp": 15.384615384615383,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 12,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "LIGHT_SCREEN",
@@ -3506,9 +4406,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_LIGHT_SCREEN",
    "levelUp": 20,
-   "machine": null
+   "machine": null,
+   "description": "Por 8 s, quem estiver perto do seu Pokémon leva metade do dano especial.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "LOCK_ON",
@@ -3529,9 +4435,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_LOCK_ON",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "LOVELY_KISS",
@@ -3552,9 +4464,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_SLEEP",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo dormir por 2,5 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "LOW_KICK",
@@ -3575,9 +4493,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 20,
+   "hunt": 20,
+   "pvp": 19.53,
+   "kind": "damage",
    "effect": "EFFECT_LOW_KICK",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Avança com uma bicuda por até 3 passos e acerta os inimigos no caminho; termina num espaço livre. Poder 60 em qualquer alvo (o peso ainda não conta).",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "LUSTER_PURGE",
@@ -3598,9 +4522,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 8.8,
+   "hunt": 8.75,
+   "pvp": 10.0625,
+   "kind": "damage",
    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "50% de chance de baixar a DEF. ESP. do alvo por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "MACH_PUNCH",
@@ -3621,9 +4551,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 30.8,
+   "hunt": 30.769230769230766,
+   "pvp": 30.769230769230766,
+   "kind": "damage",
    "effect": "EFFECT_QUICK_ATTACK",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Sai mesmo logo depois de outro golpe (não espera a vez).",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "MAGIC_COAT",
@@ -3644,9 +4580,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_MAGIC_COAT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MAGICAL_LEAF",
@@ -3667,9 +4609,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 20,
+   "hunt": 20,
+   "pvp": 23,
+   "kind": "damage",
    "effect": "EFFECT_ALWAYS_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "MAGNITUDE",
@@ -3690,9 +4638,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_MAGNITUDE",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Poder ao acaso, de 10 a 150.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MEAN_LOOK",
@@ -3713,9 +4667,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_MEAN_LOOK",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Impede o alvo de andar por 4 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MEDITATE",
@@ -3736,9 +4696,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_ATTACK_UP",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o ATAQUE do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MEGA_DRAIN",
@@ -3759,9 +4725,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 10,
+   "pvp": 11.5,
+   "kind": "damage",
    "effect": "EFFECT_ABSORB",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade do dano que causar.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "MEGA_KICK",
@@ -3782,9 +4754,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 11.3,
+   "hunt": 11.25,
+   "pvp": 11.25,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "MEGA_PUNCH",
@@ -3805,9 +4783,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 34,
+   "hunt": 34,
+   "pvp": 34,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "MEGAHORN",
@@ -3828,9 +4812,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.35,
    "powerPerSecond": 17,
+   "hunt": 17,
+   "pvp": 12.155000000000001,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Avança até 4 passos e acerta os inimigos no caminho; termina num espaço livre, sem atravessar paredes.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "MEMENTO",
@@ -3851,9 +4841,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_MEMENTO",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito o ATAQUE e o AT. ESP. do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "METAL_CLAW",
@@ -3874,9 +4870,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 36.5,
+   "hunt": 36.53846153846154,
+   "pvp": 36.53846153846154,
+   "kind": "damage",
    "effect": "EFFECT_ATTACK_UP_HIT",
    "levelUp": 11,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de subir o ATAQUE do seu Pokémon por 10 s.",
+   "huntTier": "A",
+   "pvpTier": "S"
   },
   {
    "key": "METAL_SOUND",
@@ -3897,9 +4899,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_2",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito a DEF. ESP. do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "METEOR_MASH",
@@ -3920,9 +4928,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 21.3,
+   "hunt": 21.25,
+   "pvp": 21.25,
+   "kind": "damage",
    "effect": "EFFECT_ATTACK_UP_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "20% de chance de subir o ATAQUE do seu Pokémon por 10 s.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "METRONOME",
@@ -3943,9 +4957,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_METRONOME",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MILK_DRINK",
@@ -3966,9 +4986,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_SOFTBOILED",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MIMIC",
@@ -3989,9 +5015,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_MIMIC",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MIND_READER",
@@ -4012,9 +5044,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_LOCK_ON",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MINIMIZE",
@@ -4035,9 +5073,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_MINIMIZE",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a EVASÃO do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MIRROR_COAT",
@@ -4058,9 +5102,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_MIRROR_COAT",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MIRROR_MOVE",
@@ -4081,9 +5131,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_MIRROR_MOVE",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MIST",
@@ -4104,9 +5160,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_MIST",
    "levelUp": 16,
-   "machine": null
+   "machine": null,
+   "description": "Por 8 s, os inimigos não baixam os status de quem estiver perto do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MIST_BALL",
@@ -4127,9 +5189,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 8.8,
+   "hunt": 8.75,
+   "pvp": 10.0625,
+   "kind": "damage",
    "effect": "EFFECT_SPECIAL_ATTACK_DOWN_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "50% de chance de baixar o AT. ESP. do alvo por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "MOONLIGHT",
@@ -4150,9 +5218,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_MOONLIGHT",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MORNING_SUN",
@@ -4173,9 +5247,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_MORNING_SUN",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MUD_SHOT",
@@ -4196,9 +5276,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 19.4,
+   "hunt": 19.35185185185185,
+   "pvp": 22.254629629629626,
+   "kind": "damage",
    "effect": "EFFECT_SPEED_DOWN_HIT",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a VELOCIDADE do alvo por 10 s.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "MUD_SPORT",
@@ -4219,9 +5305,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_MUD_SPORT",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Por 15 s, golpes ELÉTRICOS em quem estiver perto do seu Pokémon têm metade do poder.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "MUD_SLAP",
@@ -4242,9 +5334,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 5,
+   "hunt": 5,
+   "pvp": 5.75,
+   "kind": "damage",
    "effect": "EFFECT_ACCURACY_DOWN_HIT",
    "levelUp": 13,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Baixa a PRECISÃO do alvo por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "MUDDY_WATER",
@@ -4265,9 +5363,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 13.5,
+   "hunt": 30.28125,
+   "pvp": 14.804166666666669,
+   "kind": "damage",
    "effect": "EFFECT_ACCURACY_DOWN_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de baixar a PRECISÃO do alvo por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "NATURE_POWER",
@@ -4288,9 +5392,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_NATURE_POWER",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "NEEDLE_ARM",
@@ -4311,9 +5421,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 22.2,
+   "hunt": 22.22222222222222,
+   "pvp": 22.22222222222222,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_MINIMIZE_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "NIGHT_SHADE",
@@ -4334,9 +5450,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_LEVEL_DAMAGE",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Lança uma bola fantasma até 5 passos à frente e acerta uma vez cada inimigo no caminho. Dano pelo nível do seu Pokémon, sem contar ATAQUE nem DEFESA.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "OCTAZOOKA",
@@ -4357,9 +5479,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 13.8,
+   "hunt": 13.8125,
+   "pvp": 15.884374999999999,
+   "kind": "damage",
    "effect": "EFFECT_ACCURACY_DOWN_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "50% de chance de baixar a PRECISÃO do alvo por 10 s.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "ODOR_SLEUTH",
@@ -4380,9 +5508,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_FORESIGHT",
    "levelUp": 17,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "OUTRAGE",
@@ -4402,10 +5536,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 100,
+   "powerPerSecond": 85,
+   "hunt": 85,
+   "pvp": 85,
+   "kind": "damage",
    "effect": "EFFECT_RAMPAGE",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Depois, o seu Pokémon fica confuso por 4 s.",
+   "huntTier": "S",
+   "pvpTier": "S"
   },
   {
    "key": "OVERHEAT",
@@ -4426,9 +5566,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 10.5,
+   "hunt": 23.625,
+   "pvp": 11.55,
+   "kind": "damage",
    "effect": "EFFECT_OVERHEAT",
    "levelUp": 0,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Baixa muito o AT. ESP. do seu Pokémon por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "PAIN_SPLIT",
@@ -4449,9 +5595,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_PAIN_SPLIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "PAY_DAY",
@@ -4472,9 +5624,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 20,
+   "hunt": 20,
+   "pvp": 23,
+   "kind": "damage",
    "effect": "EFFECT_PAY_DAY",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "PECK",
@@ -4495,9 +5653,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 29.2,
+   "hunt": 29.166666666666668,
+   "pvp": 29.166666666666668,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 24,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "PERISH_SONG",
@@ -4518,9 +5682,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_PERISH_SONG",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "PETAL_DANCE",
@@ -4540,10 +5710,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 87.5,
+   "powerPerSecond": 74.4,
+   "hunt": 74.375,
+   "pvp": 74.375,
+   "kind": "damage",
    "effect": "EFFECT_RAMPAGE",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Depois, o seu Pokémon fica confuso por 4 s.",
+   "huntTier": "S",
+   "pvpTier": "S"
   },
   {
    "key": "PIN_MISSILE",
@@ -4564,9 +5740,15 @@
    "escapeTiles": 3,
    "pvpDodge": 0,
    "powerPerSecond": 11.9,
+   "hunt": 26.775,
+   "pvp": 13.684999999999997,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Espalha agulhas num leque de até 5 passos à frente. Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "POISON_FANG",
@@ -4587,9 +5769,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 18.5,
+   "hunt": 18.51851851851852,
+   "pvp": 18.51851851851852,
+   "kind": "damage",
    "effect": "EFFECT_POISON_FANG",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de envenenar gravemente o alvo por 10 s: perde cada vez mais vida.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "POISON_GAS",
@@ -4610,9 +5798,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_POISON",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Envenena o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "POISON_STING",
@@ -4633,9 +5827,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 12.5,
+   "hunt": 12.5,
+   "pvp": 14.374999999999998,
+   "kind": "damage",
    "effect": "EFFECT_POISON_HIT",
    "levelUp": 21,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "30% de chance de envenenar o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "POISON_TAIL",
@@ -4656,9 +5856,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 31.3,
+   "hunt": 31.25,
+   "pvp": 31.25,
+   "kind": "damage",
    "effect": "EFFECT_POISON_TAIL",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico. 10% de chance de envenenar o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "POISON_POWDER",
@@ -4679,9 +5885,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_POISON",
    "levelUp": 21,
-   "machine": null
+   "machine": null,
+   "description": "Envenena o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "POUND",
@@ -4702,9 +5914,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 33.3,
+   "hunt": 33.333333333333336,
+   "pvp": 33.333333333333336,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 24,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "POWDER_SNOW",
@@ -4725,9 +5943,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 16.7,
+   "hunt": 27.08333333333334,
+   "pvp": 17.500000000000004,
+   "kind": "damage",
    "effect": "EFFECT_FREEZE_HIT",
    "levelUp": 11,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela).",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "PRESENT",
@@ -4748,9 +5972,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_PRESENT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Poder 40, 80 ou 120 ao acaso; 1 vez em 5 não tira nada.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "PROTECT",
@@ -4771,9 +6001,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_PROTECT",
    "levelUp": 30,
-   "machine": null
+   "machine": null,
+   "description": "Sai mesmo logo depois de outro golpe (não espera a vez). Protege o seu Pokémon de todo golpe por 1 s; de novo em menos de 10 s, pode falhar.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "PSYBEAM",
@@ -4794,9 +6030,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 21.7,
+   "hunt": 32.5,
+   "pvp": 19.684166666666666,
+   "kind": "damage",
    "effect": "EFFECT_CONFUSE_HIT",
    "levelUp": 20,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": "A",
+   "pvpTier": "B"
   },
   {
    "key": "PSYCH_UP",
@@ -4817,9 +6059,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_PSYCH_UP",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "PSYCHIC",
@@ -4840,9 +6088,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 18,
+   "hunt": 27,
+   "pvp": 16.352999999999998,
+   "kind": "damage",
    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_HIT",
    "levelUp": 32,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de baixar a DEF. ESP. do alvo por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "PSYCHO_BOOST",
@@ -4863,9 +6117,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.4,
    "powerPerSecond": 10.5,
+   "hunt": 23.625,
+   "pvp": 7.290884999999999,
+   "kind": "damage",
    "effect": "EFFECT_OVERHEAT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito o AT. ESP. do seu Pokémon por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "D"
   },
   {
    "key": "PSYWAVE",
@@ -4886,9 +6146,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_PSYWAVE",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Dano ao acaso pelo nível do seu Pokémon (de metade a 1,5 vez).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "PURSUIT",
@@ -4909,9 +6175,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 20,
+   "hunt": 20,
+   "pvp": 20,
+   "kind": "damage",
    "effect": "EFFECT_PURSUIT",
    "levelUp": 25,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "QUICK_ATTACK",
@@ -4932,9 +6204,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 30.8,
+   "hunt": 30.769230769230766,
+   "pvp": 32.30769230769231,
+   "kind": "damage",
    "effect": "EFFECT_QUICK_ATTACK",
    "levelUp": 48,
-   "machine": null
+   "machine": null,
+   "description": "Sai mesmo logo depois de outro golpe (não espera a vez).",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "RAGE",
@@ -4955,9 +6233,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 10,
+   "pvp": 10,
+   "kind": "damage",
    "effect": "EFFECT_RAGE",
    "levelUp": 24,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "RAIN_DANCE",
@@ -4978,9 +6262,15 @@
    "escapeTiles": 3,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "weather",
    "effect": "EFFECT_RAIN_DANCE",
    "levelUp": 16,
-   "machine": null
+   "machine": null,
+   "description": "Faz chover por 15 s em volta: golpes de ÁGUA mais fortes e de FOGO mais fracos.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "RAPID_SPIN",
@@ -5001,9 +6291,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 13.3,
+   "hunt": 16.666666666666668,
+   "pvp": 10.533333333333335,
+   "kind": "damage",
    "effect": "EFFECT_RAPID_SPIN",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "RAZOR_LEAF",
@@ -5024,9 +6320,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 21.8,
+   "hunt": 35.37760416666668,
+   "pvp": 22.859375000000004,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 11,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Mais chance de acerto crítico.",
+   "huntTier": "A",
+   "pvpTier": "B"
   },
   {
    "key": "RAZOR_WIND",
@@ -5047,9 +6349,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.7,
    "powerPerSecond": 13.3,
+   "hunt": 30,
+   "pvp": 4.400000000000001,
+   "kind": "damage",
    "effect": "EFFECT_RAZOR_WIND",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico. Demora 1,2 s para sair.",
+   "huntTier": "B",
+   "pvpTier": "D"
   },
   {
    "key": "RECOVER",
@@ -5070,9 +6378,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_RESTORE_HP",
    "levelUp": 17,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "RECYCLE",
@@ -5093,9 +6407,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_RECYCLE",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "REFLECT",
@@ -5116,9 +6436,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_REFLECT",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Por 8 s, quem estiver perto do seu Pokémon leva metade do dano físico.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "REFRESH",
@@ -5139,9 +6465,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_REFRESH",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "Cura o estado do seu Pokémon (veneno, queimadura, paralisia...).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "REST",
@@ -5162,9 +6494,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_REST",
    "levelUp": 30,
-   "machine": null
+   "machine": null,
+   "description": "Recupera toda a vida e cura o estado, mas o seu Pokémon dorme 3 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "REVENGE",
@@ -5184,10 +6522,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 15,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_REVENGE",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "REVERSAL",
@@ -5208,9 +6552,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_FLAIL",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Mais forte quanto menos vida o seu Pokémon tem (até 200).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ROAR",
@@ -5231,9 +6581,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.54,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_ROAR",
    "levelUp": 19,
-   "machine": null
+   "machine": null,
+   "description": "Não troca Pokémon: durante o combate, o próximo só entra após um desmaio",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ROCK_BLAST",
@@ -5254,9 +6610,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 15,
+   "hunt": 15,
+   "pvp": 17.25,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "ROCK_SLIDE",
@@ -5277,9 +6639,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 11.3,
+   "hunt": 15,
+   "pvp": 6.598125,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_HIT",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "ROCK_SMASH",
@@ -5300,9 +6668,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 10,
+   "pvp": 10,
+   "kind": "damage",
    "effect": "EFFECT_DEFENSE_DOWN_HIT",
    "levelUp": 0,
-   "machine": "HM"
+   "machine": "HM",
+   "description": "50% de chance de baixar a DEFESA do alvo por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "ROCK_THROW",
@@ -5323,9 +6697,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 16.7,
+   "hunt": 16.666666666666664,
+   "pvp": 19.16666666666666,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 12,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "ROCK_TOMB",
@@ -5346,9 +6726,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 6.7,
+   "hunt": 8.88888888888889,
+   "pvp": 3.91,
+   "kind": "damage",
    "effect": "EFFECT_SPEED_DOWN_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a VELOCIDADE do alvo por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "ROLE_PLAY",
@@ -5369,9 +6755,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_ROLE_PLAY",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ROLLING_KICK",
@@ -5392,9 +6784,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 12.8,
+   "hunt": 15.9375,
+   "pvp": 11.8575,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_HIT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Um chute em meia-lua atinge os inimigos no semicírculo de 2 passos à frente. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "ROLLOUT",
@@ -5415,9 +6813,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 13.5,
+   "hunt": 13.5,
+   "pvp": 13.182750000000002,
+   "kind": "damage",
    "effect": "EFFECT_ROLLOUT",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "SACRED_FIRE",
@@ -5438,9 +6842,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 11.9,
+   "hunt": 11.875,
+   "pvp": 13.656249999999998,
+   "kind": "damage",
    "effect": "EFFECT_THAW_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "50% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "SAFEGUARD",
@@ -5461,9 +6871,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_SAFEGUARD",
    "levelUp": 32,
-   "machine": null
+   "machine": null,
+   "description": "Por 8 s, os inimigos não causam estados (sono, veneno, confusão...) em quem estiver perto do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SAND_TOMB",
@@ -5484,9 +6900,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 2.6,
+   "hunt": 3.5,
+   "pvp": 1.5395625,
+   "kind": "damage",
    "effect": "EFFECT_TRAP",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Prende o alvo por 3 s: ele não anda e perde vida.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "SAND_ATTACK",
@@ -5507,9 +6929,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_ACCURACY_DOWN",
    "levelUp": 37,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a PRECISÃO do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SANDSTORM",
@@ -5530,9 +6958,15 @@
    "escapeTiles": 3,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "weather",
    "effect": "EFFECT_SANDSTORM",
    "levelUp": 15,
-   "machine": null
+   "machine": null,
+   "description": "Levanta uma tempestade de areia por 15 s em volta (por enquanto, só a WEATHER BALL sente).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SCARY_FACE",
@@ -5553,9 +6987,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_SPEED_DOWN_2",
    "levelUp": 35,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito a VELOCIDADE do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SCRATCH",
@@ -5576,9 +7016,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 33.3,
+   "hunt": 33.333333333333336,
+   "pvp": 33.333333333333336,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 44,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "SCREECH",
@@ -5599,9 +7045,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_DEFENSE_DOWN_2",
    "levelUp": 51,
-   "machine": null
+   "machine": null,
+   "description": "Baixa muito a DEFESA do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SEISMIC_TOSS",
@@ -5622,9 +7074,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_LEVEL_DAMAGE",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Dano pelo nível do seu Pokémon, sem contar ATAQUE nem DEFESA.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SELF_DESTRUCT",
@@ -5644,10 +7102,16 @@
    "huntDamage": 2.25,
    "escapeTiles": 2,
    "pvpDodge": 0.68,
-   "powerPerSecond": 6.7,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_EXPLOSION",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "O seu Pokémon desmaia ao usar; a DEFESA do alvo conta pela metade. Demora 1 s para sair.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SHADOW_BALL",
@@ -5668,9 +7132,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 29.6,
+   "hunt": 29.629629629629626,
+   "pvp": 34.07407407407407,
+   "kind": "damage",
    "effect": "EFFECT_SPECIAL_DEFENSE_DOWN_HIT",
    "levelUp": 7,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "20% de chance de baixar a DEF. ESP. do alvo por 10 s.",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "SHADOW_PUNCH",
@@ -5691,9 +7161,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 30,
+   "hunt": 30,
+   "pvp": 30,
+   "kind": "damage",
    "effect": "EFFECT_ALWAYS_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "SHARPEN",
@@ -5714,9 +7190,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_ATTACK_UP",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Sobe o ATAQUE do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SHEER_COLD",
@@ -5737,9 +7219,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_OHKO",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Derruba de uma vez um selvagem do nível do seu Pokémon ou menor (acerta 30% mais a diferença de nível); de um chefe ou de um treinador, tira 1/4 da vida.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SIGNAL_BEAM",
@@ -5760,9 +7248,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 18.8,
+   "hunt": 28.125,
+   "pvp": 17.034374999999997,
+   "kind": "damage",
    "effect": "EFFECT_CONFUSE_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "SILVER_WIND",
@@ -5783,9 +7277,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 5,
+   "hunt": 8.125000000000002,
+   "pvp": 5.25,
+   "kind": "damage",
    "effect": "EFFECT_ALL_STATS_UP_HIT",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de subir o ATAQUE, a DEFESA, o AT. ESP., a DEF. ESP. e a VELOCIDADE do seu Pokémon por 10 s.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "SING",
@@ -5806,9 +7306,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_SLEEP",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo dormir por 2,5 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SKETCH",
@@ -5829,9 +7335,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_SKETCH",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SKULL_BASH",
@@ -5852,9 +7364,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 37,
+   "hunt": 37.03703703703704,
+   "pvp": 12.222222222222225,
+   "kind": "damage",
    "effect": "EFFECT_SKULL_BASH",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a DEFESA do seu Pokémon por 10 s. Demora 1 s para sair.",
+   "huntTier": "A",
+   "pvpTier": "C"
   },
   {
    "key": "SKY_ATTACK",
@@ -5875,9 +7393,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 15.8,
+   "hunt": 15.75,
+   "pvp": 5.43375,
+   "kind": "damage",
    "effect": "EFFECT_SKY_ATTACK",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. Demora 1,5 s para sair.",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "SKY_UPPERCUT",
@@ -5898,9 +7422,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 28.3,
+   "hunt": 28.333333333333332,
+   "pvp": 28.333333333333332,
+   "kind": "damage",
    "effect": "EFFECT_SKY_UPPERCUT",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Acerta até quem está no meio de um salto.",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "SLACK_OFF",
@@ -5921,9 +7451,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_RESTORE_HP",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SLAM",
@@ -5944,9 +7480,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 30,
+   "hunt": 30,
+   "pvp": 30,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 19,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "SLASH",
@@ -5967,9 +7509,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 35,
+   "hunt": 35,
+   "pvp": 35,
+   "kind": "damage",
    "effect": "EFFECT_HIGH_CRITICAL",
    "levelUp": 35,
-   "machine": null
+   "machine": null,
+   "description": "Mais chance de acerto crítico.",
+   "huntTier": "A",
+   "pvpTier": "S"
   },
   {
    "key": "SLEEP_POWDER",
@@ -5990,9 +7538,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_SLEEP",
    "levelUp": 16,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo dormir por 2,5 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SLEEP_TALK",
@@ -6013,9 +7567,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_SLEEP_TALK",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SLUDGE",
@@ -6036,9 +7596,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 21.7,
+   "hunt": 28.88888888888889,
+   "pvp": 12.7075,
+   "kind": "damage",
    "effect": "EFFECT_POISON_HIT",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Lança uma bola de lodo até 6 passos, que explode a 1 passo ao redor do impacto; paredes bloqueiam a bola e a explosão. 30% de chance de envenenar o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "SLUDGE_BOMB",
@@ -6059,9 +7625,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 15,
+   "hunt": 20,
+   "pvp": 8.7975,
+   "kind": "damage",
    "effect": "EFFECT_POISON_HIT",
    "levelUp": 5,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "30% de chance de envenenar o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "SMELLING_SALT",
@@ -6081,10 +7653,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 15,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_SMELLINGSALT",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SMOG",
@@ -6105,9 +7683,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 4.7,
+   "hunt": 5.444444444444444,
+   "pvp": 3.8710000000000004,
+   "kind": "damage",
    "effect": "EFFECT_POISON_HIT",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "Uma nuvem de veneno cobre três faixas por até 3 passos à frente. 40% de chance de envenenar o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "SMOKESCREEN",
@@ -6128,9 +7712,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_ACCURACY_DOWN",
    "levelUp": 14,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a PRECISÃO do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SNATCH",
@@ -6151,9 +7741,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_SNATCH",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SNORE",
@@ -6173,10 +7769,16 @@
    "huntDamage": 1.25,
    "escapeTiles": 1,
    "pvpDodge": 0.07,
-   "powerPerSecond": 10,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_SNORE",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SOFT_BOILED",
@@ -6197,9 +7799,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_SOFTBOILED",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SOLAR_BEAM",
@@ -6220,9 +7828,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 20,
+   "hunt": 32.50000000000001,
+   "pvp": 6.9,
+   "kind": "damage",
    "effect": "EFFECT_SOLAR_BEAM",
    "levelUp": 12,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Demora 1,5 s para sair; no sol, sai na hora.",
+   "huntTier": "A",
+   "pvpTier": "D"
   },
   {
    "key": "SONIC_BOOM",
@@ -6243,9 +7857,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_SONICBOOM",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Dano fixo: o mesmo em qualquer alvo, sem contar ATAQUE, DEFESA nem tipo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SPARK",
@@ -6266,9 +7886,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 21.7,
+   "hunt": 46.04166666666667,
+   "pvp": 17.116666666666667,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "Uma descarga elétrica atinge os inimigos até 2 passos ao redor do seu Pokémon. 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "S",
+   "pvpTier": "C"
   },
   {
    "key": "SPIDER_WEB",
@@ -6289,9 +7915,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_MEAN_LOOK",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Impede o alvo de andar por 4 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SPIKE_CANNON",
@@ -6312,9 +7944,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 22.2,
+   "hunt": 22.22222222222222,
+   "pvp": 25.555555555555554,
+   "kind": "damage",
    "effect": "EFFECT_MULTI_HIT",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Acerta de 2 a 5 vezes seguidas.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "SPIKES",
@@ -6335,9 +7973,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_SPIKES",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SPIT_UP",
@@ -6357,10 +8001,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 16.7,
+   "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_SPIT_UP",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SPITE",
@@ -6381,9 +8031,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_SPITE",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SPLASH",
@@ -6404,9 +8060,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_SPLASH",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SPORE",
@@ -6427,9 +8089,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_SLEEP",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo dormir por 2,5 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "STEEL_WING",
@@ -6450,9 +8118,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 35,
+   "hunt": 35,
+   "pvp": 35,
+   "kind": "damage",
    "effect": "EFFECT_DEFENSE_UP_HIT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "10% de chance de subir a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": "A",
+   "pvpTier": "S"
   },
   {
    "key": "STOCKPILE",
@@ -6473,9 +8147,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_STOCKPILE",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a DEFESA e a DEF. ESP. do seu Pokémon por 20 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "STOMP",
@@ -6496,9 +8176,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 21.7,
+   "hunt": 46.04166666666667,
+   "pvp": 17.116666666666667,
+   "kind": "damage",
    "effect": "EFFECT_FLINCH_MINIMIZE_HIT",
    "levelUp": 16,
-   "machine": null
+   "machine": null,
+   "description": "Um pisão atinge os inimigos até 2 passos ao redor do seu Pokémon. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "S",
+   "pvpTier": "C"
   },
   {
    "key": "STRENGTH",
@@ -6519,9 +8205,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 26.7,
+   "hunt": 26.666666666666668,
+   "pvp": 26.666666666666668,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 0,
-   "machine": "HM"
+   "machine": "HM",
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "STRING_SHOT",
@@ -6542,9 +8234,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_SPEED_DOWN",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a VELOCIDADE do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "STUN_SPORE",
@@ -6565,9 +8263,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_PARALYZE",
    "levelUp": 21,
-   "machine": null
+   "machine": null,
+   "description": "Paralisa o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SUBMISSION",
@@ -6588,9 +8292,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 32,
+   "hunt": 32,
+   "pvp": 32,
+   "kind": "damage",
    "effect": "EFFECT_RECOIL",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "O seu Pokémon perde 1/4 do dano que causar.",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "SUBSTITUTE",
@@ -6611,9 +8321,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_SUBSTITUTE",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Gasta 1/4 da vida num boneco que leva os golpes no lugar do seu Pokémon, por até 15 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SUNNY_DAY",
@@ -6634,9 +8350,15 @@
    "escapeTiles": 3,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "weather",
    "effect": "EFFECT_SUNNY_DAY",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Faz sol por 15 s em volta: golpes de FOGO mais fortes e de ÁGUA mais fracos.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SUPER_FANG",
@@ -6657,9 +8379,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_SUPER_FANG",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Tira metade da vida que o alvo tem (de um chefe ou de um treinador, no máximo 10%).",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SUPERPOWER",
@@ -6680,9 +8408,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 15,
+   "hunt": 15,
+   "pvp": 15,
+   "kind": "damage",
    "effect": "EFFECT_SUPERPOWER",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Baixa o ATAQUE e a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "SUPERSONIC",
@@ -6703,9 +8437,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_CONFUSE",
    "levelUp": 27,
-   "machine": null
+   "machine": null,
+   "description": "Confunde o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SURF",
@@ -6726,9 +8466,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 23.8,
+   "hunt": 53.4375,
+   "pvp": 26.125000000000004,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 2,
-   "machine": "HM"
+   "machine": "HM",
+   "description": "",
+   "huntTier": "S",
+   "pvpTier": "B"
   },
   {
    "key": "SWAGGER",
@@ -6749,9 +8495,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_SWAGGER",
    "levelUp": 10,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito o ATAQUE do alvo por 10 s. Confunde o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SWALLOW",
@@ -6772,9 +8524,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_SWALLOW",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SWEET_KISS",
@@ -6795,9 +8553,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_CONFUSE",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "Confunde o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SWEET_SCENT",
@@ -6818,9 +8582,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_EVASION_DOWN",
    "levelUp": 15,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a EVASÃO do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SWIFT",
@@ -6841,9 +8611,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 20,
+   "hunt": 20,
+   "pvp": 23,
+   "kind": "damage",
    "effect": "EFFECT_ALWAYS_HIT",
    "levelUp": 22,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "SWORDS_DANCE",
@@ -6864,9 +8640,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_ATTACK_UP_2",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito o ATAQUE do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "SYNTHESIS",
@@ -6887,9 +8669,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_SYNTHESIS",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TACKLE",
@@ -6910,9 +8698,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 27.7,
+   "hunt": 27.708333333333336,
+   "pvp": 27.708333333333336,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 106,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "TAIL_GLOW",
@@ -6933,9 +8727,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_SPECIAL_ATTACK_UP_2",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Sobe muito o AT. ESP. do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TAIL_WHIP",
@@ -6956,9 +8756,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_DEFENSE_DOWN",
    "levelUp": 47,
-   "machine": null
+   "machine": null,
+   "description": "Baixa a DEFESA do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TAKE_DOWN",
@@ -6979,9 +8785,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 33.3,
+   "hunt": 33.26086956521739,
+   "pvp": 34.02586956521739,
+   "kind": "damage",
    "effect": "EFFECT_RECOIL",
    "levelUp": 45,
-   "machine": null
+   "machine": null,
+   "description": "O seu Pokémon perde 1/4 do dano que causar.",
+   "huntTier": "A",
+   "pvpTier": "A"
   },
   {
    "key": "TAUNT",
@@ -7002,9 +8814,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "control",
    "effect": "EFFECT_TAUNT",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo usar só golpes de dano por 5 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TEETER_DANCE",
@@ -7025,9 +8843,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_TEETER_DANCE",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Confunde o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TELEPORT",
@@ -7048,9 +8872,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_TELEPORT",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "THIEF",
@@ -7071,9 +8901,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 10,
+   "hunt": 10,
+   "pvp": 10,
+   "kind": "damage",
    "effect": "EFFECT_THIEF",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "D",
+   "pvpTier": "C"
   },
   {
    "key": "THRASH",
@@ -7093,10 +8929,16 @@
    "huntDamage": 1,
    "escapeTiles": 1,
    "pvpDodge": 0,
-   "powerPerSecond": 112.5,
+   "powerPerSecond": 95.6,
+   "hunt": 95.625,
+   "pvp": 95.625,
+   "kind": "damage",
    "effect": "EFFECT_RAMPAGE",
    "levelUp": 13,
-   "machine": null
+   "machine": null,
+   "description": "Depois, o seu Pokémon fica confuso por 4 s.",
+   "huntTier": "S",
+   "pvpTier": "S"
   },
   {
    "key": "THUNDER",
@@ -7117,9 +8959,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.7,
    "powerPerSecond": 14,
+   "hunt": 18.666666666666664,
+   "pvp": 4.830000000000001,
+   "kind": "damage",
    "effect": "EFFECT_THUNDER",
    "levelUp": 13,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Na chuva, nunca erra e sai em 0,3 s. Acerta até quem está no meio de um salto. 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "C",
+   "pvpTier": "D"
   },
   {
    "key": "THUNDER_WAVE",
@@ -7140,9 +8988,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_PARALYZE",
    "levelUp": 19,
-   "machine": null
+   "machine": null,
+   "description": "Paralisa o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "THUNDERBOLT",
@@ -7163,9 +9017,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 23.8,
+   "hunt": 38.59375000000001,
+   "pvp": 21.576874999999998,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 4,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "S",
+   "pvpTier": "B"
   },
   {
    "key": "THUNDER_PUNCH",
@@ -7186,9 +9046,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 18.8,
+   "hunt": 18.75,
+   "pvp": 18.75,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 5,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "THUNDER_SHOCK",
@@ -7209,9 +9075,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 30.8,
+   "hunt": 30.769230769230766,
+   "pvp": 35.38461538461538,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 11,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "B",
+   "pvpTier": "S"
   },
   {
    "key": "TICKLE",
@@ -7232,9 +9104,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "debuff",
    "effect": "EFFECT_TICKLE",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Baixa o ATAQUE e a DEFESA do alvo por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TORMENT",
@@ -7255,9 +9133,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "control",
    "effect": "EFFECT_TORMENT",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Impede o alvo de repetir o mesmo golpe por 8 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TOXIC",
@@ -7278,9 +9162,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_TOXIC",
    "levelUp": 4,
-   "machine": null
+   "machine": null,
+   "description": "Envenena gravemente o alvo por 10 s: perde cada vez mais vida.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TRANSFORM",
@@ -7301,9 +9191,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_TRANSFORM",
    "levelUp": 2,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TRI_ATTACK",
@@ -7324,9 +9220,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 13.3,
+   "hunt": 16.666666666666668,
+   "pvp": 11.58666666666667,
+   "kind": "damage",
    "effect": "EFFECT_TRI_ATTACK",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Dispara três faixas paralelas até 4 passos à frente; cada inimigo é atingido uma vez. 20% de chance de queimar, congelar ou paralisar o alvo.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "TRICK",
@@ -7347,9 +9249,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_TRICK",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Ainda não faz nada neste jogo: usá-lo só gasta a recarga.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "TRIPLE_KICK",
@@ -7370,9 +9278,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 6.8,
+   "hunt": 6.75,
+   "pvp": 6.75,
+   "kind": "damage",
    "effect": "EFFECT_TRIPLE_KICK",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Acerta 3 vezes seguidas.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "TWINEEDLE",
@@ -7393,9 +9307,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 25,
+   "hunt": 25,
+   "pvp": 28.749999999999996,
+   "kind": "damage",
    "effect": "EFFECT_TWINEEDLE",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "Acerta 2 vezes seguidas. 20% de chance de envenenar o alvo por 10 s: perde vida aos poucos.",
+   "huntTier": "B",
+   "pvpTier": "A"
   },
   {
    "key": "TWISTER",
@@ -7416,9 +9336,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 13.3,
+   "hunt": 21.66666666666667,
+   "pvp": 14.000000000000002,
+   "kind": "damage",
    "effect": "EFFECT_TWISTER",
    "levelUp": 9,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "Acerta até quem está no meio de um salto. 20% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "UPROAR",
@@ -7439,9 +9365,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0,
    "powerPerSecond": 8.3,
+   "hunt": 13.54166666666667,
+   "pvp": 8.750000000000002,
+   "kind": "damage",
    "effect": "EFFECT_UPROAR",
    "levelUp": 11,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "VICE_GRIP",
@@ -7462,9 +9394,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 26.2,
+   "hunt": 32.73809523809524,
+   "pvp": 24.357142857142858,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "As pinças se fecham sobre os inimigos num cone de 2 passos à frente.",
+   "huntTier": "A",
+   "pvpTier": "B"
   },
   {
    "key": "VINE_WHIP",
@@ -7485,9 +9423,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 15,
+   "hunt": 15,
+   "pvp": 15,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 7,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "VITAL_THROW",
@@ -7508,9 +9452,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 17.5,
+   "hunt": 17.5,
+   "pvp": 17.5,
+   "kind": "damage",
    "effect": "EFFECT_VITAL_THROW",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "WATER_GUN",
@@ -7531,9 +9481,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.21,
    "powerPerSecond": 16.7,
+   "hunt": 23.611111111111114,
+   "pvp": 15.141666666666667,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 51,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "WATER_PULSE",
@@ -7554,9 +9510,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 20,
+   "hunt": 26.666666666666664,
+   "pvp": 11.729999999999999,
+   "kind": "damage",
    "effect": "EFFECT_CONFUSE_HIT",
    "levelUp": 7,
-   "machine": "TM"
+   "machine": "TM",
+   "description": "20% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo.",
+   "huntTier": "B",
+   "pvpTier": "C"
   },
   {
    "key": "WATER_SPORT",
@@ -7577,9 +9539,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "protect",
    "effect": "EFFECT_WATER_SPORT",
    "levelUp": 12,
-   "machine": null
+   "machine": null,
+   "description": "Por 15 s, golpes de FOGO em quem estiver perto do seu Pokémon têm metade do poder.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "WATER_SPOUT",
@@ -7600,9 +9568,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.12,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "damage",
    "effect": "EFFECT_ERUPTION",
    "levelUp": 3,
-   "machine": null
+   "machine": null,
+   "description": "Mais forte com a vida cheia: 150 com a vida toda, menos conforme ela cai.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "WATERFALL",
@@ -7623,9 +9597,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 20,
+   "hunt": 20,
+   "pvp": 20,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 2,
-   "machine": "HM"
+   "machine": "HM",
+   "description": "",
+   "huntTier": "C",
+   "pvpTier": "B"
   },
   {
    "key": "WEATHER_BALL",
@@ -7646,9 +9626,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 12.5,
+   "hunt": 12.5,
+   "pvp": 14.374999999999998,
+   "kind": "damage",
    "effect": "EFFECT_WEATHER_BALL",
    "levelUp": 1,
-   "machine": null
+   "machine": null,
+   "description": "No clima, vira ÁGUA, FOGO, PEDRA ou GELO, com poder 100.",
+   "huntTier": "C",
+   "pvpTier": "C"
   },
   {
    "key": "WHIRLPOOL",
@@ -7669,9 +9655,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.49,
    "powerPerSecond": 2.6,
+   "hunt": 3.5,
+   "pvp": 1.5395625,
+   "kind": "damage",
    "effect": "EFFECT_TRAP",
    "levelUp": 6,
-   "machine": null
+   "machine": null,
+   "description": "Prende o alvo por 3 s: ele não anda e perde vida.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "WHIRLWIND",
@@ -7692,9 +9684,15 @@
    "escapeTiles": 2,
    "pvpDodge": 0.54,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "none",
    "effect": "EFFECT_ROAR",
    "levelUp": 12,
-   "machine": null
+   "machine": null,
+   "description": "Não troca Pokémon: durante o combate, o próximo só entra após um desmaio",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "WILL_O_WISP",
@@ -7715,9 +9713,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_WILL_O_WISP",
    "levelUp": 5,
-   "machine": null
+   "machine": null,
+   "description": "Queima o alvo por 8 s: perde vida aos poucos e bate mais fraco.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "WING_ATTACK",
@@ -7738,9 +9742,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0.07,
    "powerPerSecond": 26.1,
+   "hunt": 26.086956521739133,
+   "pvp": 26.686956521739138,
+   "kind": "damage",
    "effect": "EFFECT_HIT",
    "levelUp": 17,
-   "machine": null
+   "machine": null,
+   "description": "Avança num rasante até 4 passos, atingindo os inimigos no caminho e terminando num espaço livre.",
+   "huntTier": "B",
+   "pvpTier": "B"
   },
   {
    "key": "WISH",
@@ -7761,9 +9771,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "heal",
    "effect": "EFFECT_WISH",
    "levelUp": 7,
-   "machine": null
+   "machine": null,
+   "description": "2 s depois, recupera metade da vida do seu Pokémon.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "WITHDRAW",
@@ -7784,9 +9800,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "boost",
    "effect": "EFFECT_DEFENSE_UP",
    "levelUp": 9,
-   "machine": null
+   "machine": null,
+   "description": "Sobe a DEFESA do seu Pokémon por 10 s.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "WRAP",
@@ -7807,9 +9829,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 6.4,
+   "hunt": 6.375,
+   "pvp": 6.375,
+   "kind": "damage",
    "effect": "EFFECT_TRAP",
    "levelUp": 15,
-   "machine": null
+   "machine": null,
+   "description": "Prende o alvo por 3 s: ele não anda e perde vida.",
+   "huntTier": "D",
+   "pvpTier": "D"
   },
   {
    "key": "YAWN",
@@ -7830,9 +9858,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": null,
+   "hunt": null,
+   "pvp": null,
+   "kind": "ailment",
    "effect": "EFFECT_YAWN",
    "levelUp": 17,
-   "machine": null
+   "machine": null,
+   "description": "Faz o alvo dormir por 2,5 s, 2 s depois de acertar.",
+   "huntTier": null,
+   "pvpTier": null
   },
   {
    "key": "ZAP_CANNON",
@@ -7853,9 +9887,15 @@
    "escapeTiles": 1,
    "pvpDodge": 0,
    "powerPerSecond": 6.3,
+   "hunt": 6.25,
+   "pvp": 7.187499999999999,
+   "kind": "damage",
    "effect": "EFFECT_PARALYZE_HIT",
    "levelUp": 8,
-   "machine": null
+   "machine": null,
+   "description": "Paralisa o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha.",
+   "huntTier": "D",
+   "pvpTier": "D"
   }
  ],
  "species": [
