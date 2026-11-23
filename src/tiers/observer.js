@@ -3,6 +3,7 @@ function syncAll() {
   if (document.querySelector('.mk, .modal .mx-row, .modal .mx-card, .lab[data-lab-dex]')) ensureStyles();
   decorateMap();
   decorateSheet();
+  decorateNatures();
   syncMarket();
 }
 

@@ -34,7 +34,7 @@ O usuário escreve em português do Brasil. Todo texto de interface fica em pt-B
 | `src/meta.js` | Cabeçalho do userscript (`@version`, grants, `@sandbox JavaScript`). |
 | `src/settings.js` | Liga e desliga os módulos (menu do Tampermonkey) e marca `html[data-poke-tools]`. |
 | `src/data/guide.js`, `src/data/dex.js`, `src/data/capture.js` | Dados gerados por `build-data.mjs`: `MARKET_GUIDE` (perfis, tiers, tipos por dex), `DEX` (`"Nome:tipo"` por dex, usado pelo monitor) e `CAPTURE` (`hunts: {id: [dex, nível ao capturar, preço]}` do principal de cada hunt, `certainAt`, `profitSchedule`, preços da Poké e da Ultra Ball; grupo tiers). Não edite à mão. |
-| `src/tiers/*.js`, `src/market/*.js` | Grupo **tiers**: constantes e selos (`tiers/common.js`), MAPA e ficha (`tiers/badges.js`), tier list (`tiers/dialog.js`), CSS (`tiers/styles.js`), filtros e recomendação (`market/filters.js`, `market/panel.js`, `market/state.js`), ordenação por tier (`market/tier-sort.js`) e o observador (`tiers/observer.js`). Dividem um escopo só, na ordem de `GROUPS` em `build-userscript.mjs`. |
+| `src/tiers/*.js`, `src/market/*.js` | Grupo **tiers**: constantes e selos (`tiers/common.js`), MAPA e ficha (`tiers/badges.js`), tier list (`tiers/dialog.js`), CSS (`tiers/styles.js`), filtros e recomendação (`market/filters.js`, `market/panel.js`, `market/state.js`), ordenação por tier (`market/tier-sort.js`), o efeito da natureza no tooltip (`tiers/nature-tips.js`) e o observador (`tiers/observer.js`). Dividem um escopo só, na ordem de `GROUPS` em `build-userscript.mjs`. |
 | `src/daily.js`, `src/monitor.js`, `src/dodge.js` | Daily de treinadores, monitor de contas e desvio de golpes, cada um no próprio escopo. O daily só usa `MARKET_GUIDE.types` de fora; o desvio não usa nada de fora. |
 | `src/trade.js` | Troca automática entre as contas ("Trocar com" no menu do Pokémon), no mesmo escopo do monitor (grupo **monitor**). |
 | `pokeafk-market-filtros.user.js`, `pokeafk-monitor.user.js` | Avisos de migração para quem tem os scripts antigos (veja acima). |
@@ -99,6 +99,7 @@ Além disso, ao mexer num módulo:
 - **Categoria separada** para Lendários/míticos (lista fixa da Gen 1–3 em `LEGENDARY_DEX`) e Megas.
 - **Tiers por percentil** das espécies normais: S = 8% melhores, A até 25%, B até 50%, C até 80%, D o resto (`tierShares`).
 - **Cores dos tiers:** S vermelho, A laranja, B amarelo, C verde, D azul.
+- **Efeito da natureza no tooltip (pedido do usuário, 2026-11-23):** os nomes de natureza que o jogo marca com `title="Natureza"` (PC `.pcx-nat`, troca `.t5-mini-nat`, bolsa `.bag-nat`) ganham o efeito, ex.: "Natureza Careful: +10% Def. Esp., −10% Atq. Esp." (`src/tiers/nature-tips.js`, chamado por `syncAll`). Testado no PC em 2026-11-23.
 - **Botão "Preencher natureza e IVs"** marca as naturezas recomendadas e IV mínimo **28** nos IVs prioritários da lista escolhida.
 
 ## Modelo de ranking (`rank-pokemon.mjs`)
