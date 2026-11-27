@@ -15,8 +15,9 @@ function createPanel(update) {
       </select></label>
       <span role="status" data-tier-sort-status></span>
     </div>
-    <p data-grouped-hint hidden>Abra uma espécie para configurar seus filtros de natureza e IV.</p>
     <form novalidate>
+      <details class="pafk-offer-filters">
+      <summary>Natureza e IV mínimo <span data-offer-filter-count></span></summary>
       <div class="pafk-form-grid">
         <fieldset class="pafk-iv-box">
           <legend>IV mínimo <span>(0–31)</span></legend>
@@ -49,10 +50,14 @@ function createPanel(update) {
       </div>
       <div class="pafk-actions">
         <p class="pafk-form-hint">Os filtros valem na hora. Vazio ou 0 aceita qualquer IV.<span class="pafk-head-hint"> Clique em +Atq, −Vel… para marcar a linha ou coluna inteira.</span></p>
-        <button type="button" data-clear>Limpar filtros</button>
+        <button type="button" data-clear>Limpar natureza e IVs</button>
       </div>
+      </details>
     </form>
-    <p role="status" data-status hidden></p>
+    <div class="pafk-search-results" data-market-results hidden>
+      <p role="status" data-status></p>
+      <button type="button" data-scan-market hidden>Próxima com resultados ›</button>
+    </div>
     <section class="pafk-recommendation" data-recommendation aria-labelledby="pafk-rec-title" hidden>
       <div class="pafk-recommendation-title">
         <h4 id="pafk-rec-title">Recomendação</h4>
@@ -78,10 +83,7 @@ function createPanel(update) {
     </section>`;
 
   const form = panel.querySelector('form');
-  // Filters apply as soon as a field changes; typed IVs wait for a short pause.
-  let typingTimer = 0;
   const apply = () => {
-    clearTimeout(typingTimer);
     update(readForm(form));
   };
   form.addEventListener('submit', event => {
@@ -102,8 +104,7 @@ function createPanel(update) {
       apply();
     } else if (target.type === 'number') {
       syncIVRow(form, target.name);
-      clearTimeout(typingTimer);
-      typingTimer = setTimeout(apply, 250);
+      apply();
     }
   });
   form.addEventListener('change', event => {
@@ -127,7 +128,6 @@ function createPanel(update) {
     apply();
   });
   panel.querySelector('[data-clear]').addEventListener('click', () => {
-    clearTimeout(typingTimer);
     form.reset();
     syncForm(form);
     update(emptyFilters());

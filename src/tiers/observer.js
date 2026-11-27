@@ -26,12 +26,17 @@ function syncMarket() {
   const isSpecies = Boolean(speciesTools && dex);
   if (!isSpecies && !browseTools) {
     scope = null;
+    recommendationDex = null;
+    marketView = null;
+    stopMarketScan();
+    syncTierSort(main, false);
     tierDialog?.close();
     panel.remove();
     return;
   }
 
   const grouped = browseTools && market.querySelector('[data-grouped][aria-pressed="true"]');
+  const view = isSpecies ? 'species' : grouped ? 'grouped' : 'offers';
   const nextScope = isSpecies ? `species:${Number(dex)}` : (grouped ? null : 'all');
 
   if (isSpecies) {
@@ -43,6 +48,7 @@ function syncMarket() {
     scope = nextScope;
     filters = nextScope ? readFilters(nextScope) : emptyFilters();
     loadForm(form, filters);
+    offerFilterDetails.open = isSpecies;
   }
   const nextDex = isSpecies ? Number(dex) : null;
   if (recommendationDex !== nextDex) {
@@ -54,10 +60,13 @@ function syncMarket() {
   const heading = speciesName ? `Filtros de ${speciesName}` : 'Filtros de Pokémon';
   if (title.textContent !== heading) title.textContent = heading;
   form.hidden = !scope;
-  groupedHint.hidden = Boolean(scope);
+  const count = offerFilterCount();
+  const summary = count ? `· ${count} ${count === 1 ? 'filtro ativo' : 'filtros ativos'}` : '';
+  if (offerFilterSummary.textContent !== summary) offerFilterSummary.textContent = summary;
   const nativeNature = speciesTools?.querySelector('[aria-label="Natureza"]')?.textContent.trim();
-  showResults(main.querySelector(OFFER_LIST), nativeNature);
+  syncMarketSearch(view);
   syncTierSort(main, Boolean(browseTools && grouped));
+  showMarketResults(main, view, nativeNature);
 }
 
 // Market, MAPA and FICHA DO POKÉMON all live in game windows (.mk inside .modal).

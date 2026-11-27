@@ -22,7 +22,9 @@ O Tampermonkey busca as versões novas no mesmo link. Para atualizar na hora, us
 ## O que o script faz
 
 ### Mercado da Comunidade
-- Filtra os anúncios de Pokémon por natureza e IV mínimo.
+- Em **Filtros de Pokémon**, busque pelo nome ou número da Pokédex e inclua ou exclua quantas espécies quiser. Em **Ranking**, escolha PvE ou Competitivo e marque um ou mais tiers, por exemplo **S**.
+- **Só com potencial** usa os mesmos limites da Caixa para IV do ataque principal, HP, Velocidade e classe de IV. Para combinar com natureza e IVs mínimos por atributo, abra **Natureza e IV mínimo**. Na lista agrupada, **Ver anúncios com potencial** abre a lista de anúncios.
+- **Próxima com resultados** pula as páginas sem correspondências e pode ser interrompida com **Parar busca**.
 - Mostra o selo de tier **PvE** e **Competitivo** ao lado do nome da espécie (lista, cartões e página da espécie).
 - Ordena a lista agrupada por tier.
 - Painel com a natureza, os IVs prioritários e o moveset de 4 golpes recomendados. O botão **Preencher natureza e IVs** marca as naturezas sugeridas e IV mínimo 28 nos IVs que mais importam.

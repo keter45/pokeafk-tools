@@ -145,13 +145,13 @@ function renderTierSort(main) {
 function syncTierSort(main, grouped) {
   tierSortBox.hidden = !grouped;
   const active = Boolean(grouped && tierSortMode);
-  const current = main.querySelector('#pafk-tier-sorted');
+  const current = main?.querySelector('#pafk-tier-sorted');
   if (!active) {
     tierSortToken++;
     tierSortBusy = false;
     tierSortStatus.textContent = '';
     current?.remove();
-    delete main.dataset.pafkSorted;
+    if (main) delete main.dataset.pafkSorted;
     return;
   }
   if (tierSortBusy) return;

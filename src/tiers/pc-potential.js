@@ -59,13 +59,14 @@ function savePotRules(rules) {
 let potRules = readPotRules();
 
 // Reference build: the profile of the sprite's form (Megas) or the species' best final evolution.
-function potProfile(card, mode) {
-  const src = card.querySelector('.pcx-spr')?.getAttribute('src') ?? '';
-  const match = src.match(/\/assets\/mon\/front\/(\d+)(-[a-z-]+?)?s?\.png/);
-  if (!match) return null;
-  const form = match[2] ? MARKET_GUIDE?.profiles?.[`${match[1]}${match[2]}`] : null;
+function potentialProfile(dex, sprite, mode) {
+  const form = sprite?.[2] ? MARKET_GUIDE?.profiles?.[`${sprite[1]}${sprite[2]}`] : null;
   if (form && rated(form, mode)) return form;
-  return speciesRating(match[1], mode);
+  return speciesRating(dex ?? sprite?.[1], mode);
+}
+
+function potentialSprite(image) {
+  return image?.getAttribute('src')?.match(/\/assets\/mon\/front\/(\d+)(-[\w-]+?)?s?\.png(?:[?#].*)?$/);
 }
 
 function mainAttackStat(profile, mode) {
@@ -87,16 +88,15 @@ function readPcCard(card) {
   return { ivs, tier, nature };
 }
 
-function evaluatePotential(card, mode) {
-  const profile = potProfile(card, mode);
-  const { ivs, tier, nature } = readPcCard(card);
-  if (!profile || !Number.isFinite(tier) || ['hp', 'atk', 'spa', 'spe'].some(stat => !(stat in ivs))) return null;
+function assessPotential({ profile, ivs, tier, nature }, mode) {
+  if (!profile || !Number.isInteger(tier) || tier < 1 || tier > 5) return null;
   const main = mainAttackStat(profile, mode);
   const checks = [
     { stat: main, need: potRules.main },
     { stat: 'hp', need: potRules.hp },
     { stat: 'spe', need: potRules.spe },
   ].map(check => ({ ...check, value: ivs[check.stat], ok: ivs[check.stat] >= check.need }));
+  if (checks.some(check => !validIV(check.value))) return null;
   const effect = nature ? NATURE_EFFECTS.get(nature) : null;
   let natureFit = null;
   if (effect && effect.up !== effect.down) {
@@ -105,6 +105,11 @@ function evaluatePotential(card, mode) {
   }
   const ok = tier <= potRules.tier && checks.every(check => check.ok);
   return { ok, profile, main, checks, tier, nature, natureFit };
+}
+
+function evaluatePotential(card, mode) {
+  const profile = potentialProfile(null, potentialSprite(card.querySelector('.pcx-spr')), mode);
+  return assessPotential({ profile, ...readPcCard(card) }, mode);
 }
 
 function potTitle(result, mode) {

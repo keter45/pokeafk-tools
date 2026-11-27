@@ -213,6 +213,8 @@ function updateRecommendation(dex) {
   modeSelect.onchange = () => {
     saveMode(modeSelect.value);
     renderProfile();
+    stopMarketScan();
+    syncAll();
   };
   fill.onclick = () => {
     const build = profile[modeSelect.value] ?? profile.pve;

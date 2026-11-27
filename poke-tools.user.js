@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.14.0
+// @version      1.15.1
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -31,7 +31,7 @@
   const MODULES = {
     tiers: 'Tiers, filtros do mercado e ficha',
     daily: 'Daily de treinadores',
-    monitor: 'Monitor de contas e troca entre contas',
+    monitor: 'Monitor de contas',
     dodge: 'Desvio SEMI/FULL e luta automática na arena (experimental)',
   };
   // Experimental parts start turned off until the player turns them on in the menu.
@@ -716,6 +716,10 @@
     }
   } /* GUIDE_DATA_END */;
 
+  // ==== src/data/dex.js ====
+  // Gerado por build-data.mjs: espécies por número da Pokédex, "Nome:tipo". Não edite à mão.
+  const DEX = /* DEX_DATA_START */ ["","Bulbasaur:grass","Ivysaur:grass","Venusaur:grass","Charmander:fire","Charmeleon:fire","Charizard:fire","Squirtle:water","Wartortle:water","Blastoise:water","Caterpie:bug","Metapod:bug","Butterfree:bug","Weedle:bug","Kakuna:bug","Beedrill:bug","Pidgey:normal","Pidgeotto:normal","Pidgeot:normal","Rattata:normal","Raticate:normal","Spearow:normal","Fearow:normal","Ekans:poison","Arbok:poison","Pikachu:electric","Raichu:electric","Sandshrew:ground","Sandslash:ground","Nidoran♀:poison","Nidorina:poison","Nidoqueen:poison","Nidoran♂:poison","Nidorino:poison","Nidoking:poison","Clefairy:normal","Clefable:normal","Vulpix:fire","Ninetales:fire","Jigglypuff:normal","Wigglytuff:normal","Zubat:poison","Golbat:poison","Oddish:grass","Gloom:grass","Vileplume:grass","Paras:bug","Parasect:bug","Venonat:bug","Venomoth:bug","Diglett:ground","Dugtrio:ground","Meowth:normal","Persian:normal","Psyduck:water","Golduck:water","Mankey:fighting","Primeape:fighting","Growlithe:fire","Arcanine:fire","Poliwag:water","Poliwhirl:water","Poliwrath:water","Abra:psychic","Kadabra:psychic","Alakazam:psychic","Machop:fighting","Machoke:fighting","Machamp:fighting","Bellsprout:grass","Weepinbell:grass","Victreebel:grass","Tentacool:water","Tentacruel:water","Geodude:rock","Graveler:rock","Golem:rock","Ponyta:fire","Rapidash:fire","Slowpoke:water","Slowbro:water","Magnemite:electric","Magneton:electric","Farfetch'd:normal","Doduo:normal","Dodrio:normal","Seel:water","Dewgong:water","Grimer:poison","Muk:poison","Shellder:water","Cloyster:water","Gastly:ghost","Haunter:ghost","Gengar:ghost","Onix:rock","Drowzee:psychic","Hypno:psychic","Krabby:water","Kingler:water","Voltorb:electric","Electrode:electric","Exeggcute:grass","Exeggutor:grass","Cubone:ground","Marowak:ground","Hitmonlee:fighting","Hitmonchan:fighting","Lickitung:normal","Koffing:poison","Weezing:poison","Rhyhorn:ground","Rhydon:ground","Chansey:normal","Tangela:grass","Kangaskhan:normal","Horsea:water","Seadra:water","Goldeen:water","Seaking:water","Staryu:water","Starmie:water","Mr. Mime:psychic","Scyther:bug","Jynx:ice","Electabuzz:electric","Magmar:fire","Pinsir:bug","Tauros:normal","Magikarp:water","Gyarados:water","Lapras:water","Ditto:normal","Eevee:normal","Vaporeon:water","Jolteon:electric","Flareon:fire","Porygon:normal","Omanyte:rock","Omastar:rock","Kabuto:rock","Kabutops:rock","Aerodactyl:rock","Snorlax:normal","Articuno:ice","Zapdos:electric","Moltres:fire","Dratini:dragon","Dragonair:dragon","Dragonite:dragon","Mewtwo:psychic","Mew:psychic","Chikorita:grass","Bayleef:grass","Meganium:grass","Cyndaquil:fire","Quilava:fire","Typhlosion:fire","Totodile:water","Croconaw:water","Feraligatr:water","Sentret:normal","Furret:normal","Hoothoot:normal","Noctowl:normal","Ledyba:bug","Ledian:bug","Spinarak:bug","Ariados:bug","Crobat:poison","Chinchou:water","Lanturn:water","Pichu:electric","Cleffa:normal","Igglybuff:normal","Togepi:normal","Togetic:normal","Natu:psychic","Xatu:psychic","Mareep:electric","Flaaffy:electric","Ampharos:electric","Bellossom:grass","Marill:water","Azumarill:water","Sudowoodo:rock","Politoed:water","Hoppip:grass","Skiploom:grass","Jumpluff:grass","Aipom:normal","Sunkern:grass","Sunflora:grass","Yanma:bug","Wooper:water","Quagsire:water","Espeon:psychic","Umbreon:dark","Murkrow:dark","Slowking:water","Misdreavus:ghost","Unown:psychic","Wobbuffet:psychic","Girafarig:normal","Pineco:bug","Forretress:bug","Dunsparce:normal","Gligar:ground","Steelix:steel","Snubbull:normal","Granbull:normal","Qwilfish:water","Scizor:bug","Shuckle:bug","Heracross:bug","Sneasel:dark","Teddiursa:normal","Ursaring:normal","Slugma:fire","Magcargo:fire","Swinub:ice","Piloswine:ice","Corsola:water","Remoraid:water","Octillery:water","Delibird:ice","Mantine:water","Skarmory:steel","Houndour:dark","Houndoom:dark","Kingdra:water","Phanpy:ground","Donphan:ground","Porygon2:normal","Stantler:normal","Smeargle:normal","Tyrogue:fighting","Hitmontop:fighting","Smoochum:ice","Elekid:electric","Magby:fire","Miltank:normal","Blissey:normal","Raikou:electric","Entei:fire","Suicune:water","Larvitar:rock","Pupitar:rock","Tyranitar:rock","Lugia:psychic","Ho-Oh:fire","Celebi:psychic","Treecko:grass","Grovyle:grass","Sceptile:grass","Torchic:fire","Combusken:fire","Blaziken:fire","Mudkip:water","Marshtomp:water","Swampert:water","Poochyena:dark","Mightyena:dark","Zigzagoon:normal","Linoone:normal","Wurmple:bug","Silcoon:bug","Beautifly:bug","Cascoon:bug","Dustox:bug","Lotad:water","Lombre:water","Ludicolo:water","Seedot:grass","Nuzleaf:grass","Shiftry:grass","Taillow:normal","Swellow:normal","Wingull:water","Pelipper:water","Ralts:psychic","Kirlia:psychic","Gardevoir:psychic","Surskit:bug","Masquerain:bug","Shroomish:grass","Breloom:grass","Slakoth:normal","Vigoroth:normal","Slaking:normal","Nincada:bug","Ninjask:bug","Shedinja:bug","Whismur:normal","Loudred:normal","Exploud:normal","Makuhita:fighting","Hariyama:fighting","Azurill:normal","Nosepass:rock","Skitty:normal","Delcatty:normal","Sableye:dark","Mawile:steel","Aron:steel","Lairon:steel","Aggron:steel","Meditite:fighting","Medicham:fighting","Electrike:electric","Manectric:electric","Plusle:electric","Minun:electric","Volbeat:bug","Illumise:bug","Roselia:grass","Gulpin:poison","Swalot:poison","Carvanha:water","Sharpedo:water","Wailmer:water","Wailord:water","Numel:fire","Camerupt:fire","Torkoal:fire","Spoink:psychic","Grumpig:psychic","Spinda:normal","Trapinch:ground","Vibrava:ground","Flygon:ground","Cacnea:grass","Cacturne:grass","Swablu:normal","Altaria:dragon","Zangoose:normal","Seviper:poison","Lunatone:rock","Solrock:rock","Barboach:water","Whiscash:water","Corphish:water","Crawdaunt:water","Baltoy:ground","Claydol:ground","Lileep:rock","Cradily:rock","Anorith:rock","Armaldo:rock","Feebas:water","Milotic:water","Castform:normal","Kecleon:normal","Shuppet:ghost","Banette:ghost","Duskull:ghost","Dusclops:ghost","Tropius:grass","Chimecho:psychic","Absol:dark","Wynaut:psychic","Snorunt:ice","Glalie:ice","Spheal:ice","Sealeo:ice","Walrein:ice","Clamperl:water","Huntail:water","Gorebyss:water","Relicanth:water","Luvdisc:water","Bagon:dragon","Shelgon:dragon","Salamence:dragon","Beldum:steel","Metang:steel","Metagross:steel","Regirock:rock","Regice:ice","Registeel:steel","Latias:dragon","Latios:dragon","Kyogre:water","Groudon:ground","Rayquaza:dragon","Jirachi:steel","Deoxys:psychic"] /* DEX_DATA_END */;
+
   if (moduleEnabled('tiers')) (() => {
     // ==== src/data/capture.js ====
     // Gerado por build-data.mjs: preço de captura do Pokémon principal de cada hunt. Não edite à mão.
@@ -1281,6 +1285,8 @@
       modeSelect.onchange = () => {
         saveMode(modeSelect.value);
         renderProfile();
+        stopMarketScan();
+        syncAll();
       };
       fill.onclick = () => {
         const build = profile[modeSelect.value] ?? profile.pve;
@@ -1481,8 +1487,9 @@
           </select></label>
           <span role="status" data-tier-sort-status></span>
         </div>
-        <p data-grouped-hint hidden>Abra uma espécie para configurar seus filtros de natureza e IV.</p>
         <form novalidate>
+          <details class="pafk-offer-filters">
+          <summary>Natureza e IV mínimo <span data-offer-filter-count></span></summary>
           <div class="pafk-form-grid">
             <fieldset class="pafk-iv-box">
               <legend>IV mínimo <span>(0–31)</span></legend>
@@ -1515,10 +1522,14 @@
           </div>
           <div class="pafk-actions">
             <p class="pafk-form-hint">Os filtros valem na hora. Vazio ou 0 aceita qualquer IV.<span class="pafk-head-hint"> Clique em +Atq, −Vel… para marcar a linha ou coluna inteira.</span></p>
-            <button type="button" data-clear>Limpar filtros</button>
+            <button type="button" data-clear>Limpar natureza e IVs</button>
           </div>
+          </details>
         </form>
-        <p role="status" data-status hidden></p>
+        <div class="pafk-search-results" data-market-results hidden>
+          <p role="status" data-status></p>
+          <button type="button" data-scan-market hidden>Próxima com resultados ›</button>
+        </div>
         <section class="pafk-recommendation" data-recommendation aria-labelledby="pafk-rec-title" hidden>
           <div class="pafk-recommendation-title">
             <h4 id="pafk-rec-title">Recomendação</h4>
@@ -1544,10 +1555,7 @@
         </section>`;
 
       const form = panel.querySelector('form');
-      // Filters apply as soon as a field changes; typed IVs wait for a short pause.
-      let typingTimer = 0;
       const apply = () => {
-        clearTimeout(typingTimer);
         update(readForm(form));
       };
       form.addEventListener('submit', event => {
@@ -1568,8 +1576,7 @@
           apply();
         } else if (target.type === 'number') {
           syncIVRow(form, target.name);
-          clearTimeout(typingTimer);
-          typingTimer = setTimeout(apply, 250);
+          apply();
         }
       });
       form.addEventListener('change', event => {
@@ -1593,7 +1600,6 @@
         apply();
       });
       panel.querySelector('[data-clear]').addEventListener('click', () => {
-        clearTimeout(typingTimer);
         form.reset();
         syncForm(form);
         update(emptyFilters());
@@ -1658,6 +1664,15 @@
           font-variant-numeric: tabular-nums;
         }
         #pafk-market-filters form { display: grid; gap: 6px; padding: 0 12px 10px; }
+        #pafk-market-filters :is(.pafk-offer-filters, [data-market-pot-rules]) > summary {
+          min-height: 40px;
+          box-sizing: border-box;
+        }
+        #pafk-market-filters :is([data-market-rule-summary], [data-offer-filter-count]) {
+          color: #465982;
+          font-weight: 500;
+          font-variant-numeric: tabular-nums;
+        }
         #pafk-market-filters fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         #pafk-market-filters legend { font-weight: 700; margin-block-end: 4px; }
         #pafk-market-filters legend span { font-weight: 400; }
@@ -1804,6 +1819,89 @@
         }
         #pafk-market-filters .pafk-actions .pafk-form-hint { padding: 0; color: #5b6b8c; font-size: 12px; flex: 1 1 260px; }
         #pafk-market-filters p { margin: 0; padding: 0 12px 10px; }
+        #pafk-market-filters .pafk-market-search { padding: 0 12px 8px; }
+        #pafk-market-filters :is(.pafk-market-search-controls, .pafk-market-chips, .pafk-market-rule-controls, .pafk-search-results) {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px 12px;
+        }
+        #pafk-market-filters .pafk-market-search-controls { align-items: flex-start; }
+        #pafk-market-filters .pafk-market-search label:not(.pafk-sr-only) {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          min-height: 40px;
+          font-weight: 700;
+        }
+        #pafk-market-filters .pafk-market-search input[type="checkbox"] { accent-color: #1958b8; }
+        #pafk-market-filters [data-market-picker] { max-inline-size: 100%; }
+        #pafk-market-filters [data-market-picker] summary {
+          box-sizing: border-box;
+          min-height: 40px;
+          padding: 9px 10px;
+          border: 1px solid #bed0ec;
+          border-radius: 6px;
+        }
+        #pafk-market-filters [data-market-picker][open] { inline-size: min(100%, 340px); }
+        #pafk-market-filters [data-market-picker][open] summary { background: #eef4ff; }
+        #pafk-market-filters [data-market-picker] input {
+          inline-size: 100%;
+          margin-block: 6px 0;
+        }
+        #pafk-market-filters [data-market-picker-status] { padding: 4px 0; color: #465982; }
+        #pafk-market-filters [data-market-picker-status]:empty { display: none; }
+        #pafk-market-filters [data-market-species-options] { margin: 0; padding: 0; list-style: none; }
+        #pafk-market-filters [data-market-species-options] li {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto auto;
+          align-items: center;
+          gap: 4px;
+          padding: 3px 0;
+          border-bottom: 1px solid #e4ebf5;
+        }
+        #pafk-market-filters .pafk-market-tiers {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 4px;
+          font-weight: 700;
+        }
+        #pafk-market-filters .pafk-market-tiers span { margin-inline-end: 3px; }
+        #pafk-market-filters .pafk-market-tiers button {
+          justify-content: center;
+          align-items: center;
+          min-width: 40px;
+          padding-inline: 5px;
+        }
+        #pafk-market-filters .pafk-market-tiers [aria-pressed="true"] {
+          color: var(--pafk-tier-fg);
+          background: var(--pafk-tier-bg);
+          border-color: currentColor;
+          box-shadow: inset 0 0 0 1px currentColor;
+        }
+        #pafk-market-filters .pafk-market-chips { margin-top: 8px; gap: 4px; }
+        #pafk-market-filters :is([data-pick-species="include"][aria-pressed="true"], [data-remove-species="include"]) {
+          color: #15633d;
+          border-color: #9dcbb0;
+          background: #eaf7ee;
+        }
+        #pafk-market-filters :is([data-pick-species="exclude"][aria-pressed="true"], [data-remove-species="exclude"]) {
+          color: #992f32;
+          border-color: #dfb2b4;
+          background: #faf0f0;
+        }
+        #pafk-market-filters .pafk-search-results {
+          align-items: center;
+          padding: 0 12px 10px;
+          font-variant-numeric: tabular-nums;
+        }
+        #pafk-market-filters .pafk-search-results p { flex: 1 1 220px; padding: 0; }
+        #pafk-market-filters .pafk-search-results p:empty { display: none; }
+        @media (pointer: coarse) {
+          #pafk-market-filters .pafk-market-search :is(button, input[type="search"], select, summary),
+          #pafk-market-filters [data-scan-market] { min-height: 44px; }
+          #pafk-market-filters .pafk-market-tiers button { min-width: 44px; }
+        }
         #pafk-market-filters .pafk-recommendation {
           border-top: 1px solid #d8e4f5;
           padding: 10px 12px 12px;
@@ -1930,6 +2028,7 @@
           margin: 10px 0 4px; padding: 6px 10px; border-radius: 8px;
           background: #eef4ff; color: #152964; font-weight: 800;
         }
+        #pafk-tier-sorted .pafk-sort-group[hidden] { display: none; }
         #pafk-tier-sorted .pafk-sort-group .${TIER_BADGE} { margin: 0; font-size: 14px; }
         #pafk-tier-sorted .pafk-sort-group small { margin-inline-start: auto; color: #465982; font-weight: 600; }
         .pafk-map-line { display: inline-flex; align-self: flex-start; align-items: stretch; gap: 3px; margin: 2px 0 0; font-size: 10px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
@@ -1978,30 +2077,71 @@
 
     // ==== src/market/state.js ====
     // Estado do painel do mercado e resultado dos filtros.
-    function showResults(list, nativeNature) {
-      const active = filters.natures.size + filters.minimums.size;
-      const rows = list ? [...list.querySelectorAll(OFFER_ROW)] : [];
+    function filterMarketRows(root, view, mode) {
+      const grouped = view === 'grouped';
+      const browsing = view !== 'species';
+      const bySpecies = browsing && hasSpeciesFilters();
+      const byOffer = !grouped && (offerFilterCount() || marketSearch.potential);
+      const active = Boolean(bySpecies || byOffer);
+      const rows = [...root.querySelectorAll(grouped ? SPECIES_ROWS : OFFER_ROW)];
       let matched = 0;
       let unknown = 0;
       for (const row of rows) {
-        const result = active ? matchOffer(readOffer(row), filters) : true;
-        row.toggleAttribute(FILTERED_ATTR, result === false);
+        const result = matchMarketRow(row, mode, bySpecies, byOffer);
+        row.toggleAttribute(FILTERED_ATTR, result === false || (marketSearch.potential && result === null));
         if (result === true) matched++;
         if (result === null) unknown++;
       }
+      for (const heading of root.querySelectorAll('.pafk-sort-group')) {
+        let count = 0;
+        for (let row = heading.nextElementSibling; row?.matches(SPECIES_ROWS); row = row.nextElementSibling) {
+          if (!row.hasAttribute(FILTERED_ATTR)) count++;
+        }
+        heading.hidden = !count;
+        const countLabel = heading.querySelector('small');
+        const label = `${count} ${count === 1 ? 'espécie' : 'espécies'}`;
+        if (countLabel.textContent !== label) countLabel.textContent = label;
+      }
+      return { active, total: rows.length, matched, unknown };
+    }
+
+    function matchMarketRow(row, mode, bySpecies, byOffer) {
+      if (!bySpecies && !byOffer) return true;
+      const sprite = potentialSprite(row.querySelector('img.mk-front'));
+      const dex = row.querySelector('[data-species]')?.dataset.species ?? sprite?.[1];
+      if (bySpecies && !matchesMarketSpecies(dex, mode)) return false;
+      if (!byOffer) return true;
+      const offer = readOffer(row);
+      const ivMatch = matchOffer(offer, filters);
+      if (!marketSearch.potential || ivMatch === false) return ivMatch;
+      const profile = potentialProfile(dex, sprite, mode);
+      const tier = Number(row.querySelector('.mk-tier')?.textContent.trim().match(/^Tier\s+([1-5])$/i)?.[1]);
+      const potential = assessPotential({ profile, ...offer, tier }, mode);
+      if (potential && !potential.ok) return false;
+      return potential ? ivMatch : null;
+    }
+
+    function offerFilterCount() {
+      return filters.natures.size + filters.minimums.size;
+    }
+
+    function showMarketResults(main, view, nativeNature) {
+      const grouped = view === 'grouped';
+      const mode = readMode();
+      const sorted = grouped && main.querySelector('#pafk-tier-sorted');
+      const { active, total, matched, unknown } = filterMarketRows(sorted || main, view, mode);
       let message = '';
-      if (active && rows.length) {
-        message = matched
-          ? `${matched} de ${rows.length} anúncios carregados passam pelos filtros.`
-          : 'Nenhum anúncio carregado atende aos filtros.';
-        if (unknown) message += ` Anúncios sem dados suficientes: ${unknown}.`;
+      if (active && (total || main.querySelector('.mk-empty p'))) {
+        const place = sorted ? 'no mercado' : view === 'species' ? 'nesta espécie' : 'nesta página';
+        const kind = grouped ? 'espécies' : 'anúncios';
+        message = matched ? `${matched} de ${total} ${kind} passam pelos filtros ${place}.`
+          : `Nenhum resultado confirmado ${place}.`;
+        if (unknown) message += ` Sem dados suficientes: ${unknown}.`;
       }
       if (filters.natures.size && NATURES.includes(nativeNature)) {
-        message += ` O filtro do jogo está em ${nativeNature}. Selecione “Todas as naturezas” nele para combinar várias.`;
+        message += ` O filtro do jogo está em ${nativeNature}. Use “Todas as naturezas” nele para combinar várias.`;
       }
-      const status = panel.querySelector('[data-status]');
-      status.hidden = !message;
-      if (status.textContent !== message) status.textContent = message;
+      syncMarketScan(main, view, active && !sorted && !(grouped && tierSortMode), matched, message);
     }
 
     let scope = null;
@@ -2012,13 +2152,15 @@
     let stylesInstalled = false;
     const panel = createPanel(next => {
       if (!scope || !panel.isConnected) return;
+      stopMarketScan();
       filters = next;
       saveFilters(scope, filters);
       syncMarket();
     });
     const form = panel.querySelector('form');
     const title = panel.querySelector('h3');
-    const groupedHint = panel.querySelector('[data-grouped-hint]');
+    const offerFilterDetails = form.querySelector('details');
+    const offerFilterSummary = form.querySelector('[data-offer-filter-count]');
 
     function ensureStyles() {
       if (stylesInstalled) return;
@@ -2174,13 +2316,13 @@
     function syncTierSort(main, grouped) {
       tierSortBox.hidden = !grouped;
       const active = Boolean(grouped && tierSortMode);
-      const current = main.querySelector('#pafk-tier-sorted');
+      const current = main?.querySelector('#pafk-tier-sorted');
       if (!active) {
         tierSortToken++;
         tierSortBusy = false;
         tierSortStatus.textContent = '';
         current?.remove();
-        delete main.dataset.pafkSorted;
+        if (main) delete main.dataset.pafkSorted;
         return;
       }
       if (tierSortBusy) return;
@@ -3437,13 +3579,14 @@
     let potRules = readPotRules();
 
     // Reference build: the profile of the sprite's form (Megas) or the species' best final evolution.
-    function potProfile(card, mode) {
-      const src = card.querySelector('.pcx-spr')?.getAttribute('src') ?? '';
-      const match = src.match(/\/assets\/mon\/front\/(\d+)(-[a-z-]+?)?s?\.png/);
-      if (!match) return null;
-      const form = match[2] ? MARKET_GUIDE?.profiles?.[`${match[1]}${match[2]}`] : null;
+    function potentialProfile(dex, sprite, mode) {
+      const form = sprite?.[2] ? MARKET_GUIDE?.profiles?.[`${sprite[1]}${sprite[2]}`] : null;
       if (form && rated(form, mode)) return form;
-      return speciesRating(match[1], mode);
+      return speciesRating(dex ?? sprite?.[1], mode);
+    }
+
+    function potentialSprite(image) {
+      return image?.getAttribute('src')?.match(/\/assets\/mon\/front\/(\d+)(-[\w-]+?)?s?\.png(?:[?#].*)?$/);
     }
 
     function mainAttackStat(profile, mode) {
@@ -3465,16 +3608,15 @@
       return { ivs, tier, nature };
     }
 
-    function evaluatePotential(card, mode) {
-      const profile = potProfile(card, mode);
-      const { ivs, tier, nature } = readPcCard(card);
-      if (!profile || !Number.isFinite(tier) || ['hp', 'atk', 'spa', 'spe'].some(stat => !(stat in ivs))) return null;
+    function assessPotential({ profile, ivs, tier, nature }, mode) {
+      if (!profile || !Number.isInteger(tier) || tier < 1 || tier > 5) return null;
       const main = mainAttackStat(profile, mode);
       const checks = [
         { stat: main, need: potRules.main },
         { stat: 'hp', need: potRules.hp },
         { stat: 'spe', need: potRules.spe },
       ].map(check => ({ ...check, value: ivs[check.stat], ok: ivs[check.stat] >= check.need }));
+      if (checks.some(check => !validIV(check.value))) return null;
       const effect = nature ? NATURE_EFFECTS.get(nature) : null;
       let natureFit = null;
       if (effect && effect.up !== effect.down) {
@@ -3483,6 +3625,11 @@
       }
       const ok = tier <= potRules.tier && checks.every(check => check.ok);
       return { ok, profile, main, checks, tier, nature, natureFit };
+    }
+
+    function evaluatePotential(card, mode) {
+      const profile = potentialProfile(null, potentialSprite(card.querySelector('.pcx-spr')), mode);
+      return assessPotential({ profile, ...readPcCard(card) }, mode);
     }
 
     function potTitle(result, mode) {
@@ -3762,6 +3909,337 @@
       if (tools) potToolbar(tools, mode);
     }
 
+    // ==== src/market/search.js ====
+    // Busca por espécie, tier da lista e potencial (os limites são os mesmos do PC).
+    const MARKET_SEARCH_KEY = 'pokeafk-market-filtros:busca';
+    const MARKET_SPECIES = DEX.flatMap((entry, dex) => entry ? [[String(dex), entry.split(':')[0]]] : []);
+    const MARKET_SPECIES_NAMES = new Map(MARKET_SPECIES);
+    const marketSpeciesOptions = MARKET_SPECIES.map(([dex, name]) => ({ dex, name, query: marketSearchText(name) }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+    function marketSearchText(value) {
+      return value.toLowerCase().normalize('NFD').replace(/[^\p{L}\p{N}♀♂]/gu, '');
+    }
+
+    function marketSearchSet(saved, valid) {
+      return new Set(Array.isArray(saved) ? saved.filter(value => valid.includes(value)) : []);
+    }
+
+    function readMarketSearch() {
+      let saved;
+      try {
+        saved = JSON.parse(localStorage.getItem(MARKET_SEARCH_KEY));
+      } catch {
+        // A busca ainda funciona durante esta sessão.
+      }
+      const dexes = [...MARKET_SPECIES_NAMES.keys()];
+      const include = marketSearchSet(saved?.include, dexes);
+      const exclude = marketSearchSet(saved?.exclude, dexes);
+      for (const dex of exclude) include.delete(dex);
+      return { include, exclude, tiers: marketSearchSet(saved?.tiers, TIERS), potential: saved?.potential === true };
+    }
+
+    let marketSearch = readMarketSearch();
+
+    function hasSpeciesFilters() {
+      return marketSearch.include.size || marketSearch.exclude.size || marketSearch.tiers.size;
+    }
+
+    function matchesMarketSpecies(dex, mode) {
+      const { include, exclude, tiers } = marketSearch;
+      return !exclude.has(dex) && (!include.size || include.has(dex))
+        && (!tiers.size || tiers.has(speciesRating(dex, mode)?.[mode].tier));
+    }
+
+    function saveMarketSearch() {
+      const { include, exclude, tiers, potential } = marketSearch;
+      try {
+        localStorage.setItem(MARKET_SEARCH_KEY, JSON.stringify({ include: [...include], exclude: [...exclude], tiers: [...tiers], potential }));
+      } catch {
+        // A seleção continua ativa mesmo sem armazenamento.
+      }
+    }
+
+    const marketSearchTools = document.createElement('section');
+    marketSearchTools.className = 'pafk-market-search';
+    marketSearchTools.innerHTML = `
+      <div class="pafk-market-search-controls">
+        <details data-market-picker>
+          <summary>Incluir ou excluir espécies</summary>
+          <label class="pafk-sr-only" for="pafk-market-species-query">Nome ou número na Pokédex</label>
+          <input id="pafk-market-species-query" type="search" placeholder="Nome ou nº na Pokédex" autocomplete="off" spellcheck="false">
+          <p role="status" data-market-picker-status></p>
+          <ul data-market-species-options></ul>
+        </details>
+        <label data-market-mode-label>Lista <select data-market-mode>
+          ${Object.entries(MODES).map(([mode, { label }]) => `<option value="${mode}">${label}</option>`).join('')}
+        </select></label>
+        <fieldset class="pafk-market-tiers" data-market-tiers>
+          <legend class="pafk-sr-only">Ranking de espécies</legend>
+          <span aria-hidden="true">Ranking</span>
+          ${TIERS.map(tier => `<button type="button" class="pafk-tier-seg" data-tier="${tier}" data-market-tier="${tier}" aria-label="Tier ${tier}" aria-pressed="false">${tier}</button>`).join('')}
+        </fieldset>
+        <label data-market-potential-label><input type="checkbox" data-market-potential> Só com potencial</label>
+        <button type="button" data-market-ungroup>Ver anúncios com potencial</button>
+        <button type="button" data-market-clear>Limpar busca</button>
+      </div>
+      <div class="pafk-market-chips" data-market-chips role="group" aria-label="Espécies selecionadas" hidden></div>
+      <details data-market-pot-rules>
+        <summary>Limites de potencial da Caixa <span data-market-rule-summary></span></summary>
+        <div class="pafk-market-rule-controls">
+          ${POT_RULE_FIELDS.map(([key, label, tip]) => `
+            <label title="${tip}">${label} ≥ <select data-market-rule="${key}" aria-label="${tip}">
+              ${Array.from({ length: 32 }, (_, iv) => `<option>${iv}</option>`).join('')}
+            </select></label>`).join('')}
+          <label>Classe de IV até <select data-market-rule="tier">
+            ${[1, 2, 3, 4, 5].map(tier => `<option value="${tier}">Tier ${tier}</option>`).join('')}
+          </select></label>
+          <button type="button" data-market-pot-reset>Padrão</button>
+        </div>
+      </details>`;
+    panel.querySelector('.pafk-filter-header').after(marketSearchTools);
+    panel.dataset.pafk = '';
+    panel.addEventListener('click', event => event.stopPropagation());
+    panel.addEventListener('keydown', event => {
+      if (event.target.matches('input, select')) event.stopPropagation();
+    });
+
+    const marketPicker = marketSearchTools.querySelector('[data-market-picker]');
+    const marketPickerInput = marketPicker.querySelector('input');
+    const marketPickerList = marketPicker.querySelector('[data-market-species-options]');
+    const marketChips = marketSearchTools.querySelector('[data-market-chips]');
+    const marketMode = marketSearchTools.querySelector('[data-market-mode]');
+    const marketPotential = marketSearchTools.querySelector('[data-market-potential]');
+    const marketClear = marketSearchTools.querySelector('[data-market-clear]');
+    const marketUngroup = marketSearchTools.querySelector('[data-market-ungroup]');
+    const marketRuleDetails = marketSearchTools.querySelector('[data-market-pot-rules]');
+
+    function renderSpeciesOptions() {
+      const query = marketSearchText(marketPickerInput.value);
+      const number = /^\d+$/.test(query) ? String(Number(query)) : null;
+      const matches = query ? marketSpeciesOptions.filter(option => number
+        ? option.dex === number : option.query.includes(query)) : [];
+      marketPicker.querySelector('[data-market-picker-status]').textContent = matches.length > 8
+        ? 'Digite mais letras para refinar a busca.' : query && !matches.length ? 'Nenhuma espécie encontrada.' : '';
+      marketPickerList.replaceChildren(...matches.slice(0, 8).map(({ dex, name }) => {
+        const row = document.createElement('li');
+        row.innerHTML = '<span></span><button type="button" data-pick-species="include">Incluir</button>'
+          + '<button type="button" data-pick-species="exclude">Excluir</button>';
+        row.firstElementChild.textContent = name;
+        for (const button of row.querySelectorAll('button')) {
+          button.dataset.dex = dex;
+          button.setAttribute('aria-label', `${button.textContent} ${name}`);
+        }
+        return row;
+      }));
+      syncSpeciesOptions();
+    }
+
+    function syncSpeciesOptions() {
+      for (const button of marketPickerList.querySelectorAll('[data-pick-species]')) {
+        button.setAttribute('aria-pressed', String(marketSearch[button.dataset.pickSpecies].has(button.dataset.dex)));
+      }
+    }
+
+    function renderMarketChips() {
+      marketChips.replaceChildren(...['include', 'exclude'].flatMap(key => [...marketSearch[key]].map(dex => {
+        const name = MARKET_SPECIES_NAMES.get(dex);
+        const included = key === 'include';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.removeSpecies = key;
+        button.dataset.dex = dex;
+        button.textContent = `${included ? '+' : '−'} ${name} ×`;
+        button.setAttribute('aria-label', `Remover ${name} das espécies ${included ? 'incluídas' : 'excluídas'}`);
+        return button;
+      })));
+    }
+
+    function syncMarketSearch(view) {
+      const browsing = view !== 'species';
+      const grouped = view === 'grouped';
+      marketPicker.hidden = !browsing;
+      marketMode.closest('label').hidden = !browsing;
+      marketMode.value = readMode();
+      marketSearchTools.querySelector('[data-market-tiers]').hidden = !browsing;
+      marketChips.hidden = !browsing || !marketChips.childElementCount;
+      marketPotential.closest('label').hidden = grouped;
+      marketPotential.checked = marketSearch.potential;
+      marketUngroup.hidden = !grouped;
+      marketClear.hidden = !browsing || !(hasSpeciesFilters() || marketSearch.potential);
+      marketRuleDetails.hidden = grouped || !marketSearch.potential;
+      const { main, hp, spe, tier } = potRules;
+      const ruleSummary = `· Ataque principal ≥ ${main} · HP ≥ ${hp} · Vel ≥ ${spe} · até Tier ${tier}`;
+      const summary = marketRuleDetails.querySelector('[data-market-rule-summary]');
+      if (summary.textContent !== ruleSummary) summary.textContent = ruleSummary;
+      for (const select of marketRuleDetails.querySelectorAll('[data-market-rule]')) {
+        select.value = potRules[select.dataset.marketRule];
+      }
+      for (const button of marketSearchTools.querySelectorAll('[data-market-tier]')) {
+        button.setAttribute('aria-pressed', String(marketSearch.tiers.has(button.dataset.marketTier)));
+      }
+    }
+
+    function changeMarketSearch() {
+      stopMarketScan();
+      saveMarketSearch();
+      renderMarketChips();
+      syncSpeciesOptions();
+      syncMarket();
+    }
+
+    function setMarketPotentialRules(rules) {
+      potRules = rules;
+      potScan = null;
+      savePotRules(rules);
+      stopMarketScan();
+      syncAll();
+    }
+
+    marketPickerInput.addEventListener('input', renderSpeciesOptions);
+    marketSearchTools.addEventListener('click', event => {
+      const button = event.target.closest('button');
+      if (!button) return;
+      const { pickSpecies, removeSpecies, dex, marketTier } = button.dataset;
+      if (pickSpecies) {
+        const selected = marketSearch[pickSpecies];
+        if (selected.has(dex)) selected.delete(dex);
+        else {
+          marketSearch[pickSpecies === 'include' ? 'exclude' : 'include'].delete(dex);
+          selected.add(dex);
+        }
+      } else if (removeSpecies) {
+        marketSearch[removeSpecies].delete(dex);
+        marketPicker.querySelector('summary').focus();
+      } else if (marketTier) {
+        if (!marketSearch.tiers.delete(marketTier)) marketSearch.tiers.add(marketTier);
+      } else if (button === marketClear) {
+        marketSearch = { include: new Set(), exclude: new Set(), tiers: new Set(), potential: false };
+        marketPickerInput.value = '';
+        renderSpeciesOptions();
+        marketPicker.querySelector('summary').focus();
+      } else if (button === marketUngroup) {
+        const grouped = marketMain()?.parentElement.querySelector('[data-grouped][aria-pressed="true"]');
+        if (!grouped) return;
+        marketSearch.potential = true;
+        grouped.click();
+      } else if (button.hasAttribute('data-market-pot-reset')) {
+        setMarketPotentialRules({ ...POT_DEFAULT_RULES });
+        return;
+      } else return;
+      changeMarketSearch();
+      if (button === marketUngroup && marketPotential.offsetParent) marketPotential.focus({ preventScroll: true });
+    });
+
+    marketSearchTools.addEventListener('change', ({ target }) => {
+      if (target === marketMode) {
+        saveMode(marketMode.value);
+        stopMarketScan();
+        syncAll();
+      } else if (target === marketPotential) {
+        marketSearch.potential = marketPotential.checked;
+        changeMarketSearch();
+      } else if (target.dataset.marketRule) {
+        setMarketPotentialRules({ ...potRules, [target.dataset.marketRule]: Number(target.value) });
+      }
+    });
+
+    renderMarketChips();
+
+    // Usa a paginação do jogo para manter os botões nativos dos anúncios funcionando.
+    const marketResults = panel.querySelector('[data-market-results]');
+    const marketStatus = panel.querySelector('[data-status]');
+    const marketScanButton = panel.querySelector('[data-scan-market]');
+    let marketView = null;
+    let marketScan = null;
+    let marketScanStatus = '';
+
+    function stopMarketScan() {
+      marketScan = null;
+      marketScanStatus = '';
+    }
+
+    function marketNextPage(main) {
+      return main?.querySelector('.mk-pager [aria-label="Próxima página"]:not(:disabled)');
+    }
+
+    function syncMarketScan(main, view, active, matched, message) {
+      if (view !== marketView || !active) stopMarketScan();
+      marketView = view;
+      if (marketScan) marketScan.matched = matched;
+      marketScanButton.hidden = !active || (!marketScan && !marketNextPage(main));
+      const label = marketScan ? 'Parar busca' : 'Próxima com resultados ›';
+      if (marketScanButton.textContent !== label) marketScanButton.textContent = label;
+      const status = marketScanStatus || message;
+      if (marketStatus.textContent !== status) marketStatus.textContent = status;
+      marketResults.hidden = !status && marketScanButton.hidden;
+      if (marketScan?.keepFocus && document.activeElement === document.body) {
+        marketScanButton.focus({ preventScroll: true });
+      }
+    }
+
+    async function scanMarketPages() {
+      if (marketScan) {
+        stopMarketScan();
+        syncMarket();
+        return;
+      }
+      const job = { view: marketView, matched: 0, keepFocus: document.activeElement === marketScanButton };
+      marketScan = job;
+      while (marketScan === job) {
+        const main = marketMain();
+        const next = marketNextPage(main);
+        if (!next) {
+          marketScanStatus = 'Nenhum resultado nas próximas páginas.';
+          break;
+        }
+        const page = Number(next.dataset.pg);
+        marketScanStatus = `Buscando resultados na página ${page + 1}…`;
+        syncMarket();
+        if (marketScan !== job) return;
+        next.click();
+        const arrived = await waitFor(() => {
+          if (marketScan !== job) return true;
+          const shown = marketMain();
+          return shown && currentPage(shown) === page
+            && (shown.querySelector(job.view === 'grouped' ? SPECIES_ROWS : OFFER_ROW)
+              || shown.querySelector('.mk-empty p'));
+        });
+        if (marketScan !== job) return;
+        if (!arrived) {
+          marketScanStatus = 'O mercado não carregou a próxima página. Tente de novo.';
+          break;
+        }
+        syncMarket();
+        if (job.matched) {
+          marketScanStatus = '';
+          break;
+        }
+      }
+      if (marketScan !== job) return;
+      marketScan = null;
+      syncMarket();
+    }
+
+    marketScanButton.addEventListener('click', () => {
+      scanMarketPages().catch(error => {
+        stopMarketScan();
+        marketScanStatus = `Erro na busca do mercado: ${error.message}`;
+        syncMarket();
+        throw error;
+      });
+    });
+
+    function cancelScanOnNativeInput(event) {
+      if (!marketScan || !event.isTrusted || panel.contains(event.target)) return;
+      if (!event.target.closest('.mk button, .mk input, .mk select')) return;
+      stopMarketScan();
+      setTimeout(syncMarket, 0);
+    }
+
+    document.addEventListener('click', cancelScanOnNativeInput, true);
+    document.addEventListener('input', cancelScanOnNativeInput, true);
+
     // ==== src/tiers/observer.js ====
     // Sincronização com a tela do jogo: um único MutationObserver para mercado, MAPA e ficha.
     function syncAll() {
@@ -3791,12 +4269,17 @@
       const isSpecies = Boolean(speciesTools && dex);
       if (!isSpecies && !browseTools) {
         scope = null;
+        recommendationDex = null;
+        marketView = null;
+        stopMarketScan();
+        syncTierSort(main, false);
         tierDialog?.close();
         panel.remove();
         return;
       }
 
       const grouped = browseTools && market.querySelector('[data-grouped][aria-pressed="true"]');
+      const view = isSpecies ? 'species' : grouped ? 'grouped' : 'offers';
       const nextScope = isSpecies ? `species:${Number(dex)}` : (grouped ? null : 'all');
 
       if (isSpecies) {
@@ -3808,6 +4291,7 @@
         scope = nextScope;
         filters = nextScope ? readFilters(nextScope) : emptyFilters();
         loadForm(form, filters);
+        offerFilterDetails.open = isSpecies;
       }
       const nextDex = isSpecies ? Number(dex) : null;
       if (recommendationDex !== nextDex) {
@@ -3819,10 +4303,13 @@
       const heading = speciesName ? `Filtros de ${speciesName}` : 'Filtros de Pokémon';
       if (title.textContent !== heading) title.textContent = heading;
       form.hidden = !scope;
-      groupedHint.hidden = Boolean(scope);
+      const count = offerFilterCount();
+      const summary = count ? `· ${count} ${count === 1 ? 'filtro ativo' : 'filtros ativos'}` : '';
+      if (offerFilterSummary.textContent !== summary) offerFilterSummary.textContent = summary;
       const nativeNature = speciesTools?.querySelector('[aria-label="Natureza"]')?.textContent.trim();
-      showResults(main.querySelector(OFFER_LIST), nativeNature);
+      syncMarketSearch(view);
       syncTierSort(main, Boolean(browseTools && grouped));
+      showMarketResults(main, view, nativeNature);
     }
 
     // Market, MAPA and FICHA DO POKÉMON all live in game windows (.mk inside .modal).
@@ -5272,10 +5759,6 @@
   })();
 
   if (moduleEnabled('monitor')) (() => {
-    // ==== src/data/dex.js ====
-    // Gerado por build-data.mjs: espécies por número da Pokédex, "Nome:tipo". Não edite à mão.
-    const DEX = /* DEX_DATA_START */ ["","Bulbasaur:grass","Ivysaur:grass","Venusaur:grass","Charmander:fire","Charmeleon:fire","Charizard:fire","Squirtle:water","Wartortle:water","Blastoise:water","Caterpie:bug","Metapod:bug","Butterfree:bug","Weedle:bug","Kakuna:bug","Beedrill:bug","Pidgey:normal","Pidgeotto:normal","Pidgeot:normal","Rattata:normal","Raticate:normal","Spearow:normal","Fearow:normal","Ekans:poison","Arbok:poison","Pikachu:electric","Raichu:electric","Sandshrew:ground","Sandslash:ground","Nidoran♀:poison","Nidorina:poison","Nidoqueen:poison","Nidoran♂:poison","Nidorino:poison","Nidoking:poison","Clefairy:normal","Clefable:normal","Vulpix:fire","Ninetales:fire","Jigglypuff:normal","Wigglytuff:normal","Zubat:poison","Golbat:poison","Oddish:grass","Gloom:grass","Vileplume:grass","Paras:bug","Parasect:bug","Venonat:bug","Venomoth:bug","Diglett:ground","Dugtrio:ground","Meowth:normal","Persian:normal","Psyduck:water","Golduck:water","Mankey:fighting","Primeape:fighting","Growlithe:fire","Arcanine:fire","Poliwag:water","Poliwhirl:water","Poliwrath:water","Abra:psychic","Kadabra:psychic","Alakazam:psychic","Machop:fighting","Machoke:fighting","Machamp:fighting","Bellsprout:grass","Weepinbell:grass","Victreebel:grass","Tentacool:water","Tentacruel:water","Geodude:rock","Graveler:rock","Golem:rock","Ponyta:fire","Rapidash:fire","Slowpoke:water","Slowbro:water","Magnemite:electric","Magneton:electric","Farfetch'd:normal","Doduo:normal","Dodrio:normal","Seel:water","Dewgong:water","Grimer:poison","Muk:poison","Shellder:water","Cloyster:water","Gastly:ghost","Haunter:ghost","Gengar:ghost","Onix:rock","Drowzee:psychic","Hypno:psychic","Krabby:water","Kingler:water","Voltorb:electric","Electrode:electric","Exeggcute:grass","Exeggutor:grass","Cubone:ground","Marowak:ground","Hitmonlee:fighting","Hitmonchan:fighting","Lickitung:normal","Koffing:poison","Weezing:poison","Rhyhorn:ground","Rhydon:ground","Chansey:normal","Tangela:grass","Kangaskhan:normal","Horsea:water","Seadra:water","Goldeen:water","Seaking:water","Staryu:water","Starmie:water","Mr. Mime:psychic","Scyther:bug","Jynx:ice","Electabuzz:electric","Magmar:fire","Pinsir:bug","Tauros:normal","Magikarp:water","Gyarados:water","Lapras:water","Ditto:normal","Eevee:normal","Vaporeon:water","Jolteon:electric","Flareon:fire","Porygon:normal","Omanyte:rock","Omastar:rock","Kabuto:rock","Kabutops:rock","Aerodactyl:rock","Snorlax:normal","Articuno:ice","Zapdos:electric","Moltres:fire","Dratini:dragon","Dragonair:dragon","Dragonite:dragon","Mewtwo:psychic","Mew:psychic","Chikorita:grass","Bayleef:grass","Meganium:grass","Cyndaquil:fire","Quilava:fire","Typhlosion:fire","Totodile:water","Croconaw:water","Feraligatr:water","Sentret:normal","Furret:normal","Hoothoot:normal","Noctowl:normal","Ledyba:bug","Ledian:bug","Spinarak:bug","Ariados:bug","Crobat:poison","Chinchou:water","Lanturn:water","Pichu:electric","Cleffa:normal","Igglybuff:normal","Togepi:normal","Togetic:normal","Natu:psychic","Xatu:psychic","Mareep:electric","Flaaffy:electric","Ampharos:electric","Bellossom:grass","Marill:water","Azumarill:water","Sudowoodo:rock","Politoed:water","Hoppip:grass","Skiploom:grass","Jumpluff:grass","Aipom:normal","Sunkern:grass","Sunflora:grass","Yanma:bug","Wooper:water","Quagsire:water","Espeon:psychic","Umbreon:dark","Murkrow:dark","Slowking:water","Misdreavus:ghost","Unown:psychic","Wobbuffet:psychic","Girafarig:normal","Pineco:bug","Forretress:bug","Dunsparce:normal","Gligar:ground","Steelix:steel","Snubbull:normal","Granbull:normal","Qwilfish:water","Scizor:bug","Shuckle:bug","Heracross:bug","Sneasel:dark","Teddiursa:normal","Ursaring:normal","Slugma:fire","Magcargo:fire","Swinub:ice","Piloswine:ice","Corsola:water","Remoraid:water","Octillery:water","Delibird:ice","Mantine:water","Skarmory:steel","Houndour:dark","Houndoom:dark","Kingdra:water","Phanpy:ground","Donphan:ground","Porygon2:normal","Stantler:normal","Smeargle:normal","Tyrogue:fighting","Hitmontop:fighting","Smoochum:ice","Elekid:electric","Magby:fire","Miltank:normal","Blissey:normal","Raikou:electric","Entei:fire","Suicune:water","Larvitar:rock","Pupitar:rock","Tyranitar:rock","Lugia:psychic","Ho-Oh:fire","Celebi:psychic","Treecko:grass","Grovyle:grass","Sceptile:grass","Torchic:fire","Combusken:fire","Blaziken:fire","Mudkip:water","Marshtomp:water","Swampert:water","Poochyena:dark","Mightyena:dark","Zigzagoon:normal","Linoone:normal","Wurmple:bug","Silcoon:bug","Beautifly:bug","Cascoon:bug","Dustox:bug","Lotad:water","Lombre:water","Ludicolo:water","Seedot:grass","Nuzleaf:grass","Shiftry:grass","Taillow:normal","Swellow:normal","Wingull:water","Pelipper:water","Ralts:psychic","Kirlia:psychic","Gardevoir:psychic","Surskit:bug","Masquerain:bug","Shroomish:grass","Breloom:grass","Slakoth:normal","Vigoroth:normal","Slaking:normal","Nincada:bug","Ninjask:bug","Shedinja:bug","Whismur:normal","Loudred:normal","Exploud:normal","Makuhita:fighting","Hariyama:fighting","Azurill:normal","Nosepass:rock","Skitty:normal","Delcatty:normal","Sableye:dark","Mawile:steel","Aron:steel","Lairon:steel","Aggron:steel","Meditite:fighting","Medicham:fighting","Electrike:electric","Manectric:electric","Plusle:electric","Minun:electric","Volbeat:bug","Illumise:bug","Roselia:grass","Gulpin:poison","Swalot:poison","Carvanha:water","Sharpedo:water","Wailmer:water","Wailord:water","Numel:fire","Camerupt:fire","Torkoal:fire","Spoink:psychic","Grumpig:psychic","Spinda:normal","Trapinch:ground","Vibrava:ground","Flygon:ground","Cacnea:grass","Cacturne:grass","Swablu:normal","Altaria:dragon","Zangoose:normal","Seviper:poison","Lunatone:rock","Solrock:rock","Barboach:water","Whiscash:water","Corphish:water","Crawdaunt:water","Baltoy:ground","Claydol:ground","Lileep:rock","Cradily:rock","Anorith:rock","Armaldo:rock","Feebas:water","Milotic:water","Castform:normal","Kecleon:normal","Shuppet:ghost","Banette:ghost","Duskull:ghost","Dusclops:ghost","Tropius:grass","Chimecho:psychic","Absol:dark","Wynaut:psychic","Snorunt:ice","Glalie:ice","Spheal:ice","Sealeo:ice","Walrein:ice","Clamperl:water","Huntail:water","Gorebyss:water","Relicanth:water","Luvdisc:water","Bagon:dragon","Shelgon:dragon","Salamence:dragon","Beldum:steel","Metang:steel","Metagross:steel","Regirock:rock","Regice:ice","Registeel:steel","Latias:dragon","Latios:dragon","Kyogre:water","Groudon:ground","Rayquaza:dragon","Jirachi:steel","Deoxys:psychic"] /* DEX_DATA_END */;
-
     // ==== src/monitor.js ====
     // ---- Monitor de contas ----
     // Each game tab reads its own HUD (DOM only) and saves a small record in the userscript manager's
@@ -5464,8 +5947,6 @@
         potionsTotal: heal.length ? potions.reduce((sum, item) => sum + item.n, 0) : null,
         potionsFrom,
         money: count(text($('.hud-wallet .hud-amt'))) || null,
-        // Channel ("Canal 1"): trades only work between trainers on the same channel.
-        canal: text($('.hud-canal .hud-canal-t')) || null,
         main: active ? {
           name: active[1].charAt(0) + active[1].slice(1).toLowerCase(),
           level: Number(active[2]),
@@ -5589,7 +6070,7 @@
       // every hit; the heartbeat carries the exact value.
       const hpStep = record.main?.hpMax ? Math.round(record.main.hp / record.main.hpMax * 10) : null;
       return JSON.stringify([record.state, record.daily, record.ballsTotal, record.potionsTotal,
-        record.afkBalls, record.money, record.canal, record.main?.level, record.main?.name, record.main?.front, hpStep, record.foe?.name,
+        record.afkBalls, record.money, record.main?.level, record.main?.name, record.main?.front, hpStep, record.foe?.name,
         Math.round((record.xp?.trainer?.rate ?? -1) / 5000), Math.round((record.xp?.mon?.rate ?? -1) / 5000)]);
     }
 
@@ -5869,15 +6350,6 @@
       #pafk-monitor .pafk-mon-meta .pafk-mon-age { margin-right: 4px; }
       #pafk-monitor .pafk-mon-meta button { border: 0; background: none; color: ${MUTED}; padding: 0 4px; font-size: 12px; border-radius: 4px; line-height: 20px; }
       #pafk-monitor .pafk-mon-meta button:hover { background: #e9eef8; color: ${NAVY}; }
-      #pafk-monitor .pafk-mon-trade {
-        flex: none; border: 1px solid #b7c6db; border-radius: 5px; background: #fff; color: ${NAVY};
-        padding: 0 7px; font: 600 11px/20px system-ui, sans-serif; white-space: nowrap;
-      }
-      #pafk-monitor .pafk-mon-meta .pafk-mon-trade { border: 1px solid #b7c6db; color: ${NAVY}; padding: 0 7px; margin-right: 2px; font-size: 11px; }
-      #pafk-monitor .pafk-mon-trade:not(:disabled):hover { background: ${NAVY}; color: #fff; }
-      #pafk-monitor .pafk-mon-trade:disabled { color: ${MUTED}; background: #f3f6fb; cursor: default; }
-      #pafk-monitor .pafk-mon-row .pafk-mon-name .pafk-mon-trade { margin-left: 6px; }
-      #pafk-monitor .pafk-mon-row .pafk-mon-name .pafk-mon-age + .pafk-mon-trade { margin-left: 4px; }
       #pafk-monitor .pafk-mon-name input {
         width: 100%; box-sizing: border-box; font: 13px system-ui, sans-serif; font-weight: 700; color: ${NAVY};
         border: 1px solid #b7c6db; border-radius: 6px; padding: 1px 6px;
@@ -6082,93 +6554,6 @@
     // Rows are kept per account and updated in place, so the buttons keep working while the
     // numbers change every second.
     const rows = new Map();
-    // ---- Trade with another account ----
-    // The game's path is menu → Amigos → the friend → Ver perfil → TROCAR. The Amigos window also
-    // has "Buscar jogador", which opens any trainer's profile by name, so the button does:
-    // menu → Amigos → Buscar jogador (name) → the profile's TROCAR (`.pa1-act[data-tr]`), which sends
-    // the invite and closes the profile. Only DOM clicks, as a player would do them.
-    const TRADE_STATES = new Set(['daily', 'battle', 'hunting', 'fishing', 'idle']);
-    let trading = false;
-
-    function tradeButtonHtml(name) {
-      return `<button type="button" class="pafk-mon-trade" data-mon-trade hidden aria-label="Trocar com ${esc(name)}">⇄ Trocar</button>`;
-    }
-
-    const visible = element => Boolean(element && element.getClientRects().length && !element.closest('[hidden], [inert]'));
-    async function waitFor(test, timeout, what) {
-      const end = performance.now() + timeout;
-      for (;;) {
-        const value = test();
-        if (value) return value;
-        if (performance.now() > end) throw new Error(`o jogo não respondeu (${what})`);
-        await new Promise(resolve => setTimeout(resolve, 120));
-      }
-    }
-
-    // Sends a trade invite to `name` through the game's own screens. Throws when the game does not
-    // react (the message says why).
-    async function sendInvite(name) {
-      if ($('.in-arena') || $('.ah-result[data-result]')) throw new Error('termine a batalha antes');
-      // Amigos window, from the trainer menu.
-      let dmName = $('.friends-window:not([hidden]) [data-friends-dm-name]');
-      if (!visible(dmName)) {
-        const menuItem = $('.hud-pm-item[data-act="friends"]');
-        if (!menuItem) throw new Error('não achei Amigos no menu do treinador');
-        if (menuItem.closest('[inert]')) {
-          $('[data-act="playerMenu"]')?.click();
-          await waitFor(() => !menuItem.closest('[inert]'), 3000, 'abrir o menu');
-        }
-        menuItem.click();
-        dmName = await waitFor(() => {
-          const input = $('.friends-window:not([hidden]) [data-friends-dm-name]');
-          return visible(input) ? input : null;
-        }, 5000, 'abrir Amigos');
-      }
-      // "Buscar jogador" opens the profile and closes the Amigos window.
-      const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-      setValue.call(dmName, name);
-      dmName.dispatchEvent(new Event('input', { bubbles: true }));
-      const search = dmName.form?.querySelector('[data-friends-action="dm"]');
-      if (!search) throw new Error('não achei Buscar jogador em Amigos');
-      search.click();
-      const tradeButton = await waitFor(() => {
-        const profile = $$('.pa1-trainer').find(element => visible(element)
-          && nameKey($('.pa1-name', element)?.textContent) === nameKey(name));
-        const found = profile && $('.pa1-act[data-tr]', profile);
-        return found && !found.disabled ? found : null;
-      }, 8000, 'abrir o perfil');
-      tradeButton.click();
-    }
-    // Only the game not reacting is expected; anything else is a bug and goes to the console too.
-    const INVITE_EXPECTED = /o jogo não respondeu|não achei|termine a batalha/;
-
-    async function startTrade(name, button) {
-      if (trading || autoTradeBusy()) return;
-      trading = true;
-      button.dataset.busy = '';
-      button.disabled = true;
-      const label = button.textContent;
-      button.textContent = '⇄ Abrindo...';
-      let message = '';
-      try {
-        await sendInvite(name);
-        message = '⇄ Convite enviado';
-      } catch (error) {
-        if (!INVITE_EXPECTED.test(error.message)) console.error(error);
-        message = '⇄ Não abriu';
-        button.title = `Trocar com ${name}: ${error.message}. Tente pelo menu do jogo.`;
-      } finally {
-        trading = false;
-        button.textContent = message;
-        // The panel leaves a busy button alone, so the result stays readable for a moment.
-        setTimeout(() => {
-          button.textContent = label;
-          delete button.dataset.busy;
-          button.disabled = false;
-        }, message.includes('enviado') ? 2500 : 6000);
-      }
-    }
-
     let shownMode = null;
     let editing = null;
     const mode = () => (store.get(COMPACT_KEY, SHORT_SCREEN.matches) ? 'compact' : 'full');
@@ -6180,11 +6565,10 @@
         item.innerHTML = `
           <span data-f="pic"></span>
           <div style="min-width: 0">
-            <div class="pafk-mon-name"><b data-f="name"></b><small data-f="sub"></small><span class="pafk-mon-age" data-f="age"></span>${tradeButtonHtml(name)}</div>
+            <div class="pafk-mon-name"><b data-f="name"></b><small data-f="sub"></small><span class="pafk-mon-age" data-f="age"></span></div>
             <div class="pafk-mon-line" data-f="line"></div>
           </div>
           <div class="pafk-mon-counts" data-f="counts"></div>`;
-        $('[data-mon-trade]', item).addEventListener('click', event => startTrade(name, event.currentTarget));
         return item;
       }
       item.className = 'pafk-mon-card';
@@ -6193,7 +6577,6 @@
         <div class="pafk-mon-name"><b data-f="name"></b><small data-f="sub"></small></div>
         <div class="pafk-mon-meta">
           <span class="pafk-mon-age" data-f="age"></span>
-          ${tradeButtonHtml(name)}
           <button type="button" data-mon-rename title="Dar um apelido" aria-label="Dar um apelido a ${esc(name)}">✎</button>
           <button type="button" data-mon-forget title="Tirar da lista (volta quando a aba da conta atualizar)" aria-label="Tirar ${esc(name)} da lista">✕</button>
         </div>
@@ -6204,7 +6587,6 @@
           <div class="pafk-mon-doing" data-f="doing"></div>
           <div class="pafk-mon-counts" data-f="counts"></div>
         </div>`;
-      $('[data-mon-trade]', item).addEventListener('click', event => startTrade(name, event.currentTarget));
       $('[data-mon-rename]', item).addEventListener('click', () => startRename(item, name));
       $('[data-mon-forget]', item).addEventListener('click', () => {
         store.del(PREFIX + name);
@@ -6245,16 +6627,6 @@
         item.dataset.state = state;
         item.style.setProperty('--c', info.color);
         item.toggleAttribute('data-me', record.name === myName);
-        // A trade needs both accounts in the game, and this tab not busy with the Daily.
-        const trade = $('[data-mon-trade]', item);
-        if (trade && !trade.dataset.busy) {
-          const why = record.name === myName ? 'esta aba'
-            : !TRADE_STATES.has(state) ? `${info.label.toLowerCase()}: a conta precisa estar no jogo`
-              : $('#pafk-daily[data-running]') ? 'espere o Daily desta aba terminar' : '';
-          trade.hidden = record.name === myName;
-          trade.disabled = Boolean(why);
-          trade.title = why ? `Trocar com ${record.name}: ${why}` : `Abrir uma troca com ${record.name} nesta aba`;
-        }
 
         const nick = allNicks[record.name];
         if (editing !== record.name) {
@@ -6478,480 +6850,6 @@
     }
 
     tick();
-
-    // ==== src/trade.js ====
-    // ---- Troca automática entre as suas contas ----
-    // Pedido do usuário: no menu de um Pokémon do PC (`.t5-pick`, aberto ao clicar nele), o bloco
-    // "Trocar com" tem um botão por conta aberta em outra aba. Ao clicar, as duas abas fazem a troca
-    // sozinhas, só com cliques na tela, como o jogador faria:
-    //   quem envia: convite (menu → Amigos → Buscar jogador → TROCAR) → espera a janela TROCA →
-    //               acha o Pokémon (busca pelo nome e páginas) → oferece → espera a oferta da outra
-    //               conta → CONFIRMAR → CONTINUAR TROCANDO.
-    //   quem recebe: aceita o convite dessa conta → espera a oferta → oferece um Pokémon qualquer da
-    //               caixa (não favorito, não brilhante) → CONFIRMAR → CONTINUAR TROCANDO.
-    // As abas conversam pelo armazenamento do Tampermonkey (o mesmo `store` do monitor, que vale para
-    // todas as abas e contêineres): `trade:ask:<quem recebe>` (pedido, gravado por quem envia) e
-    // `trade:ans:<quem envia>` (erro do outro lado). Sem esse pedido, nenhum convite é aceito sozinho.
-    // Depois de CONTINUAR TROCANDO a sessão fica aberta: quem recebe continua respondendo sozinho às
-    // próximas ofertas da mesma conta até a janela fechar (ENCERRAR ou CANCELAR).
-
-    const ASK_PREFIX = 'trade:ask:';
-    const ANSWER_PREFIX = 'trade:ans:';
-    const ASK_FRESH = 60 * 1000;            // a request older than this is ignored
-    const PARTNER_STATES = new Set(['hunting', 'fishing', 'idle']);
-    const TRADE_ICON = '/assets/ui/win/trade.png';
-
-    // Expected stops: the game did not react, a window closed, the player stopped it, preconditions.
-    class TradeStop extends Error {}
-
-    let job = null;      // this tab sending: { partner, stopped }
-    let follow = null;   // this tab answering: { partner, id, at, opened, gone, offeredAt, okAt, againAt }
-    let handledAsk = '';
-    const autoTradeBusy = () => Boolean(job || follow);
-
-    const sameName = (a, b) => Boolean(a && b) && nameKey(a) === nameKey(b);
-    const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const tradeWindow = () => $$('.modal.open .t5-trade').find(visible) ?? null;
-    // "KETER oferece" while choosing; the done screen only says "Você recebeu".
-    const partnerOf = win => text($('.t5-offer:not(.is-mine) .t5-offer-h > span', win)).replace(/\s*oferece$/i, '');
-    const offerButton = (win, uid) => $$('[data-offer]', win).find(button => button.dataset.offer === uid) ?? null;
-
-    function typeInto(input, value) {
-      const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
-      setValue.call(input, value);
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    // ---- Status bar (both tabs) ----
-    const bar = document.createElement('div');
-    bar.id = 'pafk-trade';
-    bar.dataset.pafk = '';
-    bar.hidden = true;
-    bar.setAttribute('role', 'status');
-    bar.setAttribute('aria-live', 'polite');
-    bar.innerHTML = `
-      <i class="pafk-trade-dot" aria-hidden="true"></i>
-      <span class="pafk-trade-txt"><b>TROCA AUTOMÁTICA</b><span data-trade-msg></span></span>
-      <button type="button" data-trade-stop>Parar</button>
-      <button type="button" data-trade-close aria-label="Fechar aviso">✕</button>`;
-    const barMsg = $('[data-trade-msg]', bar);
-    let barTimer = 0;
-
-    function status(message, tone = 'run') {
-      clearTimeout(barTimer);
-      bar.hidden = false;
-      bar.dataset.tone = tone;
-      barMsg.textContent = message;
-      $('[data-trade-stop]', bar).hidden = tone !== 'run';
-      $('[data-trade-close]', bar).hidden = tone === 'run';
-      if (tone === 'ok') barTimer = setTimeout(() => { bar.hidden = true; }, 10000);
-    }
-    $('[data-trade-stop]', bar).addEventListener('click', () => {
-      if (job) job.stopped = 'parada por você';
-      if (follow) {
-        follow = null;
-        status('Parada nesta aba. A janela de troca continua aberta.', 'bad');
-      }
-    });
-    $('[data-trade-close]', bar).addEventListener('click', () => { bar.hidden = true; });
-
-    const tradeStyle = document.createElement('style');
-    tradeStyle.dataset.pafk = '';
-    tradeStyle.textContent = `
-      #pafk-trade {
-        position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 43;
-        display: flex; align-items: center; gap: 10px; box-sizing: border-box;
-        max-width: min(560px, calc(100vw - 32px)); padding: 7px 8px 7px 12px;
-        border: 4px solid transparent; border-image: url("${IMG.frame}") 10 fill / 4px;
-        box-shadow: 2px 3px 0 rgb(7 26 63 / .33); font: 13px/1.35 system-ui, sans-serif; color: ${NAVY};
-      }
-      #pafk-trade[hidden], #pafk-trade [hidden] { display: none !important; }
-      #pafk-trade .pafk-trade-dot { flex: none; width: 10px; height: 10px; border-radius: 2px; background: #2459aa; }
-      #pafk-trade[data-tone="run"] .pafk-trade-dot { animation: pafk-trade-blink 1s steps(2) infinite; }
-      #pafk-trade[data-tone="ok"] .pafk-trade-dot { background: #2f9e44; }
-      #pafk-trade[data-tone="bad"] .pafk-trade-dot { background: #c92a2a; }
-      #pafk-trade .pafk-trade-txt { display: flex; flex-direction: column; min-width: 0; }
-      #pafk-trade .pafk-trade-txt b { font: 12px "HUD Pixel", system-ui, sans-serif; letter-spacing: .03em; color: ${MUTED}; }
-      #pafk-trade button {
-        flex: none; font: 600 12px system-ui, sans-serif; color: ${NAVY}; cursor: pointer;
-        border: 1px solid #b7c6db; border-radius: 5px; background: #fff; padding: 4px 10px;
-      }
-      #pafk-trade button:hover { background: ${NAVY}; color: #fff; }
-      @keyframes pafk-trade-blink { 50% { opacity: .35; } }
-      @media (prefers-reduced-motion: reduce) { #pafk-trade .pafk-trade-dot { animation: none !important; } }
-
-      /* "Trocar com" inside the game's Pokémon menu: the game's own action row, with one chip per account */
-      .t5-pick-act.pafk-trade-act { cursor: default; }
-      .pafk-trade-act .pafk-trade-ic { width: 24px; height: 24px; image-rendering: pixelated; }
-      .pafk-trade-act .pafk-trade-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 2px; }
-      .pafk-trade-act .pafk-trade-chip {
-        font: 600 12px/1 system-ui, sans-serif; color: ${NAVY}; cursor: pointer; padding: 6px 10px;
-        border: 2px solid #9fb4d8; border-radius: 6px; background: #fff; box-shadow: 0 2px 0 rgb(7 26 63 / .18);
-      }
-      .pafk-trade-act .pafk-trade-chip:not(:disabled):hover { background: ${NAVY}; border-color: ${NAVY}; color: #fff; }
-      .pafk-trade-act .pafk-trade-chip:disabled { cursor: default; color: ${MUTED}; background: #eef2f8; border-color: #d3dceb; box-shadow: none; }
-      .pafk-trade-act[data-off] .pafk-trade-ic { opacity: .5; }
-    `;
-    document.head.append(tradeStyle);
-    document.body.append(bar);
-
-    // ---- Why a trade cannot start now ----
-    function myWhy() {
-      if (!myName) return 'entre no jogo primeiro';
-      if ($('#pafk-daily[data-running]')) return 'espere o Daily desta aba terminar';
-      if ($('.in-arena') || $('.ah-result[data-result]')) return 'termine a batalha antes';
-      if (job || follow || trading) return 'já há uma troca em andamento';
-      return '';
-    }
-
-    function partnerWhy(record, now) {
-      const state = viewState(record, now);
-      if (state === 'daily') return 'está fazendo o Daily';
-      if (state === 'battle') return 'está em batalha';
-      if (!PARTNER_STATES.has(state)) return `${(STATES[state] ?? STATES.stale).label.toLowerCase()}: a conta precisa estar no jogo`;
-      if (record.canal && me?.canal && record.canal !== me.canal) return `está no ${record.canal} e você no ${me.canal}`;
-      return '';
-    }
-
-    function pickInfo(pick) {
-      return {
-        uid: pick.dataset.pick,
-        name: text($('.t5-pick-who strong', pick)),
-        inBox: /na caixa/i.test(text($('.t5-pick-who', pick))),
-        fav: Boolean($('[data-pick-fav="off"]', pick)),
-      };
-    }
-
-    // ---- "Trocar com" in the Pokémon menu ----
-    function makeBlock() {
-      const block = document.createElement('div');
-      block.className = 't5-pick-act pafk-trade-act';
-      block.dataset.pafk = '';
-      block.innerHTML = `<span class="t5-pick-ic" aria-hidden="true"><img class="pafk-trade-ic" src="${TRADE_ICON}" alt="" draggable="false"></span>
-        <span class="t5-pick-t"><b>Trocar com</b><span class="pafk-trade-chips" role="group" aria-label="Trocar com outra conta"></span><small></small></span>`;
-      block.addEventListener('click', event => {
-        const chip = event.target.closest('[data-pafk-trade]');
-        const pick = block.closest('.t5-pick[data-pick]');
-        if (!chip || chip.disabled || !pick) return;
-        event.stopPropagation();
-        sendTrade(chip.dataset.pafkTrade, pickInfo(pick));
-      });
-      return block;
-    }
-
-    function syncBlock(block, info) {
-      const now = Date.now();
-      const others = records().filter(record => record.name !== myName).sort(byName);
-      const blockWhy = !info.inBox ? 'Está na equipe: guarde no PC antes de trocar.'
-        : info.fav ? 'É favorito: tire a estrela antes de trocar.'
-          : !others.length ? 'Abra o jogo com as outras contas em outras abas.'
-            : myWhy();
-      const chips = others.map(record => {
-        const why = blockWhy || partnerWhy(record, now);
-        const label = displayName(record.name);
-        return { name: record.name, label, why, title: why ? `${label}: ${why}` : `Trocar ${info.name} com ${label}` };
-      });
-      const hint = blockWhy || (chips.some(chip => !chip.why)
-        ? 'A outra conta aceita e oferece um Pokémon qualquer da caixa.'
-        : 'Nenhuma outra conta pode trocar agora (passe o mouse para ver o motivo).');
-      const signature = JSON.stringify([blockWhy, hint, chips]);
-      if (block.dataset.sig === signature) return;
-      block.dataset.sig = signature;
-      block.toggleAttribute('data-off', Boolean(blockWhy) || chips.every(chip => chip.why));
-      $('.pafk-trade-chips', block).innerHTML = chips.map(chip => `<button type="button" class="pafk-trade-chip" data-pafk-trade="${esc(chip.name)}" title="${esc(chip.title)}"${chip.why ? ' disabled' : ''}>${esc(chip.label)}</button>`).join('');
-      $('small', block).textContent = hint;
-    }
-
-    function syncPicks() {
-      for (const pick of $$('.t5-pick[data-pick]')) {
-        const acts = $('.t5-pick-acts', pick);
-        if (!acts) continue;
-        let block = $('.pafk-trade-act', acts);
-        if (!block) {
-          block = makeBlock();
-          const fav = $('[data-pick-fav]', acts);
-          acts.insertBefore(block, fav ?? null);
-        }
-        syncBlock(block, pickInfo(pick));
-      }
-    }
-
-    // ---- Sending ----
-    // Waits for `test` to return something; the test may throw TradeStop. Stops when the player does.
-    async function until(test, timeout, why) {
-      const end = performance.now() + timeout;
-      for (;;) {
-        if (job?.stopped) throw new TradeStop(job.stopped);
-        const value = test();
-        if (value) return value;
-        if (performance.now() > end) throw new TradeStop(why);
-        await pause(150);
-      }
-    }
-
-    // The trade window, or a stop if it closed (someone cancelled). A re-render may hide it for an instant.
-    function liveWindow(state) {
-      const win = tradeWindow();
-      if (win) {
-        state.goneAt = 0;
-        return win;
-      }
-      state.goneAt ||= performance.now();
-      if (performance.now() - state.goneAt > 1500) throw new TradeStop('a janela de troca fechou (alguém cancelou?)');
-      return null;
-    }
-
-    function checkAnswer(id, partner) {
-      const answer = store.get(ANSWER_PREFIX + myName, null);
-      if (answer?.id === id && answer.error) throw new TradeStop(`${displayName(partner)}: ${answer.error}`);
-    }
-
-    // Finds the Pokémon in the "Escolha seu Pokémon" grid: first narrowed by its name, then page by page.
-    async function findOffer(uid, label, state) {
-      for (const query of label ? [label, ''] : ['']) {
-        const input = $('[data-pc-q]', liveWindow(state) ?? document);
-        if (input && input.value !== query) {
-          typeInto(input, query);
-          await pause(250);
-        }
-        for (let page = 0; page < 80; page++) {
-          const win = await until(() => liveWindow(state), 3000, 'a janela de troca fechou');
-          const found = offerButton(win, uid);
-          if (found) return found;
-          const pages = text($('.t5-pc-pages b', win));
-          const next = $('[data-pc-page="1"]:not([disabled])', win);
-          if (!next) break;
-          next.click();
-          await until(() => {
-            const current = liveWindow(state);
-            return current && text($('.t5-pc-pages b', current)) !== pages;
-          }, 4000, 'a página da lista não mudou');
-        }
-      }
-      throw new TradeStop(`não achei ${label || 'o Pokémon'} na lista da troca`);
-    }
-
-    async function sendTrade(partner, info) {
-      const why = myWhy();
-      if (why) {
-        status(why, 'bad');
-        return;
-      }
-      const record = store.get(PREFIX + partner, null);
-      const partnerProblem = record ? partnerWhy(record, Date.now()) : 'conta não encontrada';
-      if (partnerProblem) {
-        status(`${displayName(partner)} ${partnerProblem}.`, 'bad');
-        return;
-      }
-      const dn = displayName(partner);
-      const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
-      const state = { goneAt: 0 };
-      job = { partner, stopped: '' };
-      try {
-        let win = tradeWindow();
-        const reuse = win && !win.matches('.is-done') && sameName(partnerOf(win), partner);
-        if (win && !reuse) throw new TradeStop('já há uma janela de troca aberta: termine-a antes');
-        if (!reuse) {
-          // The other tab accepts only an invite it was told about.
-          store.del(ANSWER_PREFIX + myName);
-          store.set(ASK_PREFIX + partner, { id, from: myName, to: partner, at: Date.now() });
-          status(`Enviando o convite para ${dn}…`);
-          try {
-            await sendInvite(partner);
-          } catch (error) {
-            if (INVITE_EXPECTED.test(error.message)) throw new TradeStop(error.message);
-            throw error;
-          }
-          status(`Esperando ${dn} aceitar…`);
-          win = await until(() => {
-            checkAnswer(id, partner);
-            const open = tradeWindow();
-            return open && !open.matches('.is-done') ? open : null;
-          }, 30000, `${dn} não aceitou o convite (a aba dela está aberta no jogo?)`);
-          if (!sameName(partnerOf(win), partner)) throw new TradeStop(`abriu uma troca com ${partnerOf(win) || 'outro treinador'}`);
-        }
-
-        status(`Procurando ${info.name} na lista…`);
-        (await findOffer(info.uid, info.name, state)).click();
-        await until(() => {
-          const open = liveWindow(state);
-          return open && offerButton(open, info.uid)?.classList.contains('sel');
-        }, 8000, `${info.name} não entrou na oferta`);
-
-        status(`Esperando a oferta de ${dn}…`);
-        const ok = await until(() => {
-          checkAnswer(id, partner);
-          const open = liveWindow(state);
-          if (!open) return null;
-          if (!offerButton(open, info.uid)?.classList.contains('sel')) throw new TradeStop(`a oferta mudou: ${info.name} saiu`);
-          return $('[data-ok]:not(.disabled)', open);
-        }, 60000, `${dn} não ofereceu um Pokémon`);
-        ok.click();
-
-        status('Confirmando a troca…');
-        const done = await until(() => {
-          checkAnswer(id, partner);
-          const open = liveWindow(state);
-          return open?.matches('.is-done') ? open : null;
-        }, 45000, 'a troca não foi concluída');
-        const got = text($('.t5-done-h', done)).replace(/^✓\s*/, '');
-        $('[data-again]:not(.disabled)', done)?.click();
-        status(`${got || 'Troca feita!'} ${info.name} foi para ${dn}. A janela fica aberta para continuar trocando.`, 'ok');
-      } catch (error) {
-        if (!(error instanceof TradeStop)) console.error(error);
-        status(`Não terminou: ${error.message}.`, 'bad');
-      } finally {
-        job = null;
-        store.del(ASK_PREFIX + partner);
-      }
-    }
-
-    // Stops on the player's own click or key in this tab (the script's clicks are not trusted).
-    for (const type of ['pointerdown', 'keydown']) {
-      addEventListener(type, event => {
-        if (!event.isTrusted || event.target?.closest?.('#pafk-trade')) return;
-        if (job) job.stopped = 'parada porque você mexeu no jogo';
-        if (follow) {
-          follow = null;
-          status('Parada nesta aba porque você mexeu no jogo.', 'bad');
-        }
-      }, true);
-    }
-
-    // ---- Answering (the other tab) ----
-    function answer(to, id, error) {
-      store.set(ANSWER_PREFIX + to, { id, error, at: Date.now() });
-    }
-
-    function pickRandom(win) {
-      const choices = $$('[data-offer]', win).filter(button => !button.matches('.shiny, .locked, .fainted'));
-      if (choices.length) return choices[Math.floor(Math.random() * choices.length)];
-      return null;
-    }
-
-    let lastAnswerTick = 0;
-    function answerTick() {
-      const now = Date.now();
-      if (now - lastAnswerTick < 150) return;
-      lastAnswerTick = now;
-      if (!myName || job) return;
-
-      // A request for this account: accept the invite from that account only.
-      const ask = store.get(ASK_PREFIX + myName, null);
-      if (ask && ask.id !== handledAsk && now - ask.at < ASK_FRESH && !follow) {
-        const busy = $('#pafk-daily[data-running]') ? 'esta conta está fazendo o Daily'
-          : trading ? 'esta conta está abrindo outra troca' : '';
-        if (busy) {
-          handledAsk = ask.id;
-          answer(ask.from, ask.id, busy);
-        } else {
-          const card = $$('.inv-card').find(element => !element.hidden && /troca/i.test(text($('small', element)))
-            && sameName(text($('.inv-name b', element)), ask.from));
-          if (card) {
-            handledAsk = ask.id;
-            follow = { partner: ask.from, id: ask.id, at: now, opened: false, gone: 0, offeredAt: 0, okAt: 0, againAt: 0 };
-            status(`Aceitando o convite de ${displayName(ask.from)}…`);
-            $('[data-inv="yes"]', card)?.click();
-          } else if (now - ask.at > 20000) {
-            handledAsk = ask.id;
-            answer(ask.from, ask.id, 'o convite não apareceu (em batalha, ou com convites desligados?)');
-          }
-        }
-      }
-      if (follow) followTrade(now);
-    }
-
-    function followTrade(now) {
-      const partner = displayName(follow.partner);
-      const win = tradeWindow();
-      if (!win) {
-        if (follow.opened) {
-          follow.gone ||= now;
-          if (now - follow.gone > 1500) {
-            follow = null;
-            status(`A troca com ${partner} terminou.`, 'ok');
-          }
-        } else if (now - follow.at > 15000) {
-          answer(follow.partner, follow.id, 'a janela de troca não abriu (a conta estava ocupada?)');
-          follow = null;
-          status(`A troca com ${partner} não abriu.`, 'bad');
-        }
-        return;
-      }
-      follow.gone = 0;
-      if (win.matches('.is-done')) {
-        follow.opened = true;
-        const again = $('[data-again]:not(.disabled)', win);
-        if (again && now - follow.againAt > 3000) {
-          follow.againAt = now;
-          status(`${text($('.t5-done-h', win)).replace(/^✓\s*/, '')} Continuando a sessão com ${partner}.`, 'run');
-          again.click();
-        }
-        return;
-      }
-      // Another trainer's trade: not ours to answer.
-      if (!sameName(partnerOf(win), follow.partner)) return;
-      follow.opened = true;
-      follow.at = now;
-      const theirs = $('.t5-offer:not(.is-mine):not(.is-empty)', win);
-      const mine = $('.t5-offer.is-mine:not(.is-empty)', win);
-      if (!theirs) {
-        status(`Esperando ${partner} escolher o Pokémon…`);
-        return;
-      }
-      if (!mine) {
-        if (now - follow.offeredAt < 3000) return;
-        const choice = pickRandom(win);
-        if (choice) {
-          follow.offeredAt = now;
-          status(`Oferecendo um Pokémon da caixa para ${partner}…`);
-          choice.click();
-          return;
-        }
-        const clear = $('[data-pc-clear]', win);
-        const next = $('[data-pc-page="1"]:not([disabled])', win);
-        if (clear || next) {
-          follow.offeredAt = now;
-          (clear ?? next).click();
-          return;
-        }
-        answer(follow.partner, follow.id, 'não tem Pokémon disponível na caixa para oferecer');
-        follow = null;
-        status(`Sem Pokémon na caixa para oferecer a ${partner}.`, 'bad');
-        return;
-      }
-      const ok = $('[data-ok]:not(.disabled)', win);
-      if (ok && now - follow.okAt > 3000) {
-        follow.okAt = now;
-        status(`Confirmando a troca com ${partner}…`);
-        ok.click();
-      }
-    }
-
-    // The game redraws its windows when the server answers, so DOM changes drive both sides; the
-    // interval covers the rest (a background tab still runs it about once a second).
-    new MutationObserver(() => {
-      // A freshly drawn menu gets the block right away (no flash); the interval keeps it current.
-      const pick = $('.t5-pick[data-pick]');
-      if (pick && !$('.pafk-trade-act', pick)) syncPicks();
-      if (myName && (follow || store.get(ASK_PREFIX + myName, null))) answerTick();
-    }).observe(document.body, { childList: true, subtree: true });
-    setInterval(() => {
-      syncPicks();
-      answerTick();
-    }, 700);
-    if (typeof GM_addValueChangeListener === 'function') {
-      // Requests for this account, as soon as another tab writes them.
-      let listeningFor = '';
-      setInterval(() => {
-        if (!myName || listeningFor === myName) return;
-        listeningFor = myName;
-        const key = ASK_PREFIX + myName;
-        GM_addValueChangeListener(key, (_key, _old, value, remote) => {
-          if (remote && value && key === ASK_PREFIX + myName) answerTick();
-        });
-      }, 1000);
-    }
   })();
 
   if (moduleEnabled('dodge')) (() => {
