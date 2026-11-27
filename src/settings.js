@@ -7,8 +7,6 @@ const MODULES = {
   monitor: 'Monitor de contas',
   dodge: 'Desvio SEMI/FULL e luta automática na arena (experimental)',
 };
-// Experimental parts start turned off until the player turns them on in the menu.
-const MODULES_OFF_BY_DEFAULT = new Set(['dodge']);
 const MODULES_KEY = 'modules';
 const hasModuleStore = typeof GM_getValue === 'function' && typeof GM_setValue === 'function';
 
@@ -17,8 +15,7 @@ function readModules() {
   try {
     saved = (hasModuleStore ? GM_getValue(MODULES_KEY, {}) : {}) || {};
   } catch {}
-  return Object.fromEntries(Object.keys(MODULES).map(id => [id,
-    typeof saved[id] === 'boolean' ? saved[id] : !MODULES_OFF_BY_DEFAULT.has(id)]));
+  return Object.fromEntries(Object.keys(MODULES).map(id => [id, saved[id] !== false]));
 }
 
 const enabledModules = readModules();

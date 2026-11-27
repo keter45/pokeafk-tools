@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.15.1
+// @version      1.15.2
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -34,8 +34,6 @@
     monitor: 'Monitor de contas',
     dodge: 'Desvio SEMI/FULL e luta automática na arena (experimental)',
   };
-  // Experimental parts start turned off until the player turns them on in the menu.
-  const MODULES_OFF_BY_DEFAULT = new Set(['dodge']);
   const MODULES_KEY = 'modules';
   const hasModuleStore = typeof GM_getValue === 'function' && typeof GM_setValue === 'function';
 
@@ -44,8 +42,7 @@
     try {
       saved = (hasModuleStore ? GM_getValue(MODULES_KEY, {}) : {}) || {};
     } catch {}
-    return Object.fromEntries(Object.keys(MODULES).map(id => [id,
-      typeof saved[id] === 'boolean' ? saved[id] : !MODULES_OFF_BY_DEFAULT.has(id)]));
+    return Object.fromEntries(Object.keys(MODULES).map(id => [id, saved[id] !== false]));
   }
 
   const enabledModules = readModules();
@@ -6870,8 +6867,18 @@
     // script clicks AUTO again once the attack has passed. In MANUAL steps go out at once and the
     // server's "AUTO POR INATIVIDADE" keeps attacking between dodges. The game only takes movement
     // in the focused tab, so nothing happens in background tabs.
+    const DODGE_MODE_KEY = 'pokeafk-market-filtros:dodge';
+
+    function readDodgeMode() {
+      try {
+        const mode = localStorage.getItem(DODGE_MODE_KEY);
+        return mode === 'off' || mode === 'full' ? mode : 'semi';
+      } catch {
+        return 'semi';
+      }
+    }
+
     (() => {
-      const STORAGE = 'pokeafk-market-filtros:dodge';
       const TILE = 16;
       // More steps never fit in the warning time (a step takes 267 ms).
       const MAX_STEPS = 2;
@@ -6888,7 +6895,7 @@
       const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
       // 'off', 'semi' (only dodges) or 'full' (in trainer battles src/arena.js takes over).
-      let mode = readMode();
+      let mode = readDodgeMode();
       let enabled = mode !== 'off';
       let raf = 0;
       let lastScan = 0;
@@ -6902,15 +6909,6 @@
       const blocked = new Map();
       const tries = new Map();
       const stats = { tried: 0, out: 0, late: 0, blocked: 0 };
-
-      function readMode() {
-        try {
-          const value = localStorage.getItem(STORAGE);
-          return value === '1' ? 'semi' : value === 'semi' || value === 'full' ? value : 'off';
-        } catch {
-          return 'off';
-        }
-      }
 
       const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -7363,7 +7361,7 @@
         mode = mode === picked.dataset.dodgeMode ? 'off' : picked.dataset.dodgeMode;
         enabled = mode !== 'off';
         try {
-          localStorage.setItem(STORAGE, mode);
+          localStorage.setItem(DODGE_MODE_KEY, mode);
         } catch {}
         // src/arena.js reads the mode again on this event.
         document.dispatchEvent(new CustomEvent('pafk-dodge-mode'));
@@ -7398,7 +7396,6 @@
     // Only pixels of the world canvas and the arena DOM are read (no game internals). A real key or
     // click from the player pauses it for a few seconds.
     (() => {
-      const MODE_KEY = 'pokeafk-market-filtros:dodge';
       const TILE = 16;
       const SCAN_EVERY = 30;
       const STEP_TIMEOUT = 420;
@@ -7418,15 +7415,7 @@
       const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
       const ARROWS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 
-      const readMode = () => {
-        try {
-          const value = localStorage.getItem(MODE_KEY);
-          return value === '1' ? 'semi' : value === 'semi' || value === 'full' ? value : 'off';
-        } catch {
-          return 'off';
-        }
-      };
-      let mode = readMode();
+      let mode = readDodgeMode();
       const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
       const pageWindow = document.defaultView ?? window;
 
@@ -8047,7 +8036,7 @@
       addEventListener('pointerdown', onPlayerInput, true);
 
       document.addEventListener('pafk-dodge-mode', () => {
-        mode = readMode();
+        mode = readDodgeMode();
         if (mode === 'full' && !raf) raf = requestAnimationFrame(tick);
       });
       if (mode === 'full') raf = requestAnimationFrame(tick);

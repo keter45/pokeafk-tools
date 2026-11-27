@@ -12,7 +12,6 @@
 // Only pixels of the world canvas and the arena DOM are read (no game internals). A real key or
 // click from the player pauses it for a few seconds.
 (() => {
-  const MODE_KEY = 'pokeafk-market-filtros:dodge';
   const TILE = 16;
   const SCAN_EVERY = 30;
   const STEP_TIMEOUT = 420;
@@ -32,15 +31,7 @@
   const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   const ARROWS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 
-  const readMode = () => {
-    try {
-      const value = localStorage.getItem(MODE_KEY);
-      return value === '1' ? 'semi' : value === 'semi' || value === 'full' ? value : 'off';
-    } catch {
-      return 'off';
-    }
-  };
-  let mode = readMode();
+  let mode = readDodgeMode();
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const pageWindow = document.defaultView ?? window;
 
@@ -661,7 +652,7 @@
   addEventListener('pointerdown', onPlayerInput, true);
 
   document.addEventListener('pafk-dodge-mode', () => {
-    mode = readMode();
+    mode = readDodgeMode();
     if (mode === 'full' && !raf) raf = requestAnimationFrame(tick);
   });
   if (mode === 'full') raf = requestAnimationFrame(tick);

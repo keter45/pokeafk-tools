@@ -15,7 +15,7 @@ Ferramentas para o [pokeAFK](https://pokeafk.io/): um userscript que ajuda no Me
 
 O Tampermonkey busca as versões novas no mesmo link. Para atualizar na hora, use **Procurar atualizações de scripts** no menu da extensão.
 
-**Ligar e desligar partes.** No menu do Tampermonkey, com a página do jogo aberta, aparecem quatro opções: **Tiers, filtros do mercado e ficha**, **Daily de treinadores**, **Monitor de contas** e **Desvio de golpes em área (experimental)**. ✅ indica que a parte está ligada e ⬜ que está desligada. O desvio vem desligado. Clique para trocar; a mudança vale depois de recarregar a página e para todas as abas.
+**Ligar e desligar partes.** No menu do Tampermonkey, com a página do jogo aberta, aparecem quatro opções: **Tiers, filtros do mercado e ficha**, **Daily de treinadores**, **Monitor de contas** e **Desvio SEMI/FULL e luta automática na arena (experimental)**. Todas vêm ligadas por padrão. ✅ indica que a parte está ligada e ⬜ que está desligada. Clique para alternar. A mudança vale para todas as abas ao recarregar.
 
 **Vindo dos scripts antigos?** "PokeAFK — Filtros do Mercado" e "PokeAFK — Monitor de contas" viraram um só. Instale o PokeAFK Tools e desinstale os dois antigos no painel do Tampermonkey. Os filtros, as opções do daily e os times aprendidos continuam salvos. Os apelidos das contas precisam ser dados de novo.
 
@@ -84,7 +84,7 @@ Passe o mouse em cima dos números para ver cada tipo de bola e de poção. O mo
 - O script não troca de aba: ele só mostra o estado das outras contas.
 
 ### Desvio de golpes em área (experimental)
-Vem desligado. Para usar, ligue **Desvio de golpes em área (experimental)** no menu do Tampermonkey e recarregue a página. Aparece o botão **DESVIO** ao lado de AUTO e MANUAL, na barra de COMBATE. Preenchido quer dizer ligado.
+O desvio começa em **SEMI** na barra de COMBATE, ao lado de AUTO e MANUAL, quando ainda não há um modo salvo. Clique no modo ativo para desligá-lo ou em **FULL** para também automatizar as lutas contra treinadores.
 
 Com ele ligado, durante a caça, quando o aviso vermelho de um golpe em área inimigo cobre o seu Pokémon, o script anda 1 ou 2 quadrados para sair dele. No AUTO, o jogo passa para MANUAL durante o passo e o script volta para AUTO em seguida. No MANUAL, o servidor continua atacando sozinho ("AUTO POR INATIVIDADE") entre os desvios. Passe o mouse sobre o botão para ver quantos desvios deram certo.
 

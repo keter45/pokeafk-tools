@@ -10,8 +10,18 @@
 // script clicks AUTO again once the attack has passed. In MANUAL steps go out at once and the
 // server's "AUTO POR INATIVIDADE" keeps attacking between dodges. The game only takes movement
 // in the focused tab, so nothing happens in background tabs.
+const DODGE_MODE_KEY = 'pokeafk-market-filtros:dodge';
+
+function readDodgeMode() {
+  try {
+    const mode = localStorage.getItem(DODGE_MODE_KEY);
+    return mode === 'off' || mode === 'full' ? mode : 'semi';
+  } catch {
+    return 'semi';
+  }
+}
+
 (() => {
-  const STORAGE = 'pokeafk-market-filtros:dodge';
   const TILE = 16;
   // More steps never fit in the warning time (a step takes 267 ms).
   const MAX_STEPS = 2;
@@ -28,7 +38,7 @@
   const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
   // 'off', 'semi' (only dodges) or 'full' (in trainer battles src/arena.js takes over).
-  let mode = readMode();
+  let mode = readDodgeMode();
   let enabled = mode !== 'off';
   let raf = 0;
   let lastScan = 0;
@@ -42,15 +52,6 @@
   const blocked = new Map();
   const tries = new Map();
   const stats = { tried: 0, out: 0, late: 0, blocked: 0 };
-
-  function readMode() {
-    try {
-      const value = localStorage.getItem(STORAGE);
-      return value === '1' ? 'semi' : value === 'semi' || value === 'full' ? value : 'off';
-    } catch {
-      return 'off';
-    }
-  }
 
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -503,7 +504,7 @@
     mode = mode === picked.dataset.dodgeMode ? 'off' : picked.dataset.dodgeMode;
     enabled = mode !== 'off';
     try {
-      localStorage.setItem(STORAGE, mode);
+      localStorage.setItem(DODGE_MODE_KEY, mode);
     } catch {}
     // src/arena.js reads the mode again on this event.
     document.dispatchEvent(new CustomEvent('pafk-dodge-mode'));
