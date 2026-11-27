@@ -61,6 +61,7 @@
       </div>
       <div class="pafk-daily-actions">
         <button type="button" class="pafk-daily-go" data-daily-go>Fazer daily</button>
+        <button type="button" class="pafk-daily-go pafk-daily-league" data-daily-league title="Vai ao Platô Índigo e enfrenta a Elite dos Quatro e o Campeão de Kanto. Ligue o DESVIO FULL para o script lutar.">Liga de Kanto</button>
         <button type="button" class="pafk-daily-stop" hidden data-daily-stop>Parar</button>
       </div>
     </div>`;
@@ -68,6 +69,7 @@
   const body = box.querySelector('[data-daily-body]');
   const goButton = box.querySelector('[data-daily-go]');
   const stopButton = box.querySelector('[data-daily-stop]');
+  const leagueButton = box.querySelector('[data-daily-league]');
   const statusEl = box.querySelector('[data-daily-status]');
   const noteEl = box.querySelector('[data-daily-note]');
   const mainEl = box.querySelector('[data-daily-main]');
@@ -181,6 +183,9 @@
     }
     #pafk-daily .pafk-daily-go { background: var(--daily-blue); color: #fff; }
     #pafk-daily .pafk-daily-go:hover { background: #194985; }
+    #pafk-daily .pafk-daily-actions { gap: 8px; }
+    #pafk-daily .pafk-daily-league { background: #fff; color: var(--daily-blue); border-color: #a7bce1; }
+    #pafk-daily .pafk-daily-league:hover { background: #eaf2ff; }
     #pafk-daily .pafk-daily-stop { background: #fff0f0; color: #a02735; border-color: #f0bac1; }
     #pafk-daily .pafk-daily-stop:hover { background: #fce0e4; }
     /* Phones on their side (the game asks for landscape): the button sits under the Contas chip,
@@ -998,6 +1003,223 @@
     await pause(600, 1200);
   }
 
+  // ---- Liga de Kanto ----
+  // Pedido do usuário (2026-11-27): fazer a Elite dos Quatro e o Campeão de Kanto sozinho, de
+  // qualquer lugar. Tiles from the game's /assets/maps/world.json (gx, gy of the warps and NPCs);
+  // the routes the player walked by hand are in referencia/rotas/. Outside battles the camera
+  // keeps the player at the centre of the world canvas, so a tile (dx, dy) away from the player
+  // is at the canvas centre + (dx, dy) × 16 px, and a click there makes the game walk to it.
+  const TILE = 16;
+  const LEAGUE = {
+    // The MAPA teleport ("Lugares" → Indigo Plateau) leaves the player at the Centre's door.
+    town: 'MAP_KANTO_INDIGO_PLATEAU_EXTERIOR',
+    door: [0, -1],
+    // Inside the Centre: arrival from the door and the League's entrance.
+    centre: [13243, 520],
+    entrance: [13236, 505],
+    rooms: [
+      { name: 'LORELEI', arrive: [13199, 850], npc: [13199, 843], door: [13199, 840] },
+      { name: 'BRUNO', arrive: [13006, 850], npc: [13006, 843], door: [13006, 840] },
+      { name: 'AGATHA', arrive: [13430, 802], npc: [13430, 795], door: [13430, 792] },
+      { name: 'LANCE', arrive: [13156, 851], npc: [13139, 846], door: [13139, 843] },
+      { name: 'BLUE', arrive: [13051, 857], npc: [13051, 846], door: null },
+    ],
+  };
+  // How far one click may reach: the canvas shows about 15 tiles to each side and 10 up and down.
+  const REACH = [13, 9];
+
+  function clickTile(dx, dy) {
+    const canvas = worldCanvas();
+    if (!canvas) throw new Error('Canvas do mundo não encontrado.');
+    const rect = canvas.getBoundingClientRect();
+    clickTrainer({
+      canvas,
+      x: rect.left + (canvas.width / 2 + dx * TILE) * rect.width / canvas.width,
+      y: rect.top + (canvas.height / 2 + dy * TILE) * rect.height / canvas.height,
+    });
+  }
+
+  // A click can land on another player and open their profile instead of walking.
+  async function closeStrayWindow() {
+    const stray = $('.modal.open:not(.mapa-open)');
+    if (!stray) return false;
+    stray.querySelector('.close, [aria-label="Fechar"]')?.click();
+    await until(() => !$('.modal.open:not(.mapa-open)'), 4000, 'fechar a janela aberta por engano');
+    return true;
+  }
+
+  // Walks from one tile to another in clicks the screen can reach, waiting for each walk.
+  async function walk(from, to) {
+    let at = from.slice();
+    while (at[0] !== to[0] || at[1] !== to[1]) {
+      const dx = Math.max(-REACH[0], Math.min(REACH[0], to[0] - at[0]));
+      const dy = Math.max(-REACH[1], Math.min(REACH[1], to[1] - at[1]));
+      // A click hits whoever stands on that tile or the one below it; then a tile beside is tried.
+      for (let attempt = 0; ; attempt += 1) {
+        clickTile(dx + [0, 1, -1][attempt], dy);
+        await sleep(250);
+        if (!(await closeStrayWindow())) break;
+        if (attempt >= 2) throw new Stop('Parado. Outros jogadores estão no caminho.');
+        await pause(500, 900);
+      }
+      // A step takes 267 ms; detours around walls take longer.
+      await pause((Math.abs(dx) + Math.abs(dy)) * 330 + 900, (Math.abs(dx) + Math.abs(dy)) * 330 + 1300);
+      at = [at[0] + dx, at[1] + dy];
+    }
+  }
+
+  // Opens the town's card in the MAPA and returns its teleport button. Inside the League the
+  // button stays disabled: then null.
+  async function townTeleport(id) {
+    const button = $('.hud.world-hud > nav.hud-topbar > [data-act="map"]') ?? $('[aria-label="MAPA"]');
+    if (!mapWindow()) {
+      if (!button) throw new Error('Botão MAPA não encontrado.');
+      button.click();
+      await until(() => mapWindow()?.querySelector('[data-list="towns"]'), 10000, 'abrir o MAPA');
+      await pause(150, 350);
+    }
+    const kanto = mapWindow().querySelector('.mx-tab[data-region="kanto"]');
+    if (kanto && !kanto.classList.contains('on')) {
+      kanto.click();
+      await until(() => mapWindow()?.querySelector('.mx-tab.on[data-region="kanto"]'), 5000, 'trocar para Kanto');
+    }
+    mapWindow().querySelector('[data-list="towns"]').click();
+    const row = await until(() => mapWindow()?.querySelector(`.mx-row.town[data-town="${CSS.escape(id)}"]`), 6000, 'achar o Platô Índigo nos Lugares');
+    row.click();
+    await until(() => mapWindow()?.querySelector('.mx-card [data-act="tp"]'), 6000, 'abrir o cartão do lugar');
+    await pause(600, 900);
+    const tp = mapWindow()?.querySelector('.mx-card [data-act="tp"]');
+    return tp && !tp.disabled ? tp : null;
+  }
+
+  async function teleportWith(tp) {
+    await pause(150, 400);
+    tp.click();
+    await until(() => !mapWindow() && !teleportPending(), 20000, 'teleportar para o Platô Índigo');
+    await pause(1200, 1600);
+  }
+
+  // Beside the NPC on a known side, facing it, then the talk key: the player's tile stays known.
+  // (A click on the NPC lets the game pick the side, and the Elite's sprites are drawn on the HD
+  // layer, which the sprite search cannot see.) Players gather below the NPCs, so the sides come
+  // first.
+  const SIDES = [[1, 0, 'ArrowLeft'], [-1, 0, 'ArrowRight'], [0, 1, 'ArrowUp']];
+  async function talkTo(room, at) {
+    for (const [sx, sy, face] of SIDES) {
+      const spot = [room.npc[0] + sx, room.npc[1] + sy];
+      clickTile(spot[0] - at[0], spot[1] - at[1]);
+      await sleep(250);
+      if (await closeStrayWindow()) continue;
+      const steps = Math.abs(spot[0] - at[0]) + Math.abs(spot[1] - at[1]);
+      await pause(steps * 330 + 900, steps * 330 + 1300);
+      at = spot;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        // Facing the NPC turns the player without a step (the NPC blocks the tile).
+        tapKey(face);
+        await pause(300, 450);
+        tapKey(talkKey());
+        try {
+          return { answer: await until(() => challenge(), 3000, `falar com ${room.name}`), at };
+        } catch (error) {
+          if (!(error instanceof NoResponse)) throw error;
+          await closeStrayWindow();
+        }
+      }
+    }
+    throw new Stop(`Parado. ${room.name} não respondeu (o personagem pode estar fora do lugar esperado).`);
+  }
+
+  async function leagueFight(room, answer) {
+    const fight = answer.querySelector('[data-fight]');
+    if (!fight) {
+      answer.querySelector('[data-nofight], [data-ok]')?.click();
+      throw new Stop(`Parado. ${room.name} não aceitou o desafio.`);
+    }
+    await pause(200, 500);
+    fight.click();
+    await until(() => inArena() || resultWindow(), 15000, 'começar a batalha');
+    setStatus(`Lutando contra ${room.name}...`);
+    const result = await until(resultWindow, FIGHT_TIMEOUT, 'terminar a batalha');
+    const outcome = result.dataset.result;
+    await pause();
+    result.querySelector('[data-ah="ok"]')?.click();
+    await until(() => !resultWindow(), 8000, 'fechar o resultado');
+    await pause(600, 1000);
+    return outcome;
+  }
+
+  const roomOf = answer => LEAGUE.rooms.findIndex(room => fold(text(answer.querySelector('.b5-ch-name'))) === fold(room.name));
+
+  async function runLeague() {
+    if (inArena() || resultWindow() || challenge()) throw new Error('Termine a batalha ou o diálogo aberto antes.');
+    if (isHunting()) {
+      setStatus('Parando a caça...');
+      $('.hud-act.hunt[data-act="hunt"]').click();
+      await until(() => !isHunting(), 8000, 'parar a caça');
+      await pause();
+    }
+    let first = 0;
+    let resume = null;
+    if (await townTeleport(LEAGUE.town)) {
+      await closeMap();
+      // The League does not heal between rooms: start with the team healed.
+      await heal();
+      setStatus('Indo ao Platô Índigo...');
+      const tp = await townTeleport(LEAGUE.town);
+      if (!tp) throw new Stop('Parado. O teleporte para o Platô Índigo ficou indisponível.');
+      await teleportWith(tp);
+      setStatus('Entrando no Centro Pokémon...');
+      await walk([0, 0], LEAGUE.door);
+      await pause(1500, 2000);
+      setStatus('Indo até a entrada da Liga...');
+      await walk(LEAGUE.centre, LEAGUE.entrance);
+    } else {
+      // No teleport: already inside the League. Lorelei's, Bruno's and Agatha's rooms have the NPC
+      // 7 tiles above the entrance, so from an entrance the talk tells which room this is.
+      await closeMap();
+      setStatus('Dentro da Liga: procurando o treinador desta sala...');
+      const model = LEAGUE.rooms[0];
+      const talk = await talkTo(model, model.arrive);
+      first = roomOf(talk.answer);
+      if (first < 0 || first > 2) {
+        talk.answer.querySelector('[data-nofight]')?.click();
+        throw new Stop('Parado. Comece a Liga fora dela ou na entrada da sala da Lorelei, do Bruno ou da Agatha.');
+      }
+      const room = LEAGUE.rooms[first];
+      resume = { answer: talk.answer, at: [talk.at[0] - model.npc[0] + room.npc[0], talk.at[1] - model.npc[1] + room.npc[1]] };
+    }
+    for (const room of LEAGUE.rooms.slice(first)) {
+      let talk = resume;
+      resume = null;
+      if (!talk) {
+        await pause(1500, 2000);
+        setStatus(`Indo até ${room.name}...`);
+        let at = room.arrive.slice();
+        // Too far for one click (Lance, Blue): walk part of the way first.
+        if (Math.abs(room.npc[0] - at[0]) > REACH[0] - 1 || Math.abs(room.npc[1] - at[1]) > REACH[1] - 1) {
+          const near = [room.npc[0] + Math.sign(at[0] - room.npc[0]) * Math.min(3, Math.abs(at[0] - room.npc[0])), room.npc[1] + 2];
+          await walk(at, near);
+          at = near;
+        }
+        talk = await talkTo(room, at);
+        if (roomOf(talk.answer) !== LEAGUE.rooms.indexOf(room)) {
+          talk.answer.querySelector('[data-nofight]')?.click();
+          throw new Stop(`Parado. Esperava ${room.name}, mas respondeu ${text(talk.answer.querySelector('.b5-ch-name')) || 'outro NPC'}.`);
+        }
+      }
+      const outcome = await leagueFight(room, talk.answer);
+      if (outcome !== 'win') {
+        setStatus(`Liga parada: ${outcome === 'draw' ? 'empate' : 'derrota'} contra ${room.name}.`, 'stop');
+        return;
+      }
+      if (!room.door) break;
+      setStatus(`${room.name} vencido. Indo para a próxima sala...`);
+      await walk(talk.at, room.door);
+    }
+    setStatus('Liga de Kanto vencida!', 'done');
+  }
+
+
   // ---- Panel ----
   const LABELS = {
     won: 'Vencido', lost: 'Derrota', skipped: 'Pulado', locked: 'Bloqueado',
@@ -1051,6 +1273,7 @@
   function setRunning(on) {
     const restoreFocus = document.activeElement === (on ? goButton : stopButton);
     goButton.hidden = on;
+    leagueButton.hidden = on;
     stopButton.hidden = !on;
     avoidBox.disabled = on;
     swimmersBox.disabled = on;
@@ -1059,6 +1282,25 @@
   }
 
   stopButton.addEventListener('click', () => stop('Parado.'));
+
+  leagueButton.addEventListener('click', async () => {
+    if (run) return;
+    run = { stopped: false, reason: '', route: [], done: 0, total: 0, xp: 0 };
+    setRunning(true);
+    routeEl.hidden = true;
+    progressEl.hidden = true;
+    try {
+      await runLeague();
+    } catch (error) {
+      setStatus(error instanceof Stop ? error.message
+        : error instanceof NoResponse || !(error instanceof TypeError || error instanceof ReferenceError)
+          ? `Parado: ${error.message}`
+          : `Parado por um erro do script: ${error.message}`, 'stop');
+    } finally {
+      run = null;
+      setRunning(false);
+    }
+  });
 
   goButton.addEventListener('click', async () => {
     if (run) return;
