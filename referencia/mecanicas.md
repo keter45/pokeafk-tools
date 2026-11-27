@@ -51,6 +51,16 @@ Formas (campo `target` do catálogo): `cone`, `circle` (em volta do usuário), `
   - o oponente de referência: 25% (`INCOMING_DODGE`) dos golpes dele erram, menos enquanto o nosso Pokémon prepara um golpe ou dorme;
   - os dois lados: esquiva ×2 com estágio de Velocidade positivo e ×0,6 paralisado (passo de 133 ou 445 ms contra 267 ms).
 
+## Arena: avisos e ritmo (gravado em 2026-11-27)
+
+[código + medição] Gravado com `ferramentas/gravador-luta.js` em 19 lutas contra treinadores (Daily, líder Giovanni e Elite Lorelei, conta Issues com Alakazam Nv. 80, sempre no AUTO). Dados em `lutas/2026-11-27-issues.json`.
+
+- **Desenho do aviso** [código, `drawTelegraphs` em `main-*.js`]: borda opaca `#f86048` (nossos: branca, 0,9) em volta dos quadrados. O preenchimento cresce do centro para fora: progresso `(agora − t0) / w`, quadrados já cheios com `rgba(248,96,72,0.25)` e a frente crescendo com `0.55`. O golpe cai quando a forma fica cheia (`w` = preparo + viagem); o aviso some 100 ms depois e esmaece em 150 ms.
+- **Câmera na arena** [código]: `frameField` enquadra o campo inteiro e não segue o Pokémon. O campo (`field`: x, y, w, h e obstáculos `boxes`) limita os passos (`inPatch`).
+- **Tempo visível dos avisos do oponente** (do primeiro quadro com a borda até sumir): 41 de 80 duraram menos de 200 ms (projéteis de 0,2 s, cones de 0,3 s); 13 entre 300 e 500 ms (linhas de 3–4 quadrados da Lorelei, losango 7×7 de raio 3 do Nidoqueen e do Gloom); 10 entre 450 ms e 1,5 s (3×3 de Koffing, Weezing, Kadabra e Drowzee: Poison Gas, Smog, Hypnosis e parecidos). Um passo leva 267 ms e a resposta chega depois da latência: **só os avisos de 450 ms ou mais dão para desviar reagindo**.
+- **Golpes sem aviso**: 35 de 55 danos recebidos vieram sem aviso vermelho antes (corpo a corpo, `homing`, golpes rápidos demais para o quadro de 33 ms).
+- **Ritmo do oponente** [medição]: os golpes do oponente vêm em intervalos regulares, quase sempre o intervalo geral dele ou a recarga do golpe: 2,0 s ± 30 ms (Treinador Ás Yuji, Campista Bryce), 1,2 s (Giovanni, Lorelei), 1,5 s. Depois de um golpe, o próximo dificilmente vem antes desse intervalo: é a janela para atacar e se reposicionar.
+
 ## Alcance no PvP
 
 [usuário + estimativa] Atacar de longe afasta o atacante corpo a corpo. No duelo, contra o oponente de referência físico (corpo a corpo), cada golpe dele tem uma chance extra de não chegar de `KITE_MAX × clamp((alcance − 2) / 3)`: 0 com alcance de 2 quadrados ou menos, 15% com 5 ou mais. Vale o alcance do último golpe de dano usado e só quando o nosso Pokémon pode se mexer (sem preparo nem sono). O oponente especial (à distância) não é afetado.

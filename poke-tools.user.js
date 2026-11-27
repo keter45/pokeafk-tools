@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      1.12.1
+// @version      1.13.0
 // @description  Ferramentas para o pokeAFK: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, daily de treinadores, monitor de contas e desvio de golpes em área.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
@@ -32,7 +32,7 @@
     tiers: 'Tiers, filtros do mercado e ficha',
     daily: 'Daily de treinadores',
     monitor: 'Monitor de contas e troca entre contas',
-    dodge: 'Desvio de golpes em área (experimental)',
+    dodge: 'Desvio SEMI/FULL e luta automática na arena (experimental)',
   };
   // Experimental parts start turned off until the player turns them on in the menu.
   const MODULES_OFF_BY_DEFAULT = new Set(['dodge']);
@@ -6713,9 +6713,14 @@
   })();
 
   if (moduleEnabled('dodge')) (() => {
+    // ==== src/data/moves.js ====
+    // Gerado por build-data.mjs: golpes pelo nome da barra de combate, [tipo, poder, precisão, preparo ms, forma, alcance]. Não edite à mão.
+    const MOVES = /* MOVES_DATA_START */ {"TACKLE":["normal",35,95,0,"melee",1],"GROWL":["normal",0,100,300,"cone",3],"LEECH SEED":["grass",0,90,200,"projectile",5],"VINE WHIP":["grass",45,100,0,"melee",1],"POISONPOWDER":["poison",0,75,300,"cone",2],"SLEEP POWDER":["grass",0,75,300,"cone",2],"RAZOR LEAF":["grass",55,95,300,"cone",3],"SWEET SCENT":["normal",0,100,400,"circle",3],"GROWTH":["normal",0,100,0,"self",1],"SYNTHESIS":["grass",0,100,0,"self",1],"SOLARBEAM":["grass",120,100,1500,"beam",8],"SLUDGE BOMB":["poison",90,100,600,"area",6],"SCRATCH":["normal",40,100,0,"melee",1],"EMBER":["fire",40,100,200,"projectile",5],"SMOKESCREEN":["normal",0,100,300,"cone",2],"RAGE":["normal",20,100,0,"melee",1],"SCARY FACE":["normal",0,90,200,"homing",5],"FLAMETHROWER":["fire",95,100,300,"cone",4],"SLASH":["normal",70,100,0,"melee",1],"DRAGON RAGE":["dragon",0,100,400,"beam",6],"FIRE SPIN":["fire",15,70,600,"area",6],"WING ATTACK":["flying",60,100,300,"dash",4],"TAIL WHIP":["normal",0,100,300,"cone",3],"BUBBLE":["water",20,100,300,"cone",3],"WITHDRAW":["water",0,100,0,"self",1],"WATER GUN":["water",40,100,400,"beam",6],"BITE":["dark",60,100,0,"melee",1],"RAPID SPIN":["normal",20,100,400,"circle",1],"PROTECT":["normal",0,100,0,"self",1],"RAIN DANCE":["water",0,100,300,"field",5],"SKULL BASH":["normal",100,100,1000,"dash",4],"HYDRO PUMP":["water",120,80,600,"beam",8],"SURF":["water",95,100,300,"cone",4],"STRING SHOT":["bug",0,95,300,"cone",3],"HARDEN":["normal",0,100,0,"self",1],"CONFUSION":["psychic",50,100,200,"homing",5],"STUN SPORE":["grass",0,75,300,"cone",2],"SUPERSONIC":["normal",0,55,200,"projectile",5],"WHIRLWIND":["normal",0,100,900,"cone",3],"GUST":["flying",40,100,300,"cone",3],"PSYBEAM":["psychic",65,100,400,"beam",7],"SAFEGUARD":["normal",0,100,300,"field",2],"SILVER WIND":["bug",60,100,300,"cone",3],"POISON STING":["poison",15,100,200,"projectile",5],"FURY ATTACK":["normal",15,85,0,"melee",1],"FOCUS ENERGY":["normal",0,100,0,"self",1],"TWINEEDLE":["bug",25,100,200,"projectile",5],"PURSUIT":["dark",40,100,0,"melee",1],"PIN MISSILE":["bug",14,85,300,"cone",5],"AGILITY":["psychic",0,100,0,"self",1],"ENDEAVOR":["normal",0,100,0,"melee",1],"SAND-ATTACK":["ground",0,100,300,"cone",2],"QUICK ATTACK":["normal",40,100,0,"dash",3],"FEATHERDANCE":["flying",0,100,300,"cone",3],"MIRROR MOVE":["flying",0,100,0,"borrow",1],"HYPER FANG":["normal",80,90,0,"melee",1],"SUPER FANG":["normal",0,90,0,"melee",1],"PECK":["flying",35,100,0,"melee",1],"LEER":["normal",0,100,300,"cone",3],"AERIAL ACE":["flying",60,100,300,"dash",3],"DRILL PECK":["flying",80,100,0,"melee",1],"WRAP":["normal",15,85,0,"melee",1],"GLARE":["normal",0,75,200,"homing",5],"SCREECH":["normal",0,85,300,"cone",3],"ACID":["poison",40,100,300,"cone",2],"STOCKPILE":["normal",0,100,0,"self",1],"SPIT UP":["normal",100,100,200,"projectile",7],"SWALLOW":["normal",0,100,0,"self",1],"HAZE":["ice",0,100,400,"circle",4],"THUNDERSHOCK":["electric",40,100,200,"projectile",5],"THUNDER WAVE":["electric",0,100,200,"projectile",5],"DOUBLE TEAM":["normal",0,100,0,"self",1],"SLAM":["normal",80,75,0,"melee",1],"THUNDERBOLT":["electric",95,100,400,"beam",8],"THUNDER":["electric",120,70,800,"area",6],"LIGHT SCREEN":["psychic",0,100,300,"field",2],"DEFENSE CURL":["normal",0,100,0,"self",1],"SWIFT":["normal",60,100,200,"homing",5],"FURY SWIPES":["normal",18,80,0,"melee",1],"SAND TOMB":["ground",15,70,600,"area",6],"SANDSTORM":["rock",0,100,300,"field",5],"DOUBLE KICK":["fighting",30,100,0,"melee",1],"HELPING HAND":["normal",0,100,0,"self",1],"FLATTER":["dark",0,100,200,"homing",5],"CRUNCH":["dark",80,100,0,"melee",1],"BODY SLAM":["normal",85,100,0,"melee",1],"HORN ATTACK":["normal",65,100,0,"melee",1],"HORN DRILL":["normal",0,30,800,"melee",1],"THRASH":["normal",90,100,0,"rampage",1],"POUND":["normal",40,100,0,"melee",1],"ENCORE":["normal",0,100,200,"homing",5],"SING":["normal",0,55,300,"cone",3],"DOUBLESLAP":["normal",15,85,0,"melee",1],"FOLLOW ME":["normal",0,100,0,"circle",4],"MINIMIZE":["normal",0,100,0,"self",1],"METRONOME":["normal",0,100,0,"borrow",1],"COSMIC POWER":["psychic",0,100,0,"self",1],"MOONLIGHT":["normal",0,100,0,"self",1],"METEOR MASH":["steel",100,85,0,"melee",1],"ROAR":["normal",0,100,900,"cone",3],"WILL-O-WISP":["fire",0,75,200,"projectile",5],"CONFUSE RAY":["ghost",0,100,200,"projectile",5],"IMPRISON":["psychic",0,100,300,"field",5],"GRUDGE":["ghost",0,100,0,"self",1],"DISABLE":["normal",0,55,200,"homing",5],"ROLLOUT":["rock",30,90,300,"dash",3],"REST":["psychic",0,100,0,"self",1],"MIMIC":["normal",0,100,200,"homing",5],"HYPER VOICE":["normal",90,100,300,"cone",4],"DOUBLE-EDGE":["normal",120,100,500,"dash",5],"LEECH LIFE":["bug",20,100,0,"melee",1],"ASTONISH":["ghost",30,100,0,"melee",1],"AIR CUTTER":["flying",55,95,300,"cone",3],"MEAN LOOK":["normal",0,100,200,"homing",5],"POISON FANG":["poison",50,100,0,"melee",1],"ABSORB":["grass",20,100,200,"homing",5],"PETAL DANCE":["grass",70,100,0,"rampage",1],"MEGA DRAIN":["grass",40,100,200,"homing",5],"AROMATHERAPY":["grass",0,100,0,"self",1],"SPORE":["grass",0,100,0,"melee",1],"GIGA DRAIN":["grass",60,100,200,"homing",5],"FORESIGHT":["normal",0,100,200,"homing",5],"PSYCHIC":["psychic",90,100,400,"beam",7],"MAGNITUDE":["ground",0,100,400,"circle",3],"DIG":["ground",60,100,1000,"leap",5],"MUD-SLAP":["ground",20,100,200,"projectile",5],"EARTHQUAKE":["ground",100,100,600,"circle",3],"FISSURE":["ground",0,30,800,"beam",5],"TRI ATTACK":["normal",80,100,400,"beam",4],"PAY DAY":["normal",40,100,200,"projectile",5],"FAINT ATTACK":["dark",60,100,200,"homing",5],"FAKE OUT":["normal",40,100,0,"melee",1],"WATER SPORT":["water",0,100,300,"field",2],"PSYCH UP":["normal",0,100,200,"homing",5],"LOW KICK":["fighting",60,100,300,"dash",3],"KARATE CHOP":["fighting",50,100,0,"melee",1],"SEISMIC TOSS":["fighting",0,100,0,"melee",1],"CROSS CHOP":["fighting",100,80,500,"cone",3],"ODOR SLEUTH":["normal",0,100,200,"homing",5],"TAKE DOWN":["normal",90,85,300,"dash",4],"FLAME WHEEL":["fire",60,100,300,"dash",3],"EXTREMESPEED":["normal",80,100,0,"dash",5],"HYPNOSIS":["psychic",0,60,200,"projectile",5],"BELLY DRUM":["normal",0,100,0,"self",1],"SUBMISSION":["fighting",80,80,0,"melee",1],"MIND READER":["normal",0,100,200,"homing",5],"TELEPORT":["psychic",0,100,0,"self",4],"KINESIS":["psychic",0,80,200,"homing",5],"REFLECT":["psychic",0,100,300,"field",2],"RECOVER":["normal",0,100,0,"self",1],"FUTURE SIGHT":["psychic",80,90,300,"area",6],"ROLE PLAY":["psychic",0,100,200,"homing",5],"TRICK":["psychic",0,100,200,"homing",5],"CALM MIND":["psychic",0,100,0,"self",1],"REVENGE":["fighting",60,100,600,"melee",1],"VITAL THROW":["fighting",70,100,200,"melee",1],"DYNAMICPUNCH":["fighting",100,50,0,"melee",1],"CONSTRICT":["normal",10,100,0,"melee",1],"BUBBLEBEAM":["water",65,100,400,"beam",7],"BARRIER":["psychic",0,100,0,"self",1],"MUD SPORT":["ground",0,100,300,"field",2],"ROCK THROW":["rock",50,90,200,"projectile",5],"SELFDESTRUCT":["normal",200,100,1000,"circle",3],"ROCK BLAST":["rock",25,80,200,"projectile",5],"EXPLOSION":["normal",250,100,1000,"circle",4],"STOMP":["normal",65,100,400,"circle",2],"BOUNCE":["flying",85,85,1000,"leap",5],"FIRE BLAST":["fire",120,85,800,"area",6],"CURSE":["mystery",0,100,200,"homing",5],"YAWN":["normal",0,100,200,"homing",5],"HEADBUTT":["normal",70,100,0,"melee",1],"AMNESIA":["psychic",0,100,0,"self",1],"METAL SOUND":["steel",0,85,300,"cone",3],"SONICBOOM":["normal",0,90,200,"projectile",5],"SPARK":["electric",65,100,400,"circle",2],"LOCK-ON":["normal",0,100,200,"homing",5],"ZAP CANNON":["electric",100,50,200,"projectile",7],"KNOCK OFF":["dark",20,100,0,"melee",1],"FURY CUTTER":["bug",10,95,0,"melee",1],"SWORDS DANCE":["normal",0,100,0,"self",1],"FALSE SWIPE":["normal",40,100,0,"melee",1],"UPROAR":["normal",50,100,300,"cone",3],"ICY WIND":["ice",55,95,300,"cone",3],"AURORA BEAM":["ice",65,100,400,"beam",7],"ICE BEAM":["ice",95,100,400,"beam",8],"SHEER COLD":["ice",0,30,800,"homing",7],"POISON GAS":["poison",0,55,300,"cone",2],"SLUDGE":["poison",65,100,600,"area",6],"ACID ARMOR":["poison",0,100,0,"self",1],"MEMENTO":["dark",0,100,200,"homing",5],"CLAMP":["water",35,75,0,"melee",1],"SPIKES":["ground",0,100,300,"trap",5],"SPIKE CANNON":["normal",20,100,200,"projectile",5],"LICK":["ghost",20,100,0,"melee",1],"SPITE":["ghost",0,100,200,"homing",5],"NIGHT SHADE":["ghost",0,100,200,"projectile",5],"DREAM EATER":["psychic",100,100,400,"homing",7],"DESTINY BOND":["ghost",0,100,0,"self",1],"SHADOW BALL":["ghost",80,100,200,"projectile",6],"SHADOW PUNCH":["ghost",60,100,0,"melee",1],"BIND":["normal",15,75,0,"melee",1],"IRON TAIL":["steel",100,75,0,"melee",1],"MEDITATE":["psychic",0,100,0,"self",1],"VICEGRIP":["normal",55,100,300,"cone",2],"MUD SHOT":["ground",55,95,200,"projectile",5],"GUILLOTINE":["normal",0,30,800,"melee",1],"CRABHAMMER":["water",90,85,0,"melee",1],"CHARGE":["electric",0,100,0,"self",1],"MIRROR COAT":["psychic",0,100,0,"self",1],"BARRAGE":["normal",15,85,200,"projectile",5],"EGG BOMB":["normal",100,75,800,"area",6],"BONE CLUB":["ground",65,85,200,"projectile",6],"BONEMERANG":["ground",50,90,200,"projectile",5],"BONE RUSH":["ground",25,80,200,"projectile",5],"ROLLING KICK":["fighting",60,85,300,"cone",2],"JUMP KICK":["fighting",70,95,300,"dash",4],"BRICK BREAK":["fighting",75,100,0,"melee",1],"HI JUMP KICK":["fighting",85,90,300,"dash",4],"ENDURE":["normal",0,100,0,"self",1],"MEGA KICK":["normal",120,75,0,"melee",1],"REVERSAL":["fighting",0,100,0,"melee",1],"COMET PUNCH":["normal",18,85,400,"beam",3],"MACH PUNCH":["fighting",40,100,0,"dash",2],"FIRE PUNCH":["fire",75,100,0,"melee",1],"ICE PUNCH":["ice",75,100,0,"melee",1],"THUNDERPUNCH":["electric",75,100,0,"melee",1],"SKY UPPERCUT":["fighting",85,90,0,"melee",1],"MEGA PUNCH":["normal",80,85,0,"melee",1],"DETECT":["fighting",0,100,0,"self",1],"COUNTER":["fighting",0,100,0,"self",1],"REFRESH":["normal",0,100,0,"self",1],"SMOG":["poison",20,70,400,"beam",3],"MEGAHORN":["bug",120,85,500,"dash",4],"SOFTBOILED":["normal",0,100,0,"self",1],"INGRAIN":["grass",0,100,0,"self",1],"TICKLE":["normal",0,100,0,"melee",1],"DIZZY PUNCH":["normal",70,100,0,"melee",1],"TWISTER":["dragon",40,100,300,"cone",3],"DRAGON DANCE":["dragon",0,100,0,"self",1],"FLAIL":["normal",0,100,0,"melee",1],"WATERFALL":["water",80,100,0,"melee",1],"CAMOUFLAGE":["normal",0,100,0,"self",1],"SUBSTITUTE":["normal",0,100,0,"self",1],"RECYCLE":["normal",0,100,0,"self",1],"BATON PASS":["normal",0,100,0,"self",1],"LOVELY KISS":["normal",0,75,0,"melee",1],"POWDER SNOW":["ice",40,100,300,"cone",3],"FAKE TEARS":["dark",0,100,200,"homing",5],"PERISH SONG":["normal",0,100,400,"circle",4],"BLIZZARD":["ice",120,70,800,"area",6],"SUNNY DAY":["fire",0,100,300,"field",5],"SPLASH":["normal",0,100,0,"self",1],"HYPER BEAM":["normal",150,90,600,"beam",8],"MIST":["ice",0,100,300,"field",2],"TRANSFORM":["normal",0,100,200,"homing",5],"CONVERSION":["normal",0,100,0,"self",1],"CONVERSION 2":["normal",0,100,0,"self",1],"SHARPEN":["normal",0,100,0,"self",1],"ANCIENTPOWER":["rock",60,100,200,"projectile",5],"SNORE":["normal",40,100,300,"cone",2],"BLOCK":["normal",0,100,200,"homing",5],"COVET":["normal",40,100,0,"melee",1],"HEAT WAVE":["fire",100,90,500,"cone",4],"SKY ATTACK":["flying",140,90,1500,"dash",6],"OUTRAGE":["dragon",90,100,0,"rampage",1],"SPIDER WEB":["bug",0,100,200,"homing",5],"CHARM":["normal",0,100,200,"homing",5],"SWEET KISS":["normal",0,75,0,"melee",1],"WISH":["normal",0,100,0,"self",1],"COTTON SPORE":["grass",0,85,300,"cone",3],"MAGICAL LEAF":["grass",60,100,200,"homing",5],"ROCK SLIDE":["rock",75,90,600,"area",6],"SWAGGER":["normal",0,90,200,"homing",5],"BULLET SEED":["grass",10,100,200,"projectile",5],"MORNING SUN":["normal",0,100,0,"self",1],"TAUNT":["dark",0,100,200,"homing",5],"PSYWAVE":["psychic",0,80,200,"homing",6],"PAIN SPLIT":["normal",0,100,200,"homing",5],"HIDDEN POWER":["normal",0,100,200,"projectile",5],"BIDE":["normal",60,100,400,"circle",1],"METAL CLAW":["steel",50,95,0,"melee",1],"BEAT UP":["dark",10,100,200,"homing",5],"OCTAZOOKA":["water",65,85,200,"projectile",6],"PRESENT":["normal",0,90,600,"area",6],"WATER PULSE":["water",60,100,600,"area",6],"STEEL WING":["steel",70,90,0,"melee",1],"HOWL":["normal",0,100,0,"self",1],"SKETCH":["normal",0,100,200,"homing",5],"TRIPLE KICK":["fighting",10,90,0,"melee",1],"MILK DRINK":["normal",0,100,0,"self",1],"HEAL BELL":["normal",0,100,0,"self",1],"AEROBLAST":["flying",100,95,600,"beam",8],"SACRED FIRE":["fire",100,95,200,"projectile",7],"LEAF BLADE":["grass",70,100,0,"melee",1],"BULK UP":["fighting",0,100,0,"self",1],"BLAZE KICK":["fire",85,90,0,"melee",1],"WHIRLPOOL":["water",15,70,600,"area",6],"MUDDY WATER":["water",95,85,300,"cone",4],"THIEF":["dark",40,100,0,"melee",1],"ATTRACT":["normal",0,100,200,"homing",5],"TOXIC":["poison",0,85,200,"projectile",5],"NATURE POWER":["normal",0,95,0,"borrow",1],"TORMENT":["dark",0,100,200,"homing",5],"RAZOR WIND":["normal",80,100,1200,"cone",4],"EXTRASENSORY":["psychic",80,100,200,"homing",6],"SLACK OFF":["normal",0,100,0,"self",1],"FOCUS PUNCH":["fighting",150,100,1000,"melee",1],"SLEEP TALK":["normal",0,100,0,"borrow",1],"ARM THRUST":["fighting",15,100,0,"melee",1],"SMELLINGSALT":["normal",60,100,0,"melee",1],"ASSIST":["normal",0,100,0,"borrow",1],"IRON DEFENSE":["steel",0,100,0,"self",1],"TAIL GLOW":["bug",0,100,0,"self",1],"SIGNAL BEAM":["bug",75,100,400,"beam",7],"GRASSWHISTLE":["grass",0,55,300,"cone",3],"WATER SPOUT":["water",0,100,600,"circle",4],"ERUPTION":["fire",0,100,600,"circle",4],"MAGIC COAT":["psychic",0,100,0,"self",1],"TEETER DANCE":["normal",0,100,400,"circle",3],"DRAGONBREATH":["dragon",60,100,300,"cone",3],"NEEDLE ARM":["grass",60,100,0,"melee",1],"CRUSH CLAW":["normal",75,95,0,"melee",1],"POISON TAIL":["poison",50,100,0,"melee",1],"ROCK TOMB":["rock",50,80,600,"area",6],"HAIL":["ice",0,100,300,"field",5],"WEATHER BALL":["normal",50,100,200,"projectile",5],"SNATCH":["dark",0,100,0,"self",1],"ICE BALL":["ice",30,90,300,"dash",3],"DRAGON CLAW":["dragon",80,100,0,"melee",1],"FLY":["flying",70,95,1000,"leap",5],"SUPERPOWER":["fighting",120,100,0,"melee",1],"MIST BALL":["psychic",70,100,200,"projectile",6],"LUSTER PURGE":["psychic",70,100,200,"projectile",6],"DOOM DESIRE":["steel",120,85,300,"area",6],"PSYCHO BOOST":["psychic",140,90,800,"area",6],"CUT":["normal",50,95,0,"melee",1],"STRENGTH":["normal",80,100,0,"melee",1],"ROCK SMASH":["fighting",20,100,0,"melee",1],"DIVE":["water",60,100,1000,"leap",5],"OVERHEAT":["fire",140,90,500,"cone",4]} /* MOVES_DATA_END */;
+
     // ==== src/dodge.js ====
     // ---- Desvio de golpes em área ----------------------------------------------------------------
-    // Adds a DESVIO button to the combat bar. While it is on, the hunt keeps its mode (AUTO or
+    // Adds DESVIO SEMI/FULL buttons to the combat bar (FULL also takes trainer battles over, in
+    // src/arena.js). While one is on, the hunt keeps its mode (AUTO or
     // MANUAL) and, when the red warning of an enemy area attack covers the main Pokémon, the script
     // steps out of it with the arrow keys. Only the canvas pixels are read (no game internals: the
     // client detects hooks). The warning reaches the client already late by the network delay, so
@@ -6742,7 +6747,9 @@
       const KEYS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
       const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
-      let enabled = readEnabled();
+      // 'off', 'semi' (only dodges) or 'full' (in trainer battles src/arena.js takes over).
+      let mode = readMode();
+      let enabled = mode !== 'off';
       let raf = 0;
       let lastScan = 0;
       let frame = null;
@@ -6756,11 +6763,12 @@
       const tries = new Map();
       const stats = { tried: 0, out: 0, late: 0, blocked: 0 };
 
-      function readEnabled() {
+      function readMode() {
         try {
-          return localStorage.getItem(STORAGE) === '1';
+          const value = localStorage.getItem(STORAGE);
+          return value === '1' ? 'semi' : value === 'semi' || value === 'full' ? value : 'off';
         } catch {
-          return false;
+          return 'off';
         }
       }
 
@@ -6773,7 +6781,7 @@
 
       function canAct() {
         if (!enabled || document.hidden || !document.hasFocus()) return false;
-        if (!hunting() || document.querySelector('#pafk-daily[data-running]')) return false;
+        if (!hunting() || document.querySelector('#pafk-daily[data-running], .in-arena')) return false;
         const bar = document.querySelector('.mb-modes');
         if (!bar || bar.closest('[hidden]')) return false;
         const active = document.activeElement;
@@ -7124,7 +7132,7 @@
 
       // Real input from the player wins: dodging pauses for a while.
       const onPlayerInput = event => {
-        if (!event.isTrusted || button.contains(event.target)) return;
+        if (!event.isTrusted || group.contains(event.target)) return;
         if (event.type === 'keydown' && !/^(Arrow|[wasdWASD1-4]$)/.test(event.key)) return;
         if (event.type === 'pointerdown' && !event.target.closest?.('canvas, .mb-modes, .mb-slots')) return;
         lastUserInput = performance.now();
@@ -7133,17 +7141,26 @@
       addEventListener('pointerdown', onPlayerInput, true);
 
       // ---- Button ----
-      // A one-button group next to AUTO/MANUAL with the same look, copied from the game's own
+      // A group next to AUTO/MANUAL with the same look, copied from the game's own
       // buttons at runtime: filled when on, plain text when off.
 
       const group = document.createElement('span');
       group.className = 'pafk-dodge-group';
       group.dataset.pafk = '';
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'pafk-dodge';
-      button.textContent = 'DESVIO';
-      group.append(button);
+      const label = document.createElement('span');
+      label.className = 'pafk-dodge-label';
+      label.textContent = 'DESVIO';
+      const makeButton = (value, text) => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'pafk-dodge';
+        el.dataset.dodgeMode = value;
+        el.textContent = text;
+        return el;
+      };
+      const semiButton = makeButton('semi', 'SEMI');
+      const fullButton = makeButton('full', 'FULL');
+      group.append(label, semiButton, fullButton);
 
       const style = document.createElement('style');
       style.dataset.pafk = '';
@@ -7153,6 +7170,7 @@
           background: var(--pafk-g-bg, #fff); border: var(--pafk-g-border, 1px solid #b9cde6);
           border-radius: var(--pafk-g-radius, 6px); padding: var(--pafk-g-pad, 1px);
         }
+        .pafk-dodge-label { font: var(--pafk-b-font, inherit); color: var(--pafk-off-fg, #3f5585); padding: 0 4px; opacity: .8; }
         .pafk-dodge {
           appearance: none; border: 0; margin: 0; cursor: pointer;
           font: var(--pafk-b-font, inherit); padding: var(--pafk-b-pad, 0 7px);
@@ -7185,21 +7203,30 @@
       }
 
       function updateButton() {
-        button.setAttribute('aria-pressed', String(enabled));
+        semiButton.setAttribute('aria-pressed', String(mode === 'semi'));
+        fullButton.setAttribute('aria-pressed', String(mode === 'full'));
         const result = stats.tried
           ? ` Nesta sessão: ${stats.tried} tentados, ${stats.out} saíram antes do golpe, ${stats.late} tarde demais, ${stats.blocked} sem caminho livre.`
           : '';
-        button.title = enabled
-          ? `Desvio LIGADO: sai dos golpes em área lentos andando 1 ou 2 quadrados. Só funciona com a aba em foco. Clique para desligar.${result}`
-          : 'Desvio DESLIGADO. Clique para ligar: sai dos golpes em área lentos durante a caça (só com a aba em foco).';
+        semiButton.title = mode === 'semi'
+          ? `SEMI LIGADO: só desvia. Na caça, sai dos golpes em área lentos andando 1 ou 2 quadrados (só com a aba em foco). Clique para desligar.${result}`
+          : 'SEMI: só desvia dos golpes em área lentos durante a caça (só com a aba em foco). Clique para ligar.';
+        fullButton.title = mode === 'full'
+          ? `FULL LIGADO: na caça desvia como o SEMI; nas lutas contra treinadores assume o MANUAL, desvia, se mexe antes do golpe esperado do oponente e ataca no intervalo dele. Clique para desligar.${result}`
+          : 'FULL: nas lutas contra treinadores assume o controle (MANUAL): desvia, se mexe antes do golpe esperado do oponente e ataca no intervalo dele. Clique para ligar.';
       }
 
-      button.addEventListener('click', event => {
+      group.addEventListener('click', event => {
+        const picked = event.target.closest?.('[data-dodge-mode]');
+        if (!picked) return;
         event.stopPropagation();
-        enabled = !enabled;
+        mode = mode === picked.dataset.dodgeMode ? 'off' : picked.dataset.dodgeMode;
+        enabled = mode !== 'off';
         try {
-          localStorage.setItem(STORAGE, enabled ? '1' : '0');
+          localStorage.setItem(STORAGE, mode);
         } catch {}
+        // src/arena.js reads the mode again on this event.
+        document.dispatchEvent(new CustomEvent('pafk-dodge-mode'));
         updateButton();
         if (enabled && !raf) raf = requestAnimationFrame(tick);
       });
@@ -7214,6 +7241,676 @@
       mount();
       setInterval(mount, 1000);
       if (enabled) raf = requestAnimationFrame(tick);
+    })();
+
+    // ==== src/arena.js ====
+    // ---- Arena: modo FULL do desvio --------------------------------------------------------------
+    // In trainer battles the attacks are aimed at the ground and every Pokémon waits a global cooldown
+    // between moves. Recorded fights (referencia/mecanicas.md, "Arena") showed that most enemy
+    // warnings are on screen for less than 200 ms, too short to walk out after seeing them, but the
+    // enemy attacks on a steady rhythm (2.0 s ± 30 ms for most trainers). So in FULL mode the script
+    // takes the battle over in MANUAL:
+    // - walks out of any enemy warning that covers our Pokémon (the slow ones can be dodged);
+    // - learns the enemy's rhythm from its warnings and our HP drops, and takes a step just before the
+    //   next expected hit, so it is not standing on the tile the enemy aimed at;
+    // - attacks in the window right after the enemy's hit, choosing like the game's AUTO (power × same
+    //   type × accuracy, from src/data/moves.js) and walking closer when the move does not reach.
+    // Only pixels of the world canvas and the arena DOM are read (no game internals). A real key or
+    // click from the player pauses it for a few seconds.
+    (() => {
+      const MODE_KEY = 'pokeafk-market-filtros:dodge';
+      const TILE = 16;
+      const SCAN_EVERY = 30;
+      const STEP_TIMEOUT = 420;
+      const USER_QUIET = 4000;
+      // Step this long before the expected enemy hit (a step takes 267 ms; the enemy aims ~0.2–0.3 s
+      // before the hit lands).
+      const JUKE_FROM = 480;
+      const JUKE_UNTIL = 140;
+      // Our own attack keeps the Pokémon still while it casts: it must end this long before the expected
+      // hit, so the step before it is free.
+      const ATTACK_GUARD = 600;
+      // Stat stages last 10 s; renewed a little before.
+      const BUFF_MS = 9500;
+      const RHYTHM_MIN = 600;
+      const RHYTHM_MAX = 4500;
+      const MERGE_HITS = 450;
+      const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+      const ARROWS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+
+      const readMode = () => {
+        try {
+          const value = localStorage.getItem(MODE_KEY);
+          return value === '1' ? 'semi' : value === 'semi' || value === 'full' ? value : 'off';
+        } catch {
+          return 'off';
+        }
+      };
+      let mode = readMode();
+      const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+      const pageWindow = document.defaultView ?? window;
+
+      // ---- Page state ----
+
+      const inArena = () => !!document.querySelector('.in-arena');
+      const fighting = () => inArena() && !document.querySelector('.ah-intro, .ah-pick, .ah-result[data-result]');
+      const modeNow = () => document.querySelector('.mb-modes .mb-mode.on')?.dataset.mode ?? null;
+
+      function card(color) {
+        const el = [...document.querySelectorAll('.ah-card')].find(c => c.querySelector(`.ah-name.${color}`));
+        if (!el) return null;
+        const hp = el.querySelector('.ah-hp')?.getAttribute('title')?.match(/(\d+)\s*\/\s*(\d+)/);
+        const id = el.querySelector('.ah-mon-ic')?.style.backgroundImage.match(/\/([\w-]+)\.png/)?.[1];
+        const name = el.querySelector('.ah-mon-n')?.textContent.trim() ?? '';
+        return hp && id ? { id, name, hp: +hp[1], max: +hp[2] } : null;
+      }
+
+      function moveKeys() {
+        let saved = {};
+        try {
+          saved = JSON.parse(localStorage.getItem('pokeafk.ui.keys') || '{}') || {};
+        } catch {}
+        return [1, 2, 3, 4].map(n => (typeof saved[`move${n}`] === 'string' && saved[`move${n}`]) || String(n));
+      }
+
+      function press(key, code = key) {
+        const init = { key, code, bubbles: true, cancelable: true };
+        // Tampermonkey's sandbox has no bare dispatchEvent; send to the page's window.
+        pageWindow.dispatchEvent(new KeyboardEvent('keydown', init));
+        pageWindow.dispatchEvent(new KeyboardEvent('keyup', init));
+      }
+
+      // ---- Canvas ----
+
+      function worldCanvas() {
+        return [...document.querySelectorAll('canvas')]
+          .filter(c => c.width && !c.dataset.pafk && c.getBoundingClientRect().width / c.width > 1.2
+            && !c.closest('[hidden]') && !c.classList.contains('title-scene'))
+          .sort((a, b) => b.width * b.height - a.width * a.height)[0];
+      }
+
+      function readFrame() {
+        const canvas = worldCanvas();
+        if (!canvas) return null;
+        try {
+          const { width: w, height: h } = canvas;
+          return { d: canvas.getContext('2d').getImageData(0, 0, w, h).data, w, h };
+        } catch {
+          return null;
+        }
+      }
+
+      const near = (f, x, y, [r, g, b], tol) => {
+        if (x < 0 || y < 0 || x >= f.w || y >= f.h) return false;
+        const k = (y * f.w + x) * 4;
+        return Math.abs(f.d[k] - r) <= tol && Math.abs(f.d[k + 1] - g) <= tol && Math.abs(f.d[k + 2] - b) <= tol;
+      };
+
+      // HP bars: an 18×4 box in #283840 4 px above each Pokémon's head, 16 px of fill.
+      const BAR = [40, 56, 64];
+      const BAR_BG = [80, 104, 96];
+      function findBars(f) {
+        const bars = [];
+        for (let y = 1; y < f.h - 3; y++) {
+          let run = 0;
+          for (let x = 0; x <= f.w; x++) {
+            if (x < f.w && near(f, x, y, BAR, 10)) { run++; continue; }
+            const x0 = x - 18;
+            if (run === 18 && near(f, x0, y + 3, BAR, 10) && near(f, x0 + 17, y + 3, BAR, 10)
+              && near(f, x0, y + 1, BAR, 10) && near(f, x0 + 17, y + 1, BAR, 10) && !near(f, x0 + 1, y + 1, BAR, 10)) {
+              let fill = 0;
+              while (fill < 16 && !near(f, x0 + 1 + fill, y + 1, BAR_BG, 14)) fill++;
+              bars.push({ x: x0 + 1, y: y + 1, fill });
+            }
+            run = 0;
+          }
+        }
+        return bars;
+      }
+
+      // Visible height of the overworld sprite: the bar sits 4 px above it.
+      const spriteHeights = new Map();
+      function spriteHeight(id) {
+        if (spriteHeights.has(id)) return spriteHeights.get(id);
+        spriteHeights.set(id, 0);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0);
+          const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+          let top = 0;
+          outer: for (; top < canvas.height; top++)
+            for (let x = 0; x < canvas.width; x++) if (data[(top * canvas.width + x) * 4 + 3]) break outer;
+          spriteHeights.set(id, canvas.height - top);
+        };
+        img.onerror = () => spriteHeights.set(id, 24);
+        img.src = `/assets/mon/ow/${id}.png`;
+        return 0;
+      }
+
+      // Enemy warnings: opaque #f86048 edges around the tiles they will hit.
+      function warningBoxes(f) {
+        const { w, h, d } = f;
+        const mask = new Uint8Array(w * h);
+        for (let i = 0, k = 0; i < w * h; i++, k += 4) {
+          if (Math.abs(d[k] - 248) <= 6 && Math.abs(d[k + 1] - 96) <= 6 && Math.abs(d[k + 2] - 72) <= 6) mask[i] = 1;
+        }
+        const segs = [];
+        for (let y = 0; y < h; y++) {
+          let run = 0;
+          for (let x = 0; x <= w; x++) {
+            if (x < w && mask[y * w + x]) { run++; continue; }
+            if (run >= 12) segs.push([x - run, y, x - 1, y]);
+            run = 0;
+          }
+        }
+        for (let x = 0; x < w; x++) {
+          let run = 0;
+          for (let y = 0; y <= h; y++) {
+            if (y < h && mask[y * w + x]) { run++; continue; }
+            if (run >= 12) segs.push([x, y - run, x, y - 1]);
+            run = 0;
+          }
+        }
+        const boxes = [];
+        for (const seg of segs) {
+          let box = seg.slice();
+          for (let i = boxes.length - 1; i >= 0; i--) {
+            const b = boxes[i];
+            if (b[0] <= box[2] + 1 && box[0] <= b[2] + 1 && b[1] <= box[3] + 1 && box[1] <= b[3] + 1) {
+              box = [Math.min(b[0], box[0]), Math.min(b[1], box[1]), Math.max(b[2], box[2]), Math.max(b[3], box[3])];
+              boxes.splice(i, 1);
+            }
+          }
+          boxes.push(box);
+        }
+        const at = (x, y) => x >= 0 && y >= 0 && x < w && y < h && mask[y * w + x];
+        const vertical = (x, y0) => { for (let i = 3; i <= 12; i++) if (at(x, y0 + i)) return true; return false; };
+        // Tiles inside: walking each row, a left edge opens the shape and a right edge closes it.
+        return boxes.filter(b => b[2] - b[0] >= 14 && b[3] - b[1] >= 14).map(box => {
+          const cols = Math.round((box[2] - box[0] + 1) / TILE);
+          const rows = Math.round((box[3] - box[1] + 1) / TILE);
+          const cells = [];
+          for (let r = 0; r < rows; r++) {
+            let inside = false;
+            for (let c = 0; c < cols; c++) {
+              const x0 = box[0] + c * TILE;
+              const y0 = box[1] + r * TILE;
+              if (vertical(x0, y0)) inside = true;
+              if (inside) cells.push([x0, y0]);
+              if (vertical(x0 + TILE - 1, y0)) inside = false;
+            }
+          }
+          return { box, cells };
+        });
+      }
+
+      // ---- Battle state ----
+      // Tiles are counted on a grid fixed when the fight starts (the arena camera does not follow the
+      // Pokémon), so positions read from bars and warnings share coordinates.
+
+      let fight = null;
+      // jukeHit / jukeSafe: whether the enemy's hit expected right after a step still took HP.
+      const stats = { fights: 0, hits: 0, warned: 0, dodged: 0, late: 0, jukes: 0, jukeHit: 0, jukeSafe: 0, attacks: 0 };
+
+      // For tests only: 'pokeafk-market-filtros:arena-hold' (ms) keeps the script from attacking at the
+      // start of each fight, so a weak enemy attacks long enough for the rhythm and the steps to show.
+      const holdMs = () => {
+        try {
+          return Math.max(0, +localStorage.getItem('pokeafk-market-filtros:arena-hold') || 0);
+        } catch {
+          return 0;
+        }
+      };
+
+      function newFight() {
+        stats.fights++;
+        return {
+          holdUntil: performance.now() + holdMs(),
+          grid: null, votes: new Map(), me: null, foe: null, meBar: null, foeBar: null, meMiss: 0, foeMiss: 0,
+          warnings: [], lands: [], foeName: '', myHp: null,
+          blocked: new Set(), statusAt: new Map(), lastAttack: null,
+          jukedFor: 0, jukes: [], landing: [], drops: [], seenHits: 0, blindHits: 0, approach: false, lastManualClick: 0, switchedToManual: false,
+        };
+      }
+
+      const key = ([x, y]) => `${x},${y}`;
+      const toTile = (px, py) => [Math.round((px - fight.grid[0]) / TILE), Math.round((py - fight.grid[1]) / TILE)];
+
+      function vote(phase, weight) {
+        fight.votes.set(phase, (fight.votes.get(phase) ?? 0) + weight);
+        let best = null;
+        for (const [key, count] of fight.votes) if (!best || count > best[1]) best = [key, count];
+        if (best[1] >= 3) fight.grid = best[0].split(',').map(Number);
+      }
+
+      function readPositions(f, mine, foe) {
+        const bars = findBars(f);
+        const pick = (who, previous) => {
+          if (!who) return null;
+          const want = Math.ceil(16 * Math.max(0, who.hp / Math.max(1, who.max)));
+          let best = null;
+          let bestScore = Infinity;
+          for (const bar of bars) {
+            const miss = Math.abs(bar.fill - want);
+            if (miss > 3) continue;
+            const off = previous ? Math.abs(bar.x - previous.x) + Math.abs(bar.y - previous.y) : 0;
+            const score = miss * 40 + off;
+            if (score < bestScore) { best = bar; bestScore = score; }
+          }
+          return best;
+        };
+        const meBar = pick(mine, fight.meBar);
+        if (meBar) bars.splice(bars.indexOf(meBar), 1);
+        const foeBar = pick(foe, fight.foeBar) ?? (bars.length === 1 ? bars[0] : null);
+        const place = (bar, who) => {
+          const visH = who && spriteHeight(who.id);
+          return bar && visH ? { x: bar.x, y: bar.y + 4 - TILE + visH } : null;
+        };
+        const me = place(meBar, mine);
+        const them = place(foeBar, foe);
+        // The grid's phase is voted by frames where our Pokémon stands still (mid-step and during the
+        // camera's shake on hits it is off by a few pixels).
+        if (me && fight.meBar && meBar.x === fight.meBar.x && meBar.y === fight.meBar.y) {
+          vote(`${((me.x % TILE) + TILE) % TILE},${((me.y % TILE) + TILE) % TILE}`, 1);
+        }
+        fight.meBar = meBar ?? fight.meBar;
+        fight.foeBar = foeBar ?? fight.foeBar;
+        if (!fight.grid) return;
+        // A position not seen for a few frames is dropped rather than acted on.
+        if (me) { fight.me = toTile(me.x, me.y); fight.meMiss = 0; } else if (++fight.meMiss > 4) fight.me = null;
+        if (them) { fight.foe = toTile(them.x, them.y); fight.foeMiss = 0; } else if (++fight.foeMiss > 8) fight.foe = null;
+      }
+
+      function trackWarnings(boxes, now) {
+        const seen = [];
+        for (const { box, cells } of boxes) {
+          let w = fight.warnings.find(o => !seen.includes(o)
+            && Math.abs(o.box[0] - box[0]) + Math.abs(o.box[1] - box[1]) + Math.abs(o.box[2] - box[2]) + Math.abs(o.box[3] - box[3]) <= 8);
+          if (!w) {
+            w = { box, first: now, tiles: new Set(cells.map(([x, y]) => key(toTile(x, y)))), onMe: false };
+            fight.warnings.push(w);
+          }
+          w.box = box;
+          w.last = now;
+          if (fight.me && w.tiles.has(key(fight.me))) w.onMe = true;
+          seen.push(w);
+        }
+        for (const w of fight.warnings.filter(o => !seen.includes(o))) {
+          // The edge stays opaque until 100 ms after the hit, then fades out.
+          landed(w.last - 100);
+          // Whether it hit is told by our HP, not by the tiles: settled in tick().
+          if (w.onMe) fight.landing.push({ at: w.last - 100 });
+        }
+        fight.warnings = seen;
+      }
+
+      // ---- Enemy rhythm ----
+
+      function landed(t) {
+        const lands = fight.lands;
+        if (lands.length && Math.abs(t - lands.at(-1)) < MERGE_HITS) return;
+        lands.push(t);
+        if (lands.length > 12) lands.shift();
+      }
+
+      function rhythm() {
+        const gaps = [];
+        for (let i = 1; i < fight.lands.length; i++) {
+          const gap = fight.lands[i] - fight.lands[i - 1];
+          if (gap >= RHYTHM_MIN && gap <= RHYTHM_MAX) gaps.push(gap);
+        }
+        if (gaps.length < 2) return null;
+        const recent = gaps.slice(-5).sort((a, b) => a - b);
+        return recent[recent.length >> 1];
+      }
+
+      function nextHit(now) {
+        const every = rhythm();
+        if (!every) return null;
+        let next = fight.lands.at(-1) + every;
+        while (next < now - 150) next += every;
+        return { at: next, every };
+      }
+
+      // ---- Movement ----
+
+      const blockedTile = tile => fight.blocked.has(key(tile));
+      const dangerTiles = () => {
+        const set = new Set();
+        for (const w of fight.warnings) for (const t of w.tiles) set.add(t);
+        return set;
+      };
+      const neighbours = tile => Object.entries(DIRS).map(([dir, [dx, dy]]) => ({ dir, tile: [tile[0] + dx, tile[1] + dy] }));
+      const sameTile = (a, b) => a && b && a[0] === b[0] && a[1] === b[1];
+
+      async function step(dir) {
+        const from = fight.me;
+        press(ARROWS[dir]);
+        const to = [from[0] + DIRS[dir][0], from[1] + DIRS[dir][1]];
+        const end = performance.now() + STEP_TIMEOUT;
+        while (performance.now() < end) {
+          await sleep(25);
+          if (!fight) return false;
+          if (fight.me && !sameTile(fight.me, from)) return true;
+        }
+        // A fence, the arena's edge, an obstacle or the enemy.
+        fight.blocked.add(key(to));
+        return false;
+      }
+
+      // Shortest way out of the danger, at most 2 steps, preferring tiles off the enemy's row and
+      // column (lines and beams follow them).
+      function escapePath(danger) {
+        const start = fight.me;
+        const offLine = tile => (fight.foe && tile[0] !== fight.foe[0] && tile[1] !== fight.foe[1] ? 0 : 1);
+        const paths = [];
+        for (const a of neighbours(start)) {
+          if (blockedTile(a.tile) || sameTile(a.tile, fight.foe)) continue;
+          if (!danger.has(key(a.tile))) paths.push({ dirs: [a.dir], end: a.tile });
+          for (const b of neighbours(a.tile)) {
+            if (sameTile(b.tile, start) || blockedTile(b.tile) || sameTile(b.tile, fight.foe) || danger.has(key(b.tile))) continue;
+            paths.push({ dirs: [a.dir, b.dir], end: b.tile });
+          }
+        }
+        paths.sort((p, q) => p.dirs.length - q.dirs.length || offLine(p.end) - offLine(q.end));
+        return paths[0] ?? null;
+      }
+
+      // One step before the expected hit: off the enemy's lines, not into a warning, keeping some
+      // distance so melee enemies have to walk.
+      function jukeDir(danger) {
+        const options = neighbours(fight.me)
+          .filter(o => !blockedTile(o.tile) && !sameTile(o.tile, fight.foe) && !danger.has(key(o.tile)))
+          .map(o => {
+            const dist = fight.foe ? Math.abs(o.tile[0] - fight.foe[0]) + Math.abs(o.tile[1] - fight.foe[1]) : 3;
+            const line = fight.foe && (o.tile[0] === fight.foe[0] || o.tile[1] === fight.foe[1]) ? 2 : 0;
+            return { dir: o.dir, score: line + Math.abs(dist - 3) + Math.random() * 0.5 };
+          })
+          .sort((a, b) => a.score - b.score);
+        return options[0]?.dir ?? null;
+      }
+
+      // A step that opens the distance to the enemy (melee reaches 2 tiles in MANUAL), toward the side
+      // with more free tiles known.
+      function awayFromFoe(danger) {
+        const dist = tile => Math.abs(tile[0] - fight.foe[0]) + Math.abs(tile[1] - fight.foe[1]);
+        const room = tile => neighbours(tile).filter(o => !blockedTile(o.tile)).length;
+        return neighbours(fight.me)
+          .filter(o => !blockedTile(o.tile) && !danger.has(key(o.tile)) && dist(o.tile) > dist(fight.me))
+          .sort((a, b) => room(b.tile) - room(a.tile))[0]?.dir ?? null;
+      }
+
+      function towardFoe() {
+        if (!fight.foe || !fight.me) return null;
+        const dx = fight.foe[0] - fight.me[0];
+        const dy = fight.foe[1] - fight.me[1];
+        const options = [];
+        if (dx) options.push({ dir: dx > 0 ? 'right' : 'left', d: Math.abs(dx) });
+        if (dy) options.push({ dir: dy > 0 ? 'down' : 'up', d: Math.abs(dy) });
+        options.sort((a, b) => b.d - a.d);
+        return options.find(o => {
+          const t = [fight.me[0] + DIRS[o.dir][0], fight.me[1] + DIRS[o.dir][1]];
+          return !blockedTile(t) && !sameTile(t, fight.foe);
+        })?.dir ?? null;
+      }
+
+      // ---- Attacks ----
+
+      // The slots in the combat bar with the move data generated by build-data.mjs (src/data/moves.js):
+      // [type, power (0 for status), accuracy, cast ms, shape, reach].
+      function slots() {
+        return [...document.querySelectorAll('.movebar .mb-slot[data-slot]')].map(el => {
+          const name = (el.querySelector('.mb-name .full')?.textContent || el.title.replace(/\s*\(.*$/, '')).trim().toUpperCase();
+          const [type, power, accuracy, cast, shape, reach] = MOVES[name] ?? ['', 0, 100, 0, 'melee', 1];
+          return { slot: +el.dataset.slot, name, ready: el.dataset.state === 'ready', type, power, accuracy, cast, shape, reach };
+        });
+      }
+
+      // How far a move reaches, as the game counts it for MANUAL (melee 2 tiles, cones their radius,
+      // moves around the user 0: they hit whatever is close).
+      function reachOf(move) {
+        if (move.shape === 'melee' || move.shape === 'rampage') return 2;
+        if (move.shape === 'circle' || move.shape === 'field' || move.shape === 'self' || move.shape === 'borrow') return move.power ? move.reach : 99;
+        return move.reach;
+      }
+
+      // Like the game's own AUTO: the ready move with the most power × same type × accuracy. Status
+      // moves (buffs, debuffs) only when no damaging move is ready, at most once every 12 s each.
+      function chooseMove(list, myTypes, distance, now) {
+        const ready = list.filter(m => m.ready);
+        // Self buffs first (Calm Mind, Swords Dance…), again once their 10 s stage is over, as the
+        // game's AUTO does: without Calm Mind Alakazam's Psychic did ~40 to Lorelei's Slowbro instead of
+        // taking it down in one hit.
+        const buff = ready.find(m => !m.power && m.shape === 'self'
+          && now - (fight.statusAt.get(m.slot) ?? -Infinity) > BUFF_MS);
+        if (buff) return buff;
+        const damaging = ready.filter(m => m.power > 0)
+          .map(m => ({ ...m, score: m.power * (myTypes.includes(m.type) ? 1.5 : 1) * m.accuracy / 100, inReach: distance <= reachOf(m) }))
+          .sort((a, b) => b.inReach - a.inReach || b.score - a.score);
+        if (damaging.length) return damaging[0];
+        return ready.find(m => !m.power && now - (fight.statusAt.get(m.slot) ?? -Infinity) > 12000) ?? null;
+      }
+
+      async function attack(move) {
+        const keys = moveKeys();
+        const k = keys[move.slot];
+        press(k, /^\d$/.test(k) ? `Digit${k}` : k);
+        stats.attacks++;
+        if (!move.power) fight.statusAt.set(move.slot, performance.now());
+        fight.lastAttack = { name: move.name, at: performance.now() };
+        // The Pokémon stays still while it casts; wait it out before the next decision.
+        await sleep(Math.max(160, move.cast + 80));
+        if (!fight) return;
+        const el = document.querySelector(`.movebar .mb-slot[data-slot="${move.slot}"]`);
+        // Out of reach ("LONGE"): the next turns walk toward the enemy.
+        fight.approach = !!el?.classList.contains('refused');
+      }
+
+      // ---- Loop ----
+
+      let busy = false;
+      let lastScan = 0;
+      let lastUserInput = 0;
+      let raf = 0;
+
+      async function act(fn) {
+        busy = true;
+        try {
+          await fn();
+        } finally {
+          busy = false;
+        }
+      }
+
+      function keepManual(now) {
+        if (modeNow() !== 'auto' || now - fight.lastManualClick < 1000) return;
+        fight.lastManualClick = now;
+        fight.switchedToManual = true;
+        document.querySelector('.mb-modes .mb-mode[data-mode="manual"]')?.click();
+      }
+
+      function endFight() {
+        if (!fight) return;
+        // Back to AUTO for the hunt, as the player had it.
+        if (fight.switchedToManual && modeNow() === 'manual') document.querySelector('.mb-modes .mb-mode[data-mode="auto"]')?.click();
+        fight = null;
+      }
+
+      function tick(now) {
+        raf = mode === 'full' ? requestAnimationFrame(tick) : 0;
+        if (!raf) { endFight(); return; }
+        if (now - lastScan < SCAN_EVERY) return;
+        lastScan = now;
+        if (!inArena()) { endFight(); return; }
+        if (!fight) fight = newFight();
+        // Why the script is not acting right now, for the tests (data-wait on the status strip).
+        const wait = think(now) || '';
+        if (hud.dataset.wait !== wait) hud.dataset.wait = wait;
+      }
+
+      function think(now) {
+        if (!fighting()) return 'tela da arena';
+        if (document.hidden || !document.hasFocus()) return 'sem foco';
+        const mine = card('blue');
+        const foe = card('red');
+        if (!mine || !foe) return 'cartões';
+        if (foe.name !== fight.foeName) {
+          // A new enemy Pokémon: new rhythm.
+          fight.foeName = foe.name;
+          fight.lands = [];
+          fight.foeBar = null;
+          fight.seenHits = 0;
+          fight.blindHits = 0;
+        }
+        if (mine.name !== fight.myName) {
+          // Our next Pokémon: other moves in the slots, no stages yet.
+          fight.myName = mine.name;
+          fight.statusAt.clear();
+          fight.myHp = null;
+          fight.meBar = null;
+        }
+        if (fight.myHp != null && mine.hp < fight.myHp) {
+          stats.hits++;
+          // A hit with no warning on us (melee, homing, too quick to draw) cannot be stepped out of.
+          const warned = fight.warnings.some(w => w.onMe) || fight.landing.some(w => Math.abs(now - w.at) < 450);
+          if (warned) fight.seenHits++;
+          else fight.blindHits++;
+          landed(now);
+          const juke = fight.jukes.find(j => Math.abs(now - j.at) < 450);
+          if (juke) { stats.jukeHit++; fight.jukes.splice(fight.jukes.indexOf(juke), 1); }
+          fight.drops.push(now);
+          if (fight.drops.length > 20) fight.drops.shift();
+        }
+        for (const juke of fight.jukes.filter(j => now > j.at + 450)) {
+          stats.jukeSafe++;
+          fight.jukes.splice(fight.jukes.indexOf(juke), 1);
+        }
+        // The HP drops as the hit lands, before the warning's edge fades: look back at recent drops.
+        for (const warned of fight.landing.filter(w => now > w.at + 450)) {
+          stats.warned++;
+          if (fight.drops.some(t => t > warned.at - 150 && t < warned.at + 450)) stats.late++;
+          else stats.dodged++;
+          fight.landing.splice(fight.landing.indexOf(warned), 1);
+        }
+        fight.myHp = mine.hp;
+        const f = readFrame();
+        if (!f) return 'canvas';
+        // Warning edges sit exactly on the tile borders: they vote for the grid too (the camera's
+        // offset differs between arenas).
+        const boxes = warningBoxes(f);
+        for (const { box } of boxes) vote(`${box[0] % TILE},${box[1] % TILE}`, 5);
+        readPositions(f, mine, foe);
+        if (!fight.grid) return 'grade';
+        trackWarnings(boxes, now);
+        showHud(now);
+        if (busy) return 'ocupado';
+        if (!fight.me) return 'posição';
+        if (now - lastUserInput < USER_QUIET) return 'jogador';
+        keepManual(now);
+        if (modeNow() !== 'manual') return 'modo';
+
+        const danger = dangerTiles();
+        if (danger.has(key(fight.me))) {
+          const path = escapePath(danger);
+          if (path) act(async () => { for (const dir of path.dirs) if (!(await step(dir))) break; });
+          return;
+        }
+        // Against an enemy whose hits come without warnings (Lorelei's Jynx: 7 hits, none drawn) the
+        // step before its hit does not help and holding our attacks only gives it time: attack
+        // whenever a move is ready and use our cooldown to back away instead.
+        const blind = fight.blindHits >= 2 && fight.blindHits > fight.seenHits;
+        const next = blind ? null : nextHit(now);
+        if (next && now >= next.at - JUKE_FROM && now <= next.at - JUKE_UNTIL && fight.jukedFor !== Math.round(next.at)) {
+          fight.jukedFor = Math.round(next.at);
+          const dir = jukeDir(danger);
+          if (dir) {
+            stats.jukes++;
+            fight.jukes.push({ at: next.at });
+            act(() => step(dir));
+            return;
+          }
+        }
+        const distance = fight.foe ? Math.abs(fight.foe[0] - fight.me[0]) + Math.abs(fight.foe[1] - fight.me[1]) : 0;
+        const myTypes = (typeof MARKET_GUIDE === 'object' ? MARKET_GUIDE.types[parseInt(mine.id, 10)] ?? '' : '').split('/');
+        const move = chooseMove(slots(), myTypes, distance, now);
+        if (fight.approach || (move?.power && distance > reachOf(move))) {
+          const dir = towardFoe();
+          if (dir) { act(async () => { await step(dir); if (fight) fight.approach = false; }); return; }
+        }
+        if (!move && distance <= 2 && fight.foe) {
+          const dir = awayFromFoe(danger);
+          if (dir) { act(() => step(dir)); return; }
+        }
+        if (!move) return 'sem golpe pronto';
+        if (now < fight.holdUntil) return 'pausa de teste';
+        // Our cast keeps the Pokémon still: no attack that would still be casting when the step before
+        // the enemy's hit is due.
+        if (next && now + move.cast + ATTACK_GUARD > next.at && now <= next.at + 100) return 'espera o golpe do oponente';
+        act(() => attack(move));
+      }
+
+      // ---- On-screen status ----
+
+      const hud = document.createElement('div');
+      hud.className = 'pafk-arena-hud';
+      hud.dataset.pafk = '';
+      hud.hidden = true;
+      hud.setAttribute('role', 'status');
+      const style = document.createElement('style');
+      style.dataset.pafk = '';
+      style.textContent = `
+        .pafk-arena-hud {
+          position: fixed; left: 50%; top: 124px; transform: translateX(-50%); z-index: 42;
+          padding: 4px 10px; border-radius: 6px; background: rgba(20, 32, 107, .92); color: #fff;
+          font: 12px/1.3 system-ui, sans-serif; pointer-events: none; white-space: nowrap;
+          box-shadow: 2px 3px 0 rgba(0, 0, 0, .35);
+        }
+        .pafk-arena-hud b { color: #ffd84a; font-weight: 700; }`;
+      document.head.append(style);
+      document.body.append(hud);
+
+      let hudAt = 0;
+      function showHud(now) {
+        if (now - hudAt < 250) return;
+        hudAt = now;
+        const next = nextHit(now);
+        const paused = now - lastUserInput < USER_QUIET;
+        const text = paused
+          ? 'FULL pausado: você está no controle'
+          : fight.blindHits >= 2 && fight.blindHits > fight.seenHits
+            ? `FULL · golpes do oponente sem aviso: ataca direto e se afasta na espera · golpes recebidos ${stats.hits}`
+            : `FULL · ritmo do oponente ${next ?`${(next.every / 1000).toFixed(1).replace('.', ',')} s, próximo em ${Math.max(0, (next.at - now) / 1000).toFixed(1).replace('.', ',')} s` : 'aprendendo'}`
+            + ` · avisos sem dano ${stats.dodged}/${stats.warned}`
+            + (stats.jukeHit + stats.jukeSafe ? ` · passos antes do golpe ${stats.jukeSafe}/${stats.jukeHit + stats.jukeSafe} sem dano` : '')
+            + ` · golpes recebidos ${stats.hits}`;
+        if (hud.textContent !== text) hud.textContent = text;
+        hud.dataset.state = JSON.stringify({ me: fight.me, foe: fight.foe, grid: fight.grid, lands: fight.lands.length, blocked: fight.blocked.size, last: fight.lastAttack?.name, meBar: fight.meBar, stats });
+      }
+
+      setInterval(() => {
+        const show = mode === 'full' && inArena();
+        if (hud.hidden === show) hud.hidden = !show;
+      }, 500);
+
+      // Real input from the player wins: the script pauses for a while.
+      const onPlayerInput = event => {
+        if (!event.isTrusted || !inArena() || event.target?.closest?.('.pafk-dodge-group')) return;
+        if (event.type === 'keydown' && !/^(Arrow|[wasdWASD1-9]$)/.test(event.key)) return;
+        if (event.type === 'pointerdown' && !event.target.closest?.('canvas, .movebar')) return;
+        lastUserInput = performance.now();
+      };
+      addEventListener('keydown', onPlayerInput, true);
+      addEventListener('pointerdown', onPlayerInput, true);
+
+      document.addEventListener('pafk-dodge-mode', () => {
+        mode = readMode();
+        if (mode === 'full' && !raf) raf = requestAnimationFrame(tick);
+      });
+      if (mode === 'full') raf = requestAnimationFrame(tick);
     })();
   })();
 })();

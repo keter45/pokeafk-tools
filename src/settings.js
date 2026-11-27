@@ -5,7 +5,7 @@ const MODULES = {
   tiers: 'Tiers, filtros do mercado e ficha',
   daily: 'Daily de treinadores',
   monitor: 'Monitor de contas e troca entre contas',
-  dodge: 'Desvio de golpes em área (experimental)',
+  dodge: 'Desvio SEMI/FULL e luta automática na arena (experimental)',
 };
 // Experimental parts start turned off until the player turns them on in the menu.
 const MODULES_OFF_BY_DEFAULT = new Set(['dodge']);

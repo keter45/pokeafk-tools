@@ -5,6 +5,7 @@ import { captureRules } from './capture.mjs';
 const dataFile = new URL('./pokepedia-data.json', import.meta.url);
 const guideFile = new URL('./src/data/guide.js', import.meta.url);
 const dexFile = new URL('./src/data/dex.js', import.meta.url);
+const movesFile = new URL('./src/data/moves.js', import.meta.url);
 const captureFile = new URL('./src/data/capture.js', import.meta.url);
 const start = '/* GUIDE_DATA_START */';
 const end = '/* GUIDE_DATA_END */';
@@ -79,12 +80,27 @@ const capturePayload = JSON.stringify({
   hunts: captureHunts,
 });
 
+// Moves by the name the combat bar shows (upper case), for the arena's FULL mode (src/arena.js):
+// [type, power or 0 for status, accuracy, cast ms, shape, reach in tiles].
+const moveRows = {};
+const allMoves = [...rows.flatMap(row => row.moves ?? []),
+  ...(snapshot.hms ?? []).map(hm => hm.move), ...(snapshot.tms ?? []).map(tm => tm.move)];
+for (const move of allMoves) {
+  const name = move?.name?.toUpperCase();
+  if (!name || moveRows[name]) continue;
+  moveRows[name] = [move.type ?? '', move.power ?? 0, move.accuracy ?? 100, Math.round((move.cast ?? 0) * 1000),
+    move.target ?? 'melee', move.range ?? move.radius ?? 1];
+}
+const movesPayload = JSON.stringify(moveRows);
+
 // The tables were laid out for a nested scope; the source files sit at the top level.
 const guideText = `const MARKET_GUIDE = ${start} ${payload} ${end};`.replace(/\n {2}/g, '\n');
 await writeAtomic(guideFile, '// Gerado por build-data.mjs a partir de pokepedia-data.json e competitive-data.json. Não edite à mão.\n'
   + `${guideText}\n`);
 await writeAtomic(dexFile, '// Gerado por build-data.mjs: espécies por número da Pokédex, "Nome:tipo". Não edite à mão.\n'
   + `const DEX = /* DEX_DATA_START */ ${dexPayload} /* DEX_DATA_END */;\n`);
+await writeAtomic(movesFile, '// Gerado por build-data.mjs: golpes pelo nome da barra de combate, [tipo, poder, precisão, preparo ms, forma, alcance]. Não edite à mão.\n'
+  + `const MOVES = /* MOVES_DATA_START */ ${movesPayload} /* MOVES_DATA_END */;\n`);
 await writeAtomic(captureFile, '// Gerado por build-data.mjs: preço de captura do Pokémon principal de cada hunt. Não edite à mão.\n'
   + `const CAPTURE = /* CAPTURE_DATA_START */ ${capturePayload} /* CAPTURE_DATA_END */;\n`);
 

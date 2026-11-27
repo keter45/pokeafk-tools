@@ -14,7 +14,7 @@ const GROUPS = [
   ] },
   { id: 'daily', files: ['daily.js'] },
   { id: 'monitor', files: ['data/dex.js', 'monitor.js', 'trade.js'] },
-  { id: 'dodge', files: ['dodge.js'] },
+  { id: 'dodge', files: ['data/moves.js', 'dodge.js', 'arena.js'] },
 ];
 
 const read = file => readFile(new URL(`./src/${file}`, import.meta.url), 'utf8');

@@ -1,5 +1,6 @@
 // ---- Desvio de golpes em área ----------------------------------------------------------------
-// Adds a DESVIO button to the combat bar. While it is on, the hunt keeps its mode (AUTO or
+// Adds DESVIO SEMI/FULL buttons to the combat bar (FULL also takes trainer battles over, in
+// src/arena.js). While one is on, the hunt keeps its mode (AUTO or
 // MANUAL) and, when the red warning of an enemy area attack covers the main Pokémon, the script
 // steps out of it with the arrow keys. Only the canvas pixels are read (no game internals: the
 // client detects hooks). The warning reaches the client already late by the network delay, so
@@ -26,7 +27,9 @@
   const KEYS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
   const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
-  let enabled = readEnabled();
+  // 'off', 'semi' (only dodges) or 'full' (in trainer battles src/arena.js takes over).
+  let mode = readMode();
+  let enabled = mode !== 'off';
   let raf = 0;
   let lastScan = 0;
   let frame = null;
@@ -40,11 +43,12 @@
   const tries = new Map();
   const stats = { tried: 0, out: 0, late: 0, blocked: 0 };
 
-  function readEnabled() {
+  function readMode() {
     try {
-      return localStorage.getItem(STORAGE) === '1';
+      const value = localStorage.getItem(STORAGE);
+      return value === '1' ? 'semi' : value === 'semi' || value === 'full' ? value : 'off';
     } catch {
-      return false;
+      return 'off';
     }
   }
 
@@ -57,7 +61,7 @@
 
   function canAct() {
     if (!enabled || document.hidden || !document.hasFocus()) return false;
-    if (!hunting() || document.querySelector('#pafk-daily[data-running]')) return false;
+    if (!hunting() || document.querySelector('#pafk-daily[data-running], .in-arena')) return false;
     const bar = document.querySelector('.mb-modes');
     if (!bar || bar.closest('[hidden]')) return false;
     const active = document.activeElement;
@@ -408,7 +412,7 @@
 
   // Real input from the player wins: dodging pauses for a while.
   const onPlayerInput = event => {
-    if (!event.isTrusted || button.contains(event.target)) return;
+    if (!event.isTrusted || group.contains(event.target)) return;
     if (event.type === 'keydown' && !/^(Arrow|[wasdWASD1-4]$)/.test(event.key)) return;
     if (event.type === 'pointerdown' && !event.target.closest?.('canvas, .mb-modes, .mb-slots')) return;
     lastUserInput = performance.now();
@@ -417,17 +421,26 @@
   addEventListener('pointerdown', onPlayerInput, true);
 
   // ---- Button ----
-  // A one-button group next to AUTO/MANUAL with the same look, copied from the game's own
+  // A group next to AUTO/MANUAL with the same look, copied from the game's own
   // buttons at runtime: filled when on, plain text when off.
 
   const group = document.createElement('span');
   group.className = 'pafk-dodge-group';
   group.dataset.pafk = '';
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'pafk-dodge';
-  button.textContent = 'DESVIO';
-  group.append(button);
+  const label = document.createElement('span');
+  label.className = 'pafk-dodge-label';
+  label.textContent = 'DESVIO';
+  const makeButton = (value, text) => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'pafk-dodge';
+    el.dataset.dodgeMode = value;
+    el.textContent = text;
+    return el;
+  };
+  const semiButton = makeButton('semi', 'SEMI');
+  const fullButton = makeButton('full', 'FULL');
+  group.append(label, semiButton, fullButton);
 
   const style = document.createElement('style');
   style.dataset.pafk = '';
@@ -437,6 +450,7 @@
       background: var(--pafk-g-bg, #fff); border: var(--pafk-g-border, 1px solid #b9cde6);
       border-radius: var(--pafk-g-radius, 6px); padding: var(--pafk-g-pad, 1px);
     }
+    .pafk-dodge-label { font: var(--pafk-b-font, inherit); color: var(--pafk-off-fg, #3f5585); padding: 0 4px; opacity: .8; }
     .pafk-dodge {
       appearance: none; border: 0; margin: 0; cursor: pointer;
       font: var(--pafk-b-font, inherit); padding: var(--pafk-b-pad, 0 7px);
@@ -469,21 +483,30 @@
   }
 
   function updateButton() {
-    button.setAttribute('aria-pressed', String(enabled));
+    semiButton.setAttribute('aria-pressed', String(mode === 'semi'));
+    fullButton.setAttribute('aria-pressed', String(mode === 'full'));
     const result = stats.tried
       ? ` Nesta sessão: ${stats.tried} tentados, ${stats.out} saíram antes do golpe, ${stats.late} tarde demais, ${stats.blocked} sem caminho livre.`
       : '';
-    button.title = enabled
-      ? `Desvio LIGADO: sai dos golpes em área lentos andando 1 ou 2 quadrados. Só funciona com a aba em foco. Clique para desligar.${result}`
-      : 'Desvio DESLIGADO. Clique para ligar: sai dos golpes em área lentos durante a caça (só com a aba em foco).';
+    semiButton.title = mode === 'semi'
+      ? `SEMI LIGADO: só desvia. Na caça, sai dos golpes em área lentos andando 1 ou 2 quadrados (só com a aba em foco). Clique para desligar.${result}`
+      : 'SEMI: só desvia dos golpes em área lentos durante a caça (só com a aba em foco). Clique para ligar.';
+    fullButton.title = mode === 'full'
+      ? `FULL LIGADO: na caça desvia como o SEMI; nas lutas contra treinadores assume o MANUAL, desvia, se mexe antes do golpe esperado do oponente e ataca no intervalo dele. Clique para desligar.${result}`
+      : 'FULL: nas lutas contra treinadores assume o controle (MANUAL): desvia, se mexe antes do golpe esperado do oponente e ataca no intervalo dele. Clique para ligar.';
   }
 
-  button.addEventListener('click', event => {
+  group.addEventListener('click', event => {
+    const picked = event.target.closest?.('[data-dodge-mode]');
+    if (!picked) return;
     event.stopPropagation();
-    enabled = !enabled;
+    mode = mode === picked.dataset.dodgeMode ? 'off' : picked.dataset.dodgeMode;
+    enabled = mode !== 'off';
     try {
-      localStorage.setItem(STORAGE, enabled ? '1' : '0');
+      localStorage.setItem(STORAGE, mode);
     } catch {}
+    // src/arena.js reads the mode again on this event.
+    document.dispatchEvent(new CustomEvent('pafk-dodge-mode'));
     updateButton();
     if (enabled && !raf) raf = requestAnimationFrame(tick);
   });
