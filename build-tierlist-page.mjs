@@ -6,7 +6,7 @@
 // (moves-info.mjs); clicking a move anywhere on the page opens its details.
 import { readFile, writeFile } from 'node:fs/promises';
 import { buildGuide } from './rank-pokemon.mjs';
-import { buildFarms } from './farms.mjs';
+import { buildFarms, REGION_NAMES } from './farms.mjs';
 import { describeMove, moveMetrics, moveTiers } from './moves-info.mjs';
 
 const snapshot = JSON.parse(await readFile(new URL('./pokepedia-data.json', import.meta.url), 'utf8'));
@@ -38,10 +38,11 @@ const entries = Object.values(guide.profiles).map(profile => {
   };
 });
 
-const farms = buildFarms(snapshot, guide).map(farm => ({
-  ...farm,
-  sprite: `https://pokeafk.io/assets/mon/front/${farm.dex}.png`,
-  wiki: `https://pokeafk.io/pokepedia/pokemon/${byId.get(farm.dex)?.key ?? farm.dex}`,
+const farms = buildFarms(snapshot, guide).map(line => ({
+  ...line,
+  sprite: `https://pokeafk.io/assets/mon/front/${line.dex}.png`,
+  wiki: `https://pokeafk.io/pokepedia/pokemon/${byId.get(line.dex)?.key ?? line.dex}`,
+  hunts: line.hunts.map(({ perHour, odds, ...hunt }) => ({ ...hunt, hours: Math.round(hunt.hours * 10) / 10 })),
 }));
 // Every move of the game once: level-up (how many species learn it), HM or TM.
 const moveSources = new Map();
@@ -188,6 +189,18 @@ const html = `<!doctype html>
   .farm-place { grid-column: 2; font-size: 12px; font-weight: 700; min-width: 0; }
   .price { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .price b { color: var(--ink); font-size: 13px; }
+  .farm { grid-template-columns: 56px 1fr; }
+  .farm .sprite { width: 56px; height: 56px; grid-row: span 2; }
+  .farm .sprite img { width: 56px; height: 56px; }
+  .hunts { grid-column: 1 / -1; display: grid; gap: 3px; margin: 2px 0 0; padding: 0; list-style: none; font-size: 12px; }
+  .hunts li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; padding: 3px 6px; border-radius: 5px; background: color-mix(in srgb, var(--line) 45%, transparent); }
+  .hunts li:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  .hunts b { font-weight: 800; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hunts .rate { font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
+  .hunts small { grid-column: 1 / -1; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .hunts .all { color: var(--tm-ink); background: var(--tm-bg); border-radius: 4px; padding: 0 4px; font-weight: 700; }
+  .more { grid-column: 1 / -1; font: inherit; font-size: 12px; font-weight: 700; color: var(--accent); background: none; border: 0; padding: 2px 0; text-align: left; cursor: pointer; }
+  .more:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   [hidden] { display: none !important; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   footer { color: var(--muted); font-size: 12px; padding: 4px 16px 24px; max-width: 1400px; margin: 0 auto; }
@@ -216,7 +229,7 @@ const html = `<!doctype html>
     <div class="seg" role="group" aria-label="Lista">
       <button type="button" data-mode="pve" aria-pressed="true">PvE (caça)</button>
       <button type="button" data-mode="pvp" aria-pressed="false">Competitivo</button>
-      <button type="button" data-mode="farm" aria-pressed="false">Farms early game</button>
+      <button type="button" data-mode="farm" aria-pressed="false">Farms de shiny</button>
       <button type="button" data-mode="moves" aria-pressed="false">Golpes</button>
     </div>
     <div class="seg" role="group" aria-label="Golpes considerados" id="moveset">
@@ -257,6 +270,10 @@ const html = `<!doctype html>
       <option value="HM">HM</option>
       <option value="TM">TM</option>
     </select>
+    <select id="region" aria-label="Região" hidden>
+      <option value="">Todas as regiões</option>
+      ${Object.entries(REGION_NAMES).map(([id, name]) => `<option value="${id}">${name}</option>`).join('')}
+    </select>
     <input type="search" id="search" placeholder="Buscar Pokémon" aria-label="Buscar">
   </div>
   <div class="types" id="types" aria-label="Filtrar por tipo"></div>
@@ -281,15 +298,16 @@ const HELP = {
   pve: 'Dano por segundo numa caça de 60 s, como o AUTO joga: golpe pronto mais forte, recargas e preparo, área pelo tamanho (quantos do bando de 3 cada forma alcança, 75% em cada) e reforços renovados quando acabam. Os golpes de dano seguem o ataque principal do Pokémon (Atq ou Atq. Esp.; com menos de 15% de diferença, os dois). Nota 100 = espécie normal com mais dano.',
   pvp: 'Duelos 1 contra 1 de até 180 s, sem troca, contra atacantes físico e especial de referência (80%): o Pokémon precisa ganhar sozinho. Golpe com preparo longo é desviado com mais facilidade, área grande quase não, e corpo a corpo e golpes que seguem o alvo sempre acertam. Atacar de longe afasta o atacante corpo a corpo, estágio de Velocidade (Agility, Dragon Dance) dobra a velocidade do passo e a esquiva, e quem prepara um golpe não desvia. Os golpes seguem o ataque principal. Somada a isso, a referência competitiva da Gen 3 ajustada ao que a espécie aprende (20%).',
   moves: 'Todos os golpes do jogo (por nível, HM e TM), com a descrição do próprio jogo: clique num golpe. Caça = poder por segundo × área (quantos do bando de 3 a forma alcança, 75% em cada). PvP = poder por segundo × chance de não ser desviado × alcance (de longe, o atacante corpo a corpo não chega). Poder por segundo = poder × acertos × precisão ÷ o maior entre 1,2 s, recarga e preparo. Nota 100 = o melhor golpe; as letras usam os cortes das espécies (S = 8% melhores). Não contam atributos nem mesmo tipo: servem para comparar golpes. Dano fixo e poder variável ficam sem nota.',
-  farm: 'Hunts de Kanto onde aparece um Pokémon de primeiro estágio cuja evolução final é tier S ou A (PvE ou Competitivo). A fileira mostra a melhor tier entre as evoluções. Captura = preço do nível em que ele chega (70% a 80% do nível do selvagem) × fator do Tier de captura da espécie, como no guia Captura do jogo; os de primeiro estágio têm o fator mais baixo. Ordem: menos insígnias, nível recomendado e preço.',
+  farm: 'Para caçar shiny: cada linha evolutiva cuja evolução final é tier S ou A (PvE ou Competitivo), com as hunts de todas as regiões onde aparece algum Pokémon da linha. A fileira mostra a melhor tier entre as evoluções. Primeiro vêm as hunts com maior taxa de captura do shiny (menor preço de captura do shiny, pela tabela do jogo; os primeiros estágios são os mais baratos), depois as com mais shinies por hora e as de nível mais baixo. Todo selvagem tem 1 chance em 2.000 de ser shiny; em Outland, 1 em 1.000; em Nightmare todos são shiny. Horas por shiny supõem 270 selvagens por hora, a estimativa do MAPA, sem boosts.',
 };
 const PVP_NAME = { pve: 'PvE', pvp: 'Comp' };
 const ON = { land: '', surf: 'Surf', old: 'Vara velha', good: 'Vara boa', super: 'Super vara' };
+const REGIONS = ${JSON.stringify(REGION_NAMES)};
 const money = new Intl.NumberFormat('pt-BR');
 const HM = new Set(DATA.hms);
 const TM = new Set(DATA.tms);
 const number = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
-const state = { mode: 'pve', moves: 'base', category: 'normal', role: '', query: '', types: new Set(), mvSort: 'hunt', mvDir: 'desc', mvKind: '', mvOrigin: '' };
+const state = { mode: 'pve', moves: 'base', category: 'normal', role: '', query: '', types: new Set(), mvSort: 'hunt', mvDir: 'desc', mvKind: '', mvOrigin: '', region: '' };
 try { Object.assign(state, JSON.parse(localStorage.getItem('pafk-tierlist') || '{}'), { types: new Set() }); } catch {}
 if (!HELP[state.mode]) state.mode = 'pve';
 if (state.moves !== 'tm') state.moves = 'base';
@@ -297,7 +315,7 @@ const buildOf = entry => (state.moves === 'tm' ? entry.tm : entry)[state.mode];
 const save = () => {
   try {
     localStorage.setItem('pafk-tierlist', JSON.stringify({ mode: state.mode, moves: state.moves, category: state.category, role: state.role,
-      mvSort: state.mvSort, mvDir: state.mvDir, mvKind: state.mvKind, mvOrigin: state.mvOrigin }));
+      mvSort: state.mvSort, mvDir: state.mvDir, mvKind: state.mvKind, mvOrigin: state.mvOrigin, region: state.region }));
   } catch {}
 };
 const MOVES = new Map(DATA.moves.map(move => [move.name, move]));
@@ -555,32 +573,51 @@ function renderMoves() {
   document.getElementById('rows').replaceChildren(wrap);
 }
 
-function farmCard(farm) {
+const HUNTS_SHOWN = 4;
+const openLines = new Set();
+const huntName = hunt => hunt.place + (ON[hunt.on] ? ' · ' + ON[hunt.on] : '');
+
+function huntItem(hunt) {
+  const item = document.createElement('li');
+  const place = document.createElement('b');
+  place.textContent = hunt.name + ' · ' + huntName(hunt);
+  const rate = document.createElement('span'); rate.className = 'rate';
+  rate.textContent = hunt.shinyPrice ? '₽' + money.format(hunt.shinyPrice) : '';
+  rate.title = 'Preço de captura do shiny (tabela do jogo): quanto menor, maior a chance de cada bola';
+  const meta = document.createElement('small');
+  const levels = hunt.levels[0] === hunt.levels[1] ? hunt.levels[0] : hunt.levels[0] + '–' + hunt.levels[1];
+  meta.append(REGIONS[hunt.region] + ' · Nv. ' + levels
+    + (hunt.badge ? ' · ' + hunt.badge + (hunt.badge === 1 ? ' insígnia' : ' insígnias') : '')
+    + (hunt.share < 100 ? ' · ' + hunt.share + '% ' + (hunt.on === 'land' || hunt.on === 'surf' ? 'da hunt' : 'da pesca') : '') + ' · ');
+  if (hunt.allShiny) {
+    const all = document.createElement('span'); all.className = 'all'; all.textContent = 'todos shiny';
+    meta.append(all);
+  } else {
+    meta.append('~' + number.format(hunt.hours) + ' h por shiny');
+  }
+  item.title = hunt.name + ' em ' + huntName(hunt) + ' (' + REGIONS[hunt.region] + ')';
+  item.append(place, rate, meta);
+  return item;
+}
+
+function farmCard(line, hunts) {
+  const card = document.createElement('article');
+  card.className = 'card farm';
   const link = document.createElement('a');
-  link.className = 'card'; link.href = farm.wiki; link.target = '_blank'; link.rel = 'noopener noreferrer';
-  const img = document.createElement('img');
-  img.className = 'sprite'; img.src = farm.sprite; img.alt = ''; img.loading = 'lazy'; img.width = 68; img.height = 68;
+  link.className = 'sprite'; link.href = line.wiki; link.target = '_blank'; link.rel = 'noopener noreferrer';
+  link.setAttribute('aria-label', line.name + ' na Poképédia');
+  const img = document.createElement('img'); img.src = line.sprite; img.alt = ''; img.loading = 'lazy'; img.width = 56; img.height = 56;
+  link.append(img);
   const top = document.createElement('div'); top.className = 'top';
-  top.innerHTML = '<span class="name"></span><span class="dex"></span>';
-  top.querySelector('.name').textContent = farm.name;
-  top.querySelector('.dex').textContent = '#' + String(farm.dex).padStart(3, '0');
-  const place = document.createElement('div'); place.className = 'farm-place';
-  place.textContent = farm.place + (ON[farm.on] ? ' · ' + ON[farm.on] : '');
-  const price = document.createElement('div'); price.className = 'price';
-  price.innerHTML = 'Captura ≈ <b></b>';
-  price.lastChild.textContent = '₽' + money.format(farm.price);
-  price.title = 'Preço de captura: em média, o que se gasta em bolas por captura';
-  const meta = document.createElement('div'); meta.className = 'tags';
-  meta.style.gridColumn = '1 / -1';
-  meta.innerHTML = '<span class="dex"></span>';
-  const wild = farm.wild[0] === farm.wild[1] ? farm.wild[0] : farm.wild[0] + '–' + farm.wild[1];
-  meta.firstChild.textContent = 'Nv. ' + wild + ' · chega no Nv. ' + farm.caughtLevel + ' · '
-    + (farm.badge ? farm.badge + (farm.badge === 1 ? ' insígnia' : ' insígnias') : 'sem insígnia')
-    + (farm.share < 100 ? ' · ' + farm.share + '% ' + (farm.on === 'land' || farm.on === 'surf' ? 'da hunt' : 'da pesca') : '');
+  const name = document.createElement('a');
+  name.className = 'name'; name.href = line.wiki; name.target = '_blank'; name.rel = 'noopener noreferrer';
+  name.textContent = line.name;
+  const dex = document.createElement('span'); dex.className = 'dex'; dex.textContent = '#' + String(line.dex).padStart(3, '0');
+  top.append(name, dex);
   const evo = document.createElement('div'); evo.className = 'evo';
-  for (const final of farm.finals) {
+  for (const final of line.finals) {
     const item = document.createElement('span');
-    item.append('→ ' + final.name);
+    item.append((final.id === line.dex ? '' : '→ ') + final.name);
     for (const mode of ['pve', 'pvp']) {
       const badge = document.createElement('b');
       badge.style.setProperty('--tier', 'var(--' + final[mode] + ')');
@@ -590,19 +627,40 @@ function farmCard(farm) {
     }
     evo.append(item);
   }
-  link.title = farm.name + ' em ' + place.textContent + '. Selos: PvE e Competitivo da evolução.';
-  link.append(img, top, place, price, meta, evo);
-  return link;
+  evo.style.gridColumn = '2';
+  const list = document.createElement('ul'); list.className = 'hunts';
+  const open = openLines.has(line.dex);
+  list.append(...(open ? hunts : hunts.slice(0, HUNTS_SHOWN)).map(huntItem));
+  card.append(link, top, evo, list);
+  if (hunts.length > HUNTS_SHOWN) {
+    const more = document.createElement('button');
+    more.type = 'button'; more.className = 'more';
+    const rest = hunts.length - HUNTS_SHOWN;
+    more.textContent = open ? 'Mostrar menos' : 'Mais ' + rest + (rest === 1 ? ' hunt' : ' hunts');
+    more.setAttribute('aria-expanded', String(open));
+    more.addEventListener('click', () => {
+      if (open) openLines.delete(line.dex); else openLines.add(line.dex);
+      card.replaceWith(farmCard(line, hunts));
+    });
+    card.append(more);
+  }
+  return card;
 }
 
 function renderFarms() {
   const query = key(state.query.trim());
-  const list = DATA.farms.filter(farm => {
-    if (state.types.size && !farm.types.some(type => state.types.has(type))) return false;
-    return !query || key(farm.name).includes(query) || key(farm.place).includes(query)
-      || farm.finals.some(final => key(final.name).includes(query));
-  });
-  document.getElementById('count').textContent = list.length + ' farms';
+  const lines = [];
+  let huntCount = 0;
+  for (const line of DATA.farms) {
+    if (state.types.size && !line.types.some(type => state.types.has(type))) continue;
+    const named = !query || key(line.name).includes(query) || line.finals.some(final => key(final.name).includes(query));
+    const hunts = line.hunts.filter(hunt => (!state.region || hunt.region === state.region)
+      && (named || key(hunt.name).includes(query) || key(hunt.place).includes(query)));
+    if (!hunts.length) continue;
+    lines.push([line, hunts]);
+    huntCount += hunts.length;
+  }
+  document.getElementById('count').textContent = lines.length + ' Pokémon · ' + huntCount + ' hunts';
   document.getElementById('rows').replaceChildren(...['S', 'A'].map(tier => {
     const row = document.createElement('section'); row.className = 'row'; row.setAttribute('aria-label', 'Evolução tier ' + tier);
     const label = document.createElement('div'); label.className = 'label'; label.style.setProperty('--tier', 'var(--' + tier + ')');
@@ -610,9 +668,9 @@ function renderFarms() {
     label.firstChild.textContent = tier;
     label.lastChild.textContent = 'evolui para ' + tier;
     const cards = document.createElement('div'); cards.className = 'cards';
-    const members = list.filter(farm => farm.best === tier);
-    if (members.length) cards.append(...members.map(farmCard));
-    else cards.innerHTML = '<p class="empty">Nenhum farm com esses filtros.</p>';
+    const members = lines.filter(([line]) => line.best === tier);
+    if (members.length) cards.append(...members.map(([line, hunts]) => farmCard(line, hunts)));
+    else cards.innerHTML = '<p class="empty">Nenhuma hunt com esses filtros.</p>';
     row.append(label, cards);
     return row;
   }));
@@ -632,6 +690,8 @@ function render() {
   document.getElementById('moveset').hidden = farm || movesTab;
   document.getElementById('notice').hidden = farm || movesTab || state.moves !== 'tm';
   for (const id of ['mvsort', 'mvkind', 'mvorigin']) document.getElementById(id).hidden = !movesTab;
+  document.getElementById('region').hidden = !farm;
+  document.getElementById('region').value = state.region;
   document.getElementById('mvsort').value = MOVE_COLUMNS.some(column => column.key === state.mvSort) && state.mvSort !== 'cooldown' && state.mvSort !== 'cast' && state.mvSort !== 'dodge' ? state.mvSort : '';
   document.getElementById('mvkind').value = state.mvKind;
   document.getElementById('mvorigin').value = state.mvOrigin;
@@ -686,6 +746,7 @@ document.getElementById('mvsort').addEventListener('change', event => {
 });
 document.getElementById('mvkind').addEventListener('change', event => { state.mvKind = event.target.value; render(); });
 document.getElementById('mvorigin').addEventListener('change', event => { state.mvOrigin = event.target.value; render(); });
+document.getElementById('region').addEventListener('change', event => { state.region = event.target.value; render(); });
 render();
 </script>
 </body>
@@ -693,4 +754,4 @@ render();
 `;
 
 await writeFile(new URL('./tierlist.html', import.meta.url), html, 'utf8');
-console.log(`tierlist.html gerado com ${entries.length} Pokémon (sem TMs e com TMs) e ${farms.length} farms.`);
+console.log(`tierlist.html gerado com ${entries.length} Pokémon (sem TMs e com TMs) e ${farms.length} linhas para shiny (${farms.reduce((sum, line) => sum + line.hunts.length, 0)} hunts).`);

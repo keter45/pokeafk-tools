@@ -158,6 +158,14 @@ function normalizeMove(move, runtime, powerRule) {
 
 // Capture rules and hunts live in the game config module (imported by the catalog).
 // Capture price = level price (curve, at the level the Pokémon arrives) × capture tier factor.
+// "1/2e3" → 0.0005: the config writes some numbers as a division.
+const readNumber = text => {
+  if (!text) return undefined;
+  const [top, bottom] = text.split('/').map(Number);
+  const value = bottom === undefined ? top : top / bottom;
+  return Number.isFinite(value) ? value : undefined;
+};
+
 function collectConfig(config) {
   if (!config) return {};
   const { root: capture } = readTable(config, /\bcapture\s*:\s*(?=\{\s*curve\s*:)/, 'captura');
@@ -172,9 +180,19 @@ function collectConfig(config) {
   const hunts = JSON.parse(huntsSource).map(hunt => ({
     id: hunt.id, region: hunt.region, name: hunt.name, main: hunt.main, recLv: hunt.recLv,
     levels: hunt.levels, badge: hunt.badge ?? 0, ...(hunt.rod ? { rod: hunt.rod } : {}),
-    slots: hunt.slots.map(slot => ({ dex: slot.dex, lv: slot.lv, w: slot.w, on: slot.on })),
+    // Outland and Nightmare hunts carry their own shiny chance (1 = every wild one is shiny).
+    ...(hunt.shinyOdds !== undefined ? { shinyOdds: hunt.shinyOdds } : {}),
+    ...(hunt.anyShiny !== undefined ? { anyShiny: hunt.anyShiny } : {}),
+    slots: hunt.slots.map(slot => ({ dex: slot.dex, lv: slot.lv, w: slot.w, on: slot.on, ...(slot.fm ? { fm: slot.fm } : {}) })),
   }));
+  // Shiny chance of each wild one (guide "Shiny": 1 in 2.000), Outland's multiplier and the hunt
+  // pace the MAPA assumes (killsPerHour), used to estimate the hours per shiny of a species.
+  const shinyOdds = readNumber(config.match(/\bshinyOdds\s*:\s*([\d.e+\-/]+)/)?.[1]);
+  const shinyMult = readNumber(config.match(/\boutland\s*:\s*\{\s*shinyMult\s*:\s*([\d.e+\-/]+)/)?.[1]);
+  const killsPerHour = readNumber(config.match(/\bkillsPerHour\s*:\s*([\d.e+\-/]+)/)?.[1]);
+  if (!shinyOdds || !shinyMult || !killsPerHour) throw new Error('Chance de shiny ou ritmo da caça não encontrados na configuração do jogo.');
   return {
+    shiny: { odds: shinyOdds, outlandMult: shinyMult, killsPerHour },
     // The ball chance also needs the regional floors (regionFloor), fixed prices (speciesCatch), the
     // guaranteed multiple (certainAt) and the margin schedule (profitSchedule); see the "Captura" guide.
     capture: {
@@ -258,12 +276,13 @@ export function collectCatalog(catalog, assetUrl, config) {
   const tms = machines('tm');
   if (!hms.length || !tms.length) throw new Error('Tabelas de TM e HM não encontradas no catálogo.');
 
-  const { capture, hunts } = collectConfig(config);
+  const { capture, hunts, shiny } = collectConfig(config);
   return {
     sourceUrl: WIKI,
     assets: [assetUrl],
     sha256: createHash('sha256').update(catalog).digest('hex'),
     ...(capture ? { capture } : {}),
+    ...(shiny ? { shiny } : {}),
     species,
     megaForms,
     hms,
