@@ -8,13 +8,6 @@ function createPanel(update) {
       <h3 id="pafk-filter-title"></h3>
       <button type="button" data-open-tier aria-haspopup="dialog" hidden>Tier list</button>
     </div>
-    <div class="pafk-tier-sort" data-tier-sort-box hidden>
-      <label>Ordenar pela tier list <select data-tier-sort>
-        <option value="">Desligado (ordem do jogo)</option>
-        ${Object.entries(MODES).map(([mode, { label }]) => `<option value="${mode}">${label}</option>`).join('')}
-      </select></label>
-      <span role="status" data-tier-sort-status></span>
-    </div>
     <form novalidate>
       <details class="pafk-offer-filters">
       <summary>Natureza e IV mínimo <span data-offer-filter-count></span></summary>
@@ -56,7 +49,6 @@ function createPanel(update) {
     </form>
     <div class="pafk-search-results" data-market-results hidden>
       <p role="status" data-status></p>
-      <button type="button" data-scan-market hidden>Próxima com resultados ›</button>
     </div>
     <section class="pafk-recommendation" data-recommendation aria-labelledby="pafk-rec-title" hidden>
       <div class="pafk-recommendation-title">

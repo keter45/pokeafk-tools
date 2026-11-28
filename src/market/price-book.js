@@ -41,14 +41,11 @@ priceBookDialog.innerHTML = `
         <h3 id="pafk-book-detail-title"></h3>
         <p class="pafk-book-muted"></p>
         <ul></ul>
-        <button type="button" data-book-species>Ver anúncios da espécie</button>
       </section>
     </div>
   </div>
   <footer class="pafk-book-footer">
-    <span>Registros salvos neste navegador.</span>
-    <button type="button" data-book-open-history>Ver histórico do jogo</button>
-    <button type="button" data-book-open-mons>Explorar Pokémon à venda</button>
+    <span>Registros salvos neste navegador. Abra o histórico e as páginas das espécies no próprio mercado para guardar mais.</span>
   </footer>`;
 
 const bookStatus = priceBookDialog.querySelector('[data-book-status]');
@@ -129,7 +126,7 @@ function syncPriceBook(main) {
   if (nav && priceBookTrigger.parentElement !== nav) nav.append(priceBookTrigger);
   const page = main.parentElement.dataset.page;
   if (page === 'history') capturePriceBookSales(main);
-  if (page !== 'species' || priceLookup) return;
+  if (page !== 'species') return;
   const list = main.querySelector(OFFER_LIST);
   const total = speciesPriceTotal(main, priceSpeciesDex(main));
   if (!list || !total || observedBookSpecies.has(list)) return;
@@ -198,7 +195,6 @@ function renderBookDetail(group, filters) {
     item.append(amount, date, detail);
     return item;
   }));
-  bookDetail.querySelector('[data-book-species]').dataset.dex = group.dex;
 }
 
 function renderPriceBook() {
@@ -282,13 +278,6 @@ async function refreshPriceBook() {
   }
 }
 
-function openPriceBookPage(key, value) {
-  const main = marketMain();
-  if (!main) return;
-  priceBookDialog.close();
-  navigatePriceMarket(main, key, value);
-}
-
 priceBookTrigger.onclick = event => {
   event.stopPropagation();
   if (!priceBookDialog.isConnected) {
@@ -301,17 +290,6 @@ priceBookTrigger.onclick = event => {
   refreshPriceBook();
 };
 priceBookDialog.querySelector('[data-book-close]').onclick = () => priceBookDialog.close();
-priceBookDialog.querySelector('[data-book-open-history]').onclick = async () => {
-  openPriceBookPage('go', 'history');
-  await waitFor(() => marketMain()?.parentElement.dataset.page === 'history', 2000);
-  const main = marketMain();
-  if (main?.parentElement.dataset.page === 'history') {
-    main.querySelector('[data-hist-scope="general"][aria-pressed="false"]')?.click();
-  }
-};
-priceBookDialog.querySelector('[data-book-open-mons]').onclick = () => openPriceBookPage('go', 'mons');
-priceBookDialog.querySelector('[data-book-species]').onclick = ({ currentTarget }) =>
-  openPriceBookPage('species', currentTarget.dataset.dex);
 priceBookDialog.addEventListener('keydown', event => {
   event.stopPropagation();
   if (event.key === 'Escape') {

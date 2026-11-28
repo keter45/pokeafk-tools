@@ -14,16 +14,6 @@ function filterMarketRows(root, view, mode) {
     if (result === true) matched++;
     if (result === null) unknown++;
   }
-  for (const heading of root.querySelectorAll('.pafk-sort-group')) {
-    let count = 0;
-    for (let row = heading.nextElementSibling; row?.matches(SPECIES_ROWS); row = row.nextElementSibling) {
-      if (!row.hasAttribute(FILTERED_ATTR)) count++;
-    }
-    heading.hidden = !count;
-    const countLabel = heading.querySelector('small');
-    const label = `${count} ${count === 1 ? 'espécie' : 'espécies'}`;
-    if (countLabel.textContent !== label) countLabel.textContent = label;
-  }
   return { active, total: rows.length, matched, unknown };
 }
 
@@ -50,11 +40,10 @@ function offerFilterCount() {
 function showMarketResults(main, view, nativeNature) {
   const grouped = view === 'grouped';
   const mode = readMode();
-  const sorted = grouped && main.querySelector('#pafk-tier-sorted');
-  const { active, total, matched, unknown } = filterMarketRows(sorted || main, view, mode);
+  const { active, total, matched, unknown } = filterMarketRows(main, view, mode);
   let message = '';
   if (active && (total || main.querySelector('.mk-empty p'))) {
-    const place = sorted ? 'no mercado' : view === 'species' ? 'nesta espécie' : 'nesta página';
+    const place = view === 'species' ? 'nesta espécie' : 'nesta página';
     const kind = grouped ? 'espécies' : 'anúncios';
     message = matched ? `${matched} de ${total} ${kind} passam pelos filtros ${place}.`
       : `Nenhum resultado confirmado ${place}.`;
@@ -63,7 +52,7 @@ function showMarketResults(main, view, nativeNature) {
   if (filters.natures.size && NATURES.includes(nativeNature)) {
     message += ` O filtro do jogo está em ${nativeNature}. Use “Todas as naturezas” nele para combinar várias.`;
   }
-  syncMarketScan(main, view, active && !sorted && !(grouped && tierSortMode), matched, message);
+  showMarketMessage(message);
 }
 
 let scope = null;
@@ -74,7 +63,6 @@ let pending = false;
 let stylesInstalled = false;
 const panel = createPanel(next => {
   if (!scope || !panel.isConnected) return;
-  stopMarketScan();
   filters = next;
   saveFilters(scope, filters);
   syncMarket();

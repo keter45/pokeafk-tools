@@ -16,7 +16,6 @@ function syncMarket() {
   const main = document.querySelector('.mk > .mk-main');
   syncPriceComparison(main);
   syncPriceBook(main);
-  syncDeals(main);
   const speciesTools = main?.querySelector(':scope > .mk-offer-tools');
   const species = main?.querySelector(':scope > .mk-spec');
   const market = main?.parentElement;
@@ -28,9 +27,6 @@ function syncMarket() {
   if (!isSpecies && !browseTools) {
     scope = null;
     recommendationDex = null;
-    marketView = null;
-    stopMarketScan();
-    syncTierSort(main, false);
     tierDialog?.close();
     panel.remove();
     return;
@@ -66,7 +62,6 @@ function syncMarket() {
   if (offerFilterSummary.textContent !== summary) offerFilterSummary.textContent = summary;
   const nativeNature = speciesTools?.querySelector('[aria-label="Natureza"]')?.textContent.trim();
   syncMarketSearch(view);
-  syncTierSort(main, Boolean(browseTools && grouped));
   showMarketResults(main, view, nativeNature);
 }
 

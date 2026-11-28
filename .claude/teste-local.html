@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Teste local</title></head>
+<body>
+<div class="hud world-hud">
+  <div class="modal open">
+    <div class="mk" data-page="mons">
+      <div class="mk-side"><div class="mk-navs"><button type="button" data-tkind="mons" aria-pressed="true">Pokémon</button><button type="button" data-grouped aria-pressed="false">Agrupar</button></div></div>
+      <div class="mk-main">
+        <div class="mk-tools-bar"></div>
+        <div class="mk-offers">
+          <article class="mk-offer"><img class="mk-front" src="/assets/mon/front/63.png" alt=""><span class="mk-tier">Tier 1</span>
+            <div class="mk-ivs"><span><small>HP</small><b>30</b></span><span><small>ATQ</small><b>10</b></span><span><small>DEF</small><b>12</b></span><span><small>AT.E</small><b>31</b></span><span><small>DF.E</small><b>20</b></span><span><small>VEL</small><b>29</b></span></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const mem = {};
+  window.GM_getValue = (k, d) => (k in mem ? mem[k] : d);
+  window.GM_setValue = (k, v) => { mem[k] = v; };
+  window.GM_deleteValue = k => { delete mem[k]; };
+  window.GM_listValues = () => Object.keys(mem);
+  window.GM_addValueChangeListener = () => 0;
+  window.GM_registerMenuCommand = () => 0;
+  window.__errors = [];
+  addEventListener('error', e => window.__errors.push(String(e.message)));
+</script>
+<script src="/poke-tools.user.js"></script>
+</body>
+</html>

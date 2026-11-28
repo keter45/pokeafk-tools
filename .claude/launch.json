@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tierlist",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["-e", "const h=require('http'),f=require('fs'),p=require('path');h.createServer((q,r)=>{const u=decodeURIComponent(q.url.split('?')[0]);const file=p.join(process.cwd(),u==='/'?'tierlist.html':u);if(!file.startsWith(process.cwd())||!f.existsSync(file)){r.writeHead(404);return r.end();}r.writeHead(200,{'content-type':file.endsWith('.html')?'text/html; charset=utf-8':'application/octet-stream'});f.createReadStream(file).pipe(r);}).listen(8765,'127.0.0.1')"],
+      "port": 8765
+    }
+  ]
+}

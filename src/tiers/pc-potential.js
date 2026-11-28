@@ -8,9 +8,8 @@
 // A natureza que aumenta o ataque principal não é exigida: só aparece como ponto positivo (em verde no cartão).
 // Quem tem potencial ganha uma tag pequena "POT" ao lado do nome; os outros continuam visíveis.
 // A natureza que aumenta o ataque principal fica em verde (▲) e a que reduz, em vermelho (▼).
-// O botão "Potencial" liga os filtros do próprio jogo "IV 70% ou mais" e ordem "Melhor IV" (pedido do
-// usuário: esconder cartões deixava a paginação ruim); desligado, tira os dois.
-// "Próxima com potencial" passa as páginas (o jogo pagina de 40 em 40) até achar um.
+// Os botões "★ Potencial" (ligava os filtros do jogo) e "Próxima com potencial" (passava as páginas)
+// saíram na 2.0.0: o jogo agora bloqueia e reporta cliques enviados por scripts.
 const POT_DEFAULT_RULES = { main: PRIORITY_IV, hp: 25, spe: 25, tier: 2 };
 const POT_RULES_KEY = 'pokeafk-market-filtros:pc-potential-rules';
 const POT_RULE_FIELDS = [
@@ -24,15 +23,6 @@ const POT_BOX_CARD = '.t5-pc [data-pc-zone="box"] .t5-mon.pcx[data-pc]';
 const POT_IV_LABELS = { hp: 'HP', atk: 'ATQ', spa: 'AT.E', spe: 'VEL' };
 
 let potStylesInstalled = false;
-let potScan = null; // { status: 'running' | 'found' | 'end', text }
-
-class PotPageTimeout extends Error {}
-
-// The toggle shows whether the game's own chips are on, since the game keeps (or resets) them.
-function gameFiltersOn() {
-  const chip = key => document.querySelector(`.modal.open .t5-pc [data-pc-rmf="${key}"]`)?.textContent ?? '';
-  return /70%/.test(chip('iv')) && /Melhor IV/i.test(chip('order'));
-}
 
 function readPotRules() {
   let saved = {};
@@ -175,8 +165,6 @@ function potToolbar(tools, mode) {
     bar.className = 'pafk-pot';
     bar.dataset.pafk = '';
     bar.innerHTML = `
-      <button type="button" class="pafk-pot-toggle" data-pot-toggle aria-pressed="false"
-        title="Liga os filtros do jogo IV 70% ou mais e ordem Melhor IV. Os Pokémon que atingem os IVs mínimos escolhidos ao lado (ataque principal da build, HP e Velocidade) e a classe de IV ganham a tag POT.">★ Potencial</button>
       <span class="pafk-pot-modes" role="group" aria-label="Build de referência">
         ${Object.entries(MODES).map(([key, info]) => `<button type="button" data-pot-mode="${key}" aria-pressed="false">${info.short}</button>`).join('')}
       </span>
@@ -185,24 +173,16 @@ function potToolbar(tools, mode) {
         <label title="Classe de IV do jogo (Tier 1 é a melhor)"><span>Classe até</span><select data-pot-rule="tier" aria-label="Classe de IV máxima">${[1, 2, 3, 4, 5].map(value => `<option value="${value}">Tier ${value}</option>`).join('')}</select></label>
         <button type="button" class="pafk-pot-reset" data-pot-reset title="Voltar a ataque ≥ ${POT_DEFAULT_RULES.main}, HP e Vel ≥ ${POT_DEFAULT_RULES.hp}, até Tier ${POT_DEFAULT_RULES.tier}">Padrão</button>
       </span>
-      <span class="pafk-pot-status" data-pot-status aria-live="polite"></span>
-      <button type="button" class="pafk-pot-next" data-pot-next>Próxima com potencial ›</button>`;
+      <span class="pafk-pot-status" data-pot-status aria-live="polite"></span>`;
     bar.addEventListener('click', event => {
       const button = event.target.closest('button');
       if (!button) return;
       event.stopPropagation();
-      if (button.matches('[data-pot-toggle]')) {
-        potScan = null;
-        applyGameFilters(!gameFiltersOn());
-      } else if (button.dataset.potMode) {
+      if (button.dataset.potMode) {
         saveMode(button.dataset.potMode);
-        potScan = null;
-      } else if (button.matches('[data-pot-next]')) {
-        findNextPotentialPage();
       } else if (button.matches('[data-pot-reset]')) {
         potRules = { ...POT_DEFAULT_RULES };
         savePotRules(potRules);
-        potScan = null;
       }
       decoratePc();
     });
@@ -212,16 +192,12 @@ function potToolbar(tools, mode) {
       event.stopPropagation();
       potRules = { ...potRules, [select.dataset.potRule]: Number(select.value) };
       savePotRules(potRules);
-      potScan = null;
       decoratePc();
     });
     // Keys typed in the selects must not reach the game's shortcuts.
     bar.addEventListener('keydown', event => event.stopPropagation());
     tools.append(bar);
   }
-  const toggle = bar.querySelector('[data-pot-toggle]');
-  const potEnabled = gameFiltersOn();
-  toggle.setAttribute('aria-pressed', String(potEnabled));
   for (const button of bar.querySelectorAll('[data-pot-mode]')) {
     button.setAttribute('aria-pressed', String(button.dataset.potMode === mode));
   }
@@ -230,109 +206,9 @@ function potToolbar(tools, mode) {
     if (select.value !== value) select.value = value;
   }
   const { total, found } = boxPageCounts();
-  const next = nextPageButton();
-  const running = potScan?.status === 'running';
-  let text = potScan?.text ?? '';
-  if (!text) text = found ? `${found} de ${total} com potencial nesta página` : `Nenhum dos ${total} desta página tem potencial`;
+  const text = found ? `${found} de ${total} com potencial nesta página` : `Nenhum dos ${total} desta página tem potencial`;
   const status = bar.querySelector('[data-pot-status]');
   if (status.textContent !== text) status.textContent = text;
-  const nextButton = bar.querySelector('[data-pot-next]');
-  nextButton.hidden = !next && !running;
-  nextButton.disabled = running || !next || next.disabled;
-  nextButton.textContent = running ? 'Procurando…' : 'Próxima com potencial ›';
-}
-
-// The game's filter panel only exists while open, and every change redraws the window, so each
-// step looks the element up again.
-const POT_GAME_FILTERS = [['[data-pc-iv]', '70', 'iv'], ['[data-pc-order]', 'ivDown', 'order']];
-
-async function waitForPc(selector) {
-  const started = Date.now();
-  while (Date.now() - started < 3000) {
-    const element = document.querySelector(`.modal.open .t5-pc ${selector}`);
-    if (element) return element;
-    await new Promise(resolve => setTimeout(resolve, 80));
-  }
-  throw new PotPageTimeout(`O PC não mostrou ${selector}.`);
-}
-
-async function applyGameFilters(on) {
-  try {
-    if (!on) {
-      for (const [, , key] of POT_GAME_FILTERS) {
-        document.querySelector(`.modal.open .t5-pc [data-pc-rmf="${key}"]`)?.click();
-        await new Promise(resolve => setTimeout(resolve, 80));
-      }
-      return;
-    }
-    if (!document.querySelector('.modal.open .t5-pc .t5-pc-fpanel')) (await waitForPc('[data-pc-filters]')).click();
-    for (const [selector, value] of POT_GAME_FILTERS) {
-      const select = await waitForPc(selector);
-      if (select.value === value) continue;
-      select.value = value;
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-      await new Promise(resolve => setTimeout(resolve, 80));
-    }
-    (await waitForPc('[data-pc-filters-done]')).click();
-  } catch (error) {
-    if (!(error instanceof PotPageTimeout)) throw error;
-    potScan = { status: 'end', text: 'Não consegui ligar os filtros do jogo; use Filtros' };
-    decoratePc();
-  }
-}
-
-function nextPageButton() {
-  return document.querySelector('.t5-pc [data-pc-zone="box"] .t5-pc-bar:not(.is-bottom) [data-pc-page="1"]');
-}
-
-function pageLabel() {
-  return document.querySelector('.t5-pc [data-pc-zone="box"] .t5-pc-bar:not(.is-bottom) .t5-pc-pages b')?.textContent.trim() ?? '';
-}
-
-async function waitPageChange(before) {
-  const started = Date.now();
-  while (Date.now() - started < 4000) {
-    await new Promise(resolve => setTimeout(resolve, 120));
-    if (pageLabel() && pageLabel() !== before) return;
-  }
-  throw new PotPageTimeout('A caixa não mudou de página.');
-}
-
-async function findNextPotentialPage() {
-  if (potScan?.status === 'running') return;
-  potScan = { status: 'running', text: 'Procurando nas próximas páginas…' };
-  decoratePc();
-  try {
-    let checked = 0;
-    for (;;) {
-      const next = nextPageButton();
-      if (!next || next.disabled) {
-        potScan = { status: 'end', text: checked ? `Fim da caixa: nenhum nas ${checked} páginas seguintes` : 'Esta é a última página' };
-        break;
-      }
-      const before = pageLabel();
-      next.click();
-      await waitPageChange(before);
-      checked++;
-      decoratePc();
-      const { found } = boxPageCounts();
-      if (found) {
-        potScan = null;
-        document.querySelector(`${POT_BOX_CARD}[${POT_ATTR}$=":yes"]`)?.scrollIntoView({ block: 'center' });
-        break;
-      }
-      potScan = { status: 'running', text: `Procurando… página ${pageLabel()}` };
-      decoratePc();
-    }
-  } catch (error) {
-    if (!(error instanceof PotPageTimeout)) {
-      potScan = { status: 'end', text: `Erro: ${error.message}` };
-      decoratePc();
-      throw error;
-    }
-    potScan = { status: 'end', text: 'A caixa não respondeu; tente de novo' };
-  }
-  decoratePc();
 }
 
 function ensurePotStyles() {

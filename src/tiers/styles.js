@@ -275,7 +275,6 @@ function installStyles() {
     #pafk-market-filters .pafk-search-results p:empty { display: none; }
     @media (pointer: coarse) {
       #pafk-market-filters .pafk-market-search :is(button, input[type="search"], select, summary),
-      #pafk-market-filters [data-scan-market] { min-height: 44px; }
       #pafk-market-filters .pafk-market-tiers button { min-width: 44px; }
     }
     #pafk-market-filters .pafk-recommendation {

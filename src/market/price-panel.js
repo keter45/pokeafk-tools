@@ -22,7 +22,6 @@ pricePanel.innerHTML = `
     <button type="button" class="pafk-price-link" data-price-reset>Restaurar filtros sugeridos</button>
   </details>
   <p class="pafk-price-muted" data-price-criteria></p>
-  <button type="button" class="mk-btn mk-pri pafk-price-action" data-price-search>Buscar comparáveis</button>
   <p class="pafk-price-muted" data-price-status role="status"></p>
   <button type="button" class="pafk-price-link" data-price-old hidden>Ver consulta anterior</button>
   <div class="pafk-price-result" data-price-result hidden>
@@ -31,9 +30,8 @@ pricePanel.innerHTML = `
       <strong data-price-estimate></strong>
       <small data-price-range></small>
       <small data-price-gap hidden></small>
+      <small data-price-gems hidden></small>
     </div>
-    <button type="button" class="mk-btn mk-ghost pafk-price-action" data-price-use>Preencher preço em ₽</button>
-    <button type="button" class="pafk-price-link" data-price-use-gems hidden></button>
     <details data-price-comparables>
       <summary></summary>
       <ul></ul>
@@ -44,7 +42,6 @@ pricePanel.innerHTML = `
     <b></b><small></small>
   </div>`;
 
-const priceSearchButton = pricePanel.querySelector('[data-price-search]');
 const priceTotalInput = pricePanel.querySelector('[data-price-total]');
 const priceStatFields = new Map(STATS.map(([stat, , label]) => [stat, {
   label,
@@ -53,8 +50,6 @@ const priceStatFields = new Map(STATS.map(([stat, , label]) => [stat, {
 }]));
 const priceResult = pricePanel.querySelector('[data-price-result]');
 const priceComparables = pricePanel.querySelector('[data-price-comparables]');
-const priceUse = pricePanel.querySelector('[data-price-use]');
-const priceUseGems = pricePanel.querySelector('[data-price-use-gems]');
 const priceOld = pricePanel.querySelector('[data-price-old]');
 const priceStatus = pricePanel.querySelector('[data-price-status]');
 const priceSales = pricePanel.querySelector('[data-price-sales]');
@@ -102,7 +97,7 @@ function formatPriceComparable(offer, criteria) {
 }
 
 function showPriceComparison(state) {
-  const { target, snapshot, previous, error, applied } = state;
+  const { target, snapshot, previous, error } = state;
   const criteria = getPriceCriteria();
   for (const { check, input } of priceStatFields.values()) input.disabled = !check.checked;
   const { count, sample } = nearestPriceOffers(snapshot?.offers ?? [], target, criteria);
@@ -113,7 +108,6 @@ function showPriceComparison(state) {
   const filters = [`IV total ≥ ${criteria.total}`, ...[...criteria.minimums].map(([stat, min]) =>
     `${priceStatFields.get(stat).label} ≥ ${min}`)];
   pricePanel.querySelector('[data-price-criteria]').textContent = filters.join(' · ');
-  priceSearchButton.textContent = snapshot ? 'Consultar novamente' : 'Buscar comparáveis';
   priceOld.hidden = !previous || previous === snapshot || count > 0 ||
     !nearestPriceOffers(previous.offers, target, criteria).count;
   priceResult.hidden = !money;
@@ -127,7 +121,6 @@ function showPriceComparison(state) {
     else if (!count) messages.push('Nenhum anúncio comparável. Você pode reduzir os mínimos de IV.');
     else messages.push(`${count} ${count === 1 ? 'anúncio atende' : 'anúncios atendem'} aos filtros.`);
   }
-  if (applied) messages.push('Preço preenchido. Você pode editá-lo no anúncio.');
   priceStatus.textContent = messages.filter(Boolean).join(' ');
   showPriceSales(state, criteria.total);
   if (!money) return;
@@ -142,8 +135,9 @@ function showPriceComparison(state) {
   if (!gapNote.hidden) {
     gapNote.textContent = `O mais próximo tem IV ${sample[0].total}/186 (${gap > 0 ? '+' : '−'}${Math.abs(gap)}).`;
   }
-  priceUseGems.hidden = !gems;
-  if (gems) priceUseGems.textContent = `Preencher ≈ ${priceNumber.format(gems.estimate)} diam.`;
+  const gemsNote = pricePanel.querySelector('[data-price-gems]');
+  gemsNote.hidden = !gems;
+  if (gems) gemsNote.textContent = `Em diamantes: ≈ ${priceNumber.format(gems.estimate)}`;
   priceComparables.querySelector('summary').textContent = sample.length === 1
     ? '1 anúncio comparável' : `${sample.length} anúncios mais próximos`;
   priceComparables.querySelector('ul').replaceChildren(...sample.map(offer => formatPriceComparable(offer, criteria)));

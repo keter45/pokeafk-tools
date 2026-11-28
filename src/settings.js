@@ -3,9 +3,7 @@
 // the manager's storage (shared by every tab and container) and applies on the next page load.
 const MODULES = {
   tiers: 'Tiers, filtros do mercado e ficha',
-  daily: 'Daily de treinadores',
   monitor: 'Monitor de contas',
-  dodge: 'Desvio SEMI/FULL e luta automática na arena (experimental)',
 };
 const MODULES_KEY = 'modules';
 const hasModuleStore = typeof GM_getValue === 'function' && typeof GM_setValue === 'function';

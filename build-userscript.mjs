@@ -11,11 +11,9 @@ const GROUPS = [
     'tiers/styles.js', 'market/state.js', 'market/tier-sort.js', 'market/price-data.js',
     'market/price-book-data.js', 'market/price-panel.js', 'market/price-search.js',
     'market/price-book.js', 'market/price-book-styles.js', 'tiers/nature-tips.js', 'tiers/pc-potential.js',
-    'market/search.js', 'market/deals.js', 'tiers/observer.js',
+    'market/search.js', 'tiers/observer.js',
   ] },
-  { id: 'daily', files: ['daily.js'] },
   { id: 'monitor', files: ['monitor.js'] },
-  { id: 'dodge', files: ['data/moves.js', 'dodge.js', 'arena.js'] },
 ];
 
 const read = file => readFile(new URL(`./src/${file}`, import.meta.url), 'utf8');

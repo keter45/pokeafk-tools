@@ -68,7 +68,6 @@ marketSearchTools.innerHTML = `
       ${TIERS.map(tier => `<button type="button" class="pafk-tier-seg" data-tier="${tier}" data-market-tier="${tier}" aria-label="Tier ${tier}" aria-pressed="false">${tier}</button>`).join('')}
     </fieldset>
     <label data-market-potential-label><input type="checkbox" data-market-potential> Só com potencial</label>
-    <button type="button" data-market-ungroup>Ver anúncios com potencial</button>
     <button type="button" data-market-clear>Limpar busca</button>
   </div>
   <div class="pafk-market-chips" data-market-chips role="group" aria-label="Espécies selecionadas" hidden></div>
@@ -99,7 +98,6 @@ const marketChips = marketSearchTools.querySelector('[data-market-chips]');
 const marketMode = marketSearchTools.querySelector('[data-market-mode]');
 const marketPotential = marketSearchTools.querySelector('[data-market-potential]');
 const marketClear = marketSearchTools.querySelector('[data-market-clear]');
-const marketUngroup = marketSearchTools.querySelector('[data-market-ungroup]');
 const marketRuleDetails = marketSearchTools.querySelector('[data-market-pot-rules]');
 
 function renderSpeciesOptions() {
@@ -153,7 +151,6 @@ function syncMarketSearch(view) {
   marketChips.hidden = !browsing || !marketChips.childElementCount;
   marketPotential.closest('label').hidden = grouped;
   marketPotential.checked = marketSearch.potential;
-  marketUngroup.hidden = !grouped;
   marketClear.hidden = !browsing || !(hasSpeciesFilters() || marketSearch.potential);
   marketRuleDetails.hidden = grouped || !marketSearch.potential;
   const { main, hp, spe, tier } = potRules;
@@ -169,7 +166,6 @@ function syncMarketSearch(view) {
 }
 
 function changeMarketSearch() {
-  stopMarketScan();
   saveMarketSearch();
   renderMarketChips();
   syncSpeciesOptions();
@@ -178,9 +174,7 @@ function changeMarketSearch() {
 
 function setMarketPotentialRules(rules) {
   potRules = rules;
-  potScan = null;
   savePotRules(rules);
-  stopMarketScan();
   syncAll();
 }
 
@@ -206,23 +200,16 @@ marketSearchTools.addEventListener('click', event => {
     marketPickerInput.value = '';
     renderSpeciesOptions();
     marketPicker.querySelector('summary').focus();
-  } else if (button === marketUngroup) {
-    const grouped = marketMain()?.parentElement.querySelector('[data-grouped][aria-pressed="true"]');
-    if (!grouped) return;
-    marketSearch.potential = true;
-    grouped.click();
   } else if (button.hasAttribute('data-market-pot-reset')) {
     setMarketPotentialRules({ ...POT_DEFAULT_RULES });
     return;
   } else return;
   changeMarketSearch();
-  if (button === marketUngroup && marketPotential.offsetParent) marketPotential.focus({ preventScroll: true });
 });
 
 marketSearchTools.addEventListener('change', ({ target }) => {
   if (target === marketMode) {
     saveMode(marketMode.value);
-    stopMarketScan();
     syncAll();
   } else if (target === marketPotential) {
     marketSearch.potential = marketPotential.checked;
@@ -234,96 +221,12 @@ marketSearchTools.addEventListener('change', ({ target }) => {
 
 renderMarketChips();
 
-// Usa a paginação do jogo para manter os botões nativos dos anúncios funcionando.
+// Result of the filters on the page the player is looking at. The script no longer turns pages
+// itself (removed in 2.0.0: the game blocks and reports clicks sent by scripts).
 const marketResults = panel.querySelector('[data-market-results]');
 const marketStatus = panel.querySelector('[data-status]');
-const marketScanButton = panel.querySelector('[data-scan-market]');
-let marketView = null;
-let marketScan = null;
-let marketScanStatus = '';
 
-function stopMarketScan() {
-  marketScan = null;
-  marketScanStatus = '';
+function showMarketMessage(message) {
+  if (marketStatus.textContent !== message) marketStatus.textContent = message;
+  marketResults.hidden = !message;
 }
-
-function marketNextPage(main) {
-  return main?.querySelector('.mk-pager [aria-label="Próxima página"]:not(:disabled)');
-}
-
-function syncMarketScan(main, view, active, matched, message) {
-  if (view !== marketView || !active) stopMarketScan();
-  marketView = view;
-  if (marketScan) marketScan.matched = matched;
-  marketScanButton.hidden = !active || (!marketScan && !marketNextPage(main));
-  const label = marketScan ? 'Parar busca' : 'Próxima com resultados ›';
-  if (marketScanButton.textContent !== label) marketScanButton.textContent = label;
-  const status = marketScanStatus || message;
-  if (marketStatus.textContent !== status) marketStatus.textContent = status;
-  marketResults.hidden = !status && marketScanButton.hidden;
-  if (marketScan?.keepFocus && document.activeElement === document.body) {
-    marketScanButton.focus({ preventScroll: true });
-  }
-}
-
-async function scanMarketPages() {
-  if (marketScan) {
-    stopMarketScan();
-    syncMarket();
-    return;
-  }
-  const job = { view: marketView, matched: 0, keepFocus: document.activeElement === marketScanButton };
-  marketScan = job;
-  while (marketScan === job) {
-    const main = marketMain();
-    const next = marketNextPage(main);
-    if (!next) {
-      marketScanStatus = 'Nenhum resultado nas próximas páginas.';
-      break;
-    }
-    const page = Number(next.dataset.pg);
-    marketScanStatus = `Buscando resultados na página ${page + 1}…`;
-    syncMarket();
-    if (marketScan !== job) return;
-    next.click();
-    const arrived = await waitFor(() => {
-      if (marketScan !== job) return true;
-      const shown = marketMain();
-      return shown && currentPage(shown) === page
-        && (shown.querySelector(job.view === 'grouped' ? SPECIES_ROWS : OFFER_ROW)
-          || shown.querySelector('.mk-empty p'));
-    });
-    if (marketScan !== job) return;
-    if (!arrived) {
-      marketScanStatus = 'O mercado não carregou a próxima página. Tente de novo.';
-      break;
-    }
-    syncMarket();
-    if (job.matched) {
-      marketScanStatus = '';
-      break;
-    }
-  }
-  if (marketScan !== job) return;
-  marketScan = null;
-  syncMarket();
-}
-
-marketScanButton.addEventListener('click', () => {
-  scanMarketPages().catch(error => {
-    stopMarketScan();
-    marketScanStatus = `Erro na busca do mercado: ${error.message}`;
-    syncMarket();
-    throw error;
-  });
-});
-
-function cancelScanOnNativeInput(event) {
-  if (!marketScan || !event.isTrusted || panel.contains(event.target)) return;
-  if (!event.target.closest('.mk button, .mk input, .mk select')) return;
-  stopMarketScan();
-  setTimeout(syncMarket, 0);
-}
-
-document.addEventListener('click', cancelScanOnNativeInput, true);
-document.addEventListener('input', cancelScanOnNativeInput, true);
