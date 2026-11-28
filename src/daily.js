@@ -46,12 +46,17 @@
           <div class="pafk-daily-count"><strong data-daily-left></strong><span>Vitórias <span data-daily-total></span></span></div>
           <div class="pafk-daily-bar" role="progressbar" aria-label="Vitórias" aria-valuemin="0" data-daily-bar><i></i></div>
         </div>
+        <p class="pafk-daily-note pafk-daily-league-info" data-daily-league-info></p>
         <p class="pafk-daily-status" role="status" aria-live="polite" data-daily-status></p>
         <ol class="pafk-daily-route" aria-label="Rota de treinadores" hidden data-daily-route></ol>
         <div class="pafk-daily-options">
           <label class="pafk-daily-avoid">
             <input type="checkbox" aria-describedby="pafk-daily-avoid-help" data-daily-avoid checked>
             <span><strong>Evitar vantagem de tipo</strong><small id="pafk-daily-avoid-help">O Daily aprende o time de cada treinador na primeira luta.</small></span>
+          </label>
+          <label class="pafk-daily-avoid">
+            <input type="checkbox" aria-describedby="pafk-daily-worth-help" data-daily-worth checked>
+            <span><strong>Só lutas que compensam</strong><small id="pafk-daily-worth-help">Pula quem dá menos XP do Pokémon por minuto que a hunt. Treinador sem XP conhecido é enfrentado.</small></span>
           </label>
           <label class="pafk-daily-avoid">
             <input type="checkbox" aria-describedby="pafk-daily-swim-help" data-daily-swimmers checked>
@@ -78,6 +83,8 @@
   const routeEl = box.querySelector('[data-daily-route]');
   const avoidBox = box.querySelector('[data-daily-avoid]');
   const swimmersBox = box.querySelector('[data-daily-swimmers]');
+  const worthBox = box.querySelector('[data-daily-worth]');
+  const leagueInfoEl = box.querySelector('[data-daily-league-info]');
 
   const style = document.createElement('style');
   style.dataset.pafk = '';
@@ -174,7 +181,7 @@
     #pafk-daily .pafk-daily-route li[data-state="current"] b { color: #174683; background: #dceaff; }
     #pafk-daily .pafk-daily-route li[data-state="won"] b { color: #17603d; background: #e0f3e8; }
     #pafk-daily .pafk-daily-route li[data-state="lost"] b { color: #a02735; background: #fbe7ea; }
-    #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="swimmer"], [data-state="unreachable"]) b { color: #713a05; background: #fff0da; }
+    #pafk-daily .pafk-daily-route li:is([data-state="avoided"], [data-state="swimmer"], [data-state="unreachable"], [data-state="poor"]) b { color: #713a05; background: #fff0da; }
     #pafk-daily .pafk-daily-actions {
       display: flex; flex: none; padding: 10px 12px 12px; border-top: 1px solid var(--daily-line); background: #f6f9ff;
     }
@@ -412,12 +419,111 @@
   }
   const xpNow = () => ({ trainer: xpTotal('.hud-trainer-xp'), mon: xpTotal('.hud-xp-line') });
   const formatXp = value => value.toLocaleString('pt-BR');
+  // Short form for the route rows: 34 mil, 1,2 mi.
+  const shortXp = value => (value >= 1e6
+    ? `${(value / 1e6).toFixed(1).replace('.', ',')} mi`
+    : value >= 10000 ? `${Math.round(value / 1000).toLocaleString('pt-BR')} mil`
+      : `${(value / 1000).toFixed(1).replace('.', ',')} mil`);
+
+  // ---- Is a fight worth it? (pedido do usuário, 2026-11-27) ----
+  // A trainer is worth fighting when the main Pokémon's XP per minute of the fight (XP of the last
+  // win ÷ measured time of teleport + talk + fight) is at least the hunt's XP per minute. The
+  // Pokémon's XP counts, not the trainer's: the trainer can be far above the Pokémon.
+  const HUNT_RATE_STORAGE = 'pokeafk-market-filtros:hunt-rate';
+  const HUNT_SAMPLES_STORAGE = 'pokeafk-market-filtros:hunt-samples';
+  const HUNT_WINDOW = 10 * 60 * 1000;
+  const HUNT_MIN_SPAN = 3 * 60 * 1000;
+  // A rate measured more than this long ago no longer stands for the current hunt.
+  const HUNT_RATE_MAX_AGE = 6 * 60 * 60 * 1000;
+  // Teleport, talk and fight when no time was measured yet (Daily fights took 20–40 s).
+  const DEFAULT_FIGHT_MS = 40000;
+
+  const mainName = () => ($('button.hud-active-button')?.getAttribute('aria-label') ?? '').match(/Resumo de (.+?), nível/i)?.[1] ?? '';
+
+  // The level's size from the HUD ("2.460.551/2.562.128 XP neste nível; …"): a fight's XP as a
+  // share of a level.
+  function levelSpan() {
+    const match = ($('.hud-xp-line')?.getAttribute('title') ?? '').match(/[\d.]+\s*\/\s*([\d.]+)\s*XP neste n[ií]vel/i);
+    return match ? Number(match[1].replace(/\./g, '')) : null;
+  }
+
+  function readJson(key, fallback) {
+    try {
+      return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  function writeJson(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Without storage the value is measured again.
+    }
+  }
+
+  // Every 10 s while hunting (and not running the Daily), the main Pokémon's XP total.
+  function sampleHunt() {
+    if (run || !isHunting()) return;
+    const mon = mainName();
+    const xp = xpTotal('.hud-xp-line');
+    if (!mon || xp === null) return;
+    const now = Date.now();
+    let samples = [];
+    try {
+      samples = JSON.parse(sessionStorage.getItem(HUNT_SAMPLES_STORAGE) ?? '[]');
+    } catch {
+      // A new series starts.
+    }
+    samples = samples.filter(sample => sample.mon === mon && now - sample.t <= HUNT_WINDOW && sample.xp <= xp);
+    samples.push({ t: now, mon, xp });
+    try {
+      sessionStorage.setItem(HUNT_SAMPLES_STORAGE, JSON.stringify(samples));
+    } catch {
+      // Kept for this sample only.
+    }
+    const span = now - samples[0].t;
+    if (span < HUNT_MIN_SPAN) return;
+    writeJson(HUNT_RATE_STORAGE, { mon, perMin: (xp - samples[0].xp) / (span / 60000), at: now });
+    showMain();
+  }
+  setInterval(sampleHunt, 10000);
+
+  function huntRate() {
+    const saved = readJson(HUNT_RATE_STORAGE, null);
+    return saved && saved.mon === mainName() && Date.now() - saved.at <= HUNT_RATE_MAX_AGE ? saved.perMin : null;
+  }
+
+  // Value of a trainer from its saved record: Pokémon XP, XP per minute, share of a level, and
+  // whether it beats the hunt (null when either side is unknown).
+  function fightValue(record) {
+    if (!record?.monXp) return null;
+    const ms = record.ms ?? DEFAULT_FIGHT_MS;
+    const perMin = record.monXp / (ms / 60000);
+    const span = levelSpan();
+    const hunt = huntRate();
+    return {
+      xp: record.monXp, perMin, measured: Boolean(record.ms),
+      share: span ? record.monXp / span : null,
+      worth: hunt === null ? null : perMin >= hunt,
+    };
+  }
+
+  function saveFightTime(id, ms) {
+    const teams = readTeams();
+    if (!teams[id]) return;
+    teams[id].ms = Math.round(ms);
+    writeJson(TEAMS_STORAGE, teams);
+  }
 
   try {
     avoidBox.checked = localStorage.getItem(AVOID_STORAGE) !== 'off';
   } catch {
     // Defaults to on.
   }
+  const WORTH_STORAGE = 'pokeafk-market-filtros:daily-worth';
+  worthBox.checked = readJson(WORTH_STORAGE, 'on') !== 'off';
+  worthBox.addEventListener('change', () => writeJson(WORTH_STORAGE, worthBox.checked ? 'on' : 'off'));
   avoidBox.addEventListener('change', () => {
     try {
       localStorage.setItem(AVOID_STORAGE, avoidBox.checked ? 'on' : 'off');
@@ -965,7 +1071,9 @@
     saveFight(npc, [...seen], gain);
     if (gain) {
       npc.gain = gain.xp;
+      npc.monGain = gain.monXp;
       run.xp += gain.xp;
+      run.monXp = (run.monXp ?? 0) + (gain.monXp ?? 0);
     }
     return battleResult === 'win' ? 'won' : (sentToCenter ? 'lost-healed' : 'lost');
   }
@@ -1136,6 +1244,7 @@
       throw new Stop(`Parado. ${room.name} não aceitou o desafio.`);
     }
     await pause(200, 500);
+    const before = xpNow();
     fight.click();
     await until(() => inArena() || resultWindow(), 15000, 'começar a batalha');
     setStatus(`Lutando contra ${room.name}...`);
@@ -1144,8 +1253,32 @@
     await pause();
     result.querySelector('[data-ah="ok"]')?.click();
     await until(() => !resultWindow(), 8000, 'fechar o resultado');
+    if (outcome === 'win') run.monXp = (run.monXp ?? 0) + ((await xpGain(before))?.monXp ?? 0);
     await pause(600, 1000);
     return outcome;
+  }
+
+  // ---- League tracker ----
+  // Today's League attempt, by the game's day (it resets at midnight in Brasília), with the
+  // Pokémon XP and time it took, to compare with the hunt.
+  const LEAGUE_STORAGE = 'pokeafk-market-filtros:league';
+  const gameDay = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+  function saveLeague(entry) {
+    writeJson(LEAGUE_STORAGE, { ...entry, day: gameDay() });
+    showLeague();
+  }
+  function showLeague() {
+    const last = readJson(LEAGUE_STORAGE, null);
+    const today = last?.day === gameDay();
+    const minutes = last?.ms ? last.ms / 60000 : 0;
+    const gain = last?.monXp ? `+${shortXp(last.monXp)} XP do Pokémon em ${Math.max(1, Math.round(minutes))} min` : '';
+    const hunt = huntRate();
+    const versus = last?.monXp && minutes && hunt
+      ? ` (${shortXp(last.monXp / minutes)}/min; a hunt dá ${shortXp(hunt)}/min)` : '';
+    leagueInfoEl.textContent = !last ? 'Liga de Kanto: ainda não feita com o script.'
+      : today
+        ? `Liga de Kanto hoje: ${last.result === 'win' ? 'vencida' : `parou em ${last.stopped}`}${gain ? `, ${gain}` : ''}${versus}.`
+        : `Liga de Kanto: não feita hoje. Última: ${last.result === 'win' ? 'vencida' : `parou em ${last.stopped}`}${gain ? `, ${gain}` : ''}${versus}.`;
   }
 
   const roomOf = answer => LEAGUE.rooms.findIndex(room => fold(text(answer.querySelector('.b5-ch-name'))) === fold(room.name));
@@ -1160,6 +1293,8 @@
     }
     let first = 0;
     let resume = null;
+    run.leagueStarted = performance.now();
+    run.monXp = 0;
     if (await townTeleport(LEAGUE.town)) {
       await closeMap();
       // The League does not heal between rooms: start with the team healed.
@@ -1207,8 +1342,10 @@
           throw new Stop(`Parado. Esperava ${room.name}, mas respondeu ${text(talk.answer.querySelector('.b5-ch-name')) || 'outro NPC'}.`);
         }
       }
+      run.leagueRoom = room.name;
       const outcome = await leagueFight(room, talk.answer);
       if (outcome !== 'win') {
+        saveLeague({ result: outcome, stopped: room.name, monXp: run.monXp, ms: performance.now() - run.leagueStarted });
         setStatus(`Liga parada: ${outcome === 'draw' ? 'empate' : 'derrota'} contra ${room.name}.`, 'stop');
         return;
       }
@@ -1216,14 +1353,15 @@
       setStatus(`${room.name} vencido. Indo para a próxima sala...`);
       await walk(talk.at, room.door);
     }
-    setStatus('Liga de Kanto vencida!', 'done');
+    saveLeague({ result: 'win', monXp: run.monXp, ms: performance.now() - run.leagueStarted });
+    setStatus(`Liga de Kanto vencida! +${formatXp(run.monXp)} XP do Pokémon.`, 'done');
   }
 
 
   // ---- Panel ----
   const LABELS = {
     won: 'Vencido', lost: 'Derrota', skipped: 'Pulado', locked: 'Bloqueado',
-    unreachable: 'Inacessível', closed: 'Inacessível', avoided: 'Evitado', swimmer: 'Pulado', current: 'Agora', todo: '',
+    unreachable: 'Inacessível', closed: 'Inacessível', avoided: 'Evitado', swimmer: 'Pulado', poor: 'Não compensa', current: 'Agora', todo: '',
   };
   function renderProgress() {
     const { route, done, total } = run;
@@ -1245,9 +1383,13 @@
       item.querySelector('strong').textContent = `${npc.name} · Nv. ${npc.level}`;
       const edge = npc.edge ? `time com ${TYPE_NAMES[npc.edge] ?? npc.edge}`
         : npc.state === 'swimmer' ? 'nadador, na água' : '';
-      // XP measured in this run, or the one saved from an earlier win.
-      const xp = npc.gain ? `+${formatXp(npc.gain)} XP` : npc.knownXp ? `~${formatXp(npc.knownXp)} XP` : '';
-      item.querySelector('small').textContent = [npc.place, xp, edge, npc.failure].filter(Boolean).join(' · ');
+      // Pokémon XP measured in this run, or the one saved from an earlier win, with its share of a
+      // level and the XP per minute the fight is worth.
+      const value = npc.value;
+      const xp = npc.monGain ? `+${shortXp(npc.monGain)} XP` : value ? `~${shortXp(value.xp)} XP` : '';
+      const share = value?.share ? `${(value.share * 100).toFixed(1).replace('.', ',')}% do nível` : '';
+      const rate = value ? `${value.measured ? '' : '~'}${shortXp(value.perMin)}/min` : '';
+      item.querySelector('small').textContent = [npc.place, xp, share, rate, edge, npc.failure].filter(Boolean).join(' · ');
       item.querySelector('b').textContent = LABELS[npc.state] ?? '';
       return item;
     }));
@@ -1265,9 +1407,11 @@
     mainEl.textContent = main ? `${main.name} · Nv. ${main.level}` : 'Pokémon principal';
     spriteEl.hidden = !main?.sprite;
     if (main?.sprite && spriteEl.getAttribute('src') !== main.sprite) spriteEl.src = main.sprite;
-    noteEl.textContent = main
-      ? 'Todos os treinadores do dia, na ordem do MAPA: mais XP primeiro.'
-      : 'Entre no jogo para ver o Pokémon principal.';
+    const hunt = huntRate();
+    noteEl.textContent = !main ? 'Entre no jogo para ver o Pokémon principal.'
+      : hunt ? `Hunt: ${shortXp(hunt)} XP do Pokémon por minuto (medido caçando).`
+        : 'Hunt: ainda sem medida. Cace uns 3 minutos para comparar as lutas.';
+    showLeague();
   }
 
   function setRunning(on) {
@@ -1277,6 +1421,7 @@
     stopButton.hidden = !on;
     avoidBox.disabled = on;
     swimmersBox.disabled = on;
+    worthBox.disabled = on;
     box.toggleAttribute('data-running', on);
     if (restoreFocus) (on ? stopButton : goButton).focus({ preventScroll: true });
   }
@@ -1292,6 +1437,7 @@
     try {
       await runLeague();
     } catch (error) {
+      if (run.leagueRoom) saveLeague({ result: 'stop', stopped: run.leagueRoom, monXp: run.monXp, ms: performance.now() - run.leagueStarted });
       setStatus(error instanceof Stop ? error.message
         : error instanceof NoResponse || !(error instanceof TypeError || error instanceof ReferenceError)
           ? `Parado: ${error.message}`
@@ -1328,15 +1474,19 @@
       run.route = route.map(npc => {
         const swimmer = swimmersBox.checked && isSwimmer(npc);
         const edge = !swimmer && avoidBox.checked ? typeEdge(npc, main.dex) : null;
-        const state = swimmer ? 'swimmer' : edge ? 'avoided' : 'todo';
-        return { ...npc, edge, knownXp: known[npc.id]?.xp, state };
+        const value = fightValue(known[npc.id]);
+        const poor = !swimmer && !edge && worthBox.checked && value?.worth === false;
+        const state = swimmer ? 'swimmer' : edge ? 'avoided' : poor ? 'poor' : 'todo';
+        return { ...npc, edge, value, state };
       });
       const avoided = run.route.filter(npc => npc.state === 'avoided').length;
       const swimmers = run.route.filter(npc => npc.state === 'swimmer').length;
+      const poor = run.route.filter(npc => npc.state === 'poor').length;
       const leftOut = [avoided && `${avoided} evitado(s) por vantagem de tipo`,
-        swimmers && `${swimmers} nadador(es) pulado(s)`].filter(Boolean).join(' e ');
+        swimmers && `${swimmers} nadador(es) pulado(s)`,
+        poor && `${poor} que não compensa(m) contra a hunt`].filter(Boolean).join(', ');
       // Trainers left out on purpose do not count in "Faltam N".
-      run.total = route.length - avoided - swimmers + beaten;
+      run.total = route.length - avoided - swimmers - poor + beaten;
       run.done = beaten;
       renderProgress();
       if (!run.route.some(npc => npc.state === 'todo')) {
@@ -1358,6 +1508,7 @@
         renderProgress();
         if ((hpRatio() ?? 1) < HEAL_BELOW) await heal();
         setStatus(`Indo até ${npc.name} (${npc.place})...`);
+        const started = performance.now();
         let outcome;
         try {
           const arrival = await teleportTo(npc);
@@ -1377,6 +1528,7 @@
           renderProgress();
           throw new Error(`${MAX_UNREACHABLE_STREAK} treinadores seguidos sem resposta do jogo`);
         }
+        if (outcome === 'won') saveFightTime(npc.id, performance.now() - started);
         if (outcome === 'lost') await heal();
         if (outcome === 'lost-healed') outcome = 'lost';
         npc.state = outcome;
@@ -1392,7 +1544,7 @@
       const skipped = run.route.filter(npc => npc.state === 'skipped' || npc.state === 'locked').length;
       const unreachable = run.route.filter(npc => npc.state === 'unreachable').length;
       const closed = run.route.filter(npc => npc.state === 'closed').length;
-      setStatus(['Daily concluído.', run.xp && `+${formatXp(run.xp)} XP de treinador.`,
+      setStatus(['Daily concluído.', run.monXp && `+${formatXp(run.monXp)} XP do Pokémon.`,
         lost && `${lost} derrota(s).`, skipped && `${skipped} pulado(s).`,
         unreachable && `${unreachable} sem resposta do jogo.`,
         closed && `${closed} em lugar fechado (falta insígnia).`,
