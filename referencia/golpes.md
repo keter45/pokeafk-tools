@@ -23,19 +23,19 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 | Razor Leaf | grass | Físico | 55 | 95% | 2,4 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 21,8 | A | B | nível (11) + TM | Mais chance de acerto crítico. |
 | Heat Wave | fire | Especial | 100 | 90% | 6 s | 0,5 s | 4 | 4 | 3 | 225% | — | 15 | A | C | nível (2) | 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
 | Hyper Voice | normal | Especial | 90 | 100% | 6 s | 0,3 s | 4 | 4 | 3 | 225% | — | 15 | A | C | nível (4) |  |
-| ViceGrip | normal | Físico | 55 | 100% | 2,1 s | 0,3 s | 2 | 2 | 1,5 | 125% | 7% | 26,2 | A | B | nível (6) | As pinças se fecham sobre os inimigos num cone de 2 passos à frente. |
+| ViceGrip | normal | Físico | 55 | 100% | 2,1 s | 0,3 s | 2 | 2 | 1,5 | 125% | — | 26,2 | A | B | nível (6) | As pinças se fecham sobre os inimigos num cone de 2 passos à frente. |
 | DragonBreath | dragon | Especial | 60 | 100% | 3 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 20 | A | B | nível (8) | 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
 | Muddy Water | water | Especial | 95 | 85% | 6 s | 0,3 s | 4 | 4 | 3 | 225% | — | 13,5 | B | C | nível (2) | 30% de chance de baixar a PRECISÃO do alvo por 10 s. |
 | Razor Wind | normal | Especial | 80 | 100% | 6 s | 1,2 s | 4 | 4 | 3 | 225% | 70% | 13,3 | B | D | nível (2) | Mais chance de acerto crítico. Demora 1,2 s para sair. |
-| Powder Snow | ice | Especial | 40 | 100% | 2,4 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 16,7 | B | B | nível (11) + TM | 10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela). |
+| Powder Snow | ice | Especial | 40 | 100% | 2,4 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 16,7 | B | C | nível (11) + TM | 10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela). |
 | Pin Missile | bug | Físico | 14×3 | 85% | 3 s | 0,3 s | 5 | 5 | 3 | 225% | — | 11,9 | B | C | nível (6) | Espalha agulhas num leque de até 5 passos à frente. Acerta de 2 a 5 vezes seguidas. |
-| Acid | poison | Especial | 40 | 100% | 2 s | 0,3 s | 2 | 2 | 1,5 | 125% | 7% | 20 | B | B | nível (10) + TM | 10% de chance de baixar a DEFESA do alvo por 10 s. |
+| Acid | poison | Especial | 40 | 100% | 2 s | 0,3 s | 2 | 2 | 1,5 | 125% | — | 20 | B | B | nível (10) + TM | 10% de chance de baixar a DEFESA do alvo por 10 s. |
 | Overheat | fire | Especial | 140 | 90% | 12 s | 0,5 s | 4 | 4 | 3 | 225% | — | 10,5 | B | C | TM | Baixa muito o AT. ESP. do seu Pokémon por 10 s. |
 | Twister | dragon | Especial | 40 | 100% | 3 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 13,3 | B | C | nível (9) + TM | Acerta até quem está no meio de um salto. 20% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
 | Icy Wind | ice | Especial | 55 | 95% | 4 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 13,1 | C | C | nível (6) | Baixa a VELOCIDADE do alvo por 10 s. |
 | Bubble | water | Especial | 20 | 100% | 2 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 10 | C | C | nível (19) | 10% de chance de baixar a VELOCIDADE do alvo por 10 s. |
-| Rolling Kick | fighting | Físico | 60 | 85% | 4 s | 0,3 s | 2 | 2 | 1,5 | 125% | 7% | 12,8 | C | C | nível (2) | Um chute em meia-lua atinge os inimigos no semicírculo de 2 passos à frente. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
-| Uproar | normal | Especial | 50 | 100% | 6 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 8,3 | C | C | nível (11) |  |
+| Rolling Kick | fighting | Físico | 60 | 85% | 4 s | 0,3 s | 2 | 2 | 1,5 | 125% | — | 12,8 | C | C | nível (2) | Um chute em meia-lua atinge os inimigos no semicírculo de 2 passos à frente. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
+| Uproar | normal | Especial | 50 | 100% | 6 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 8,3 | C | D | nível (11) |  |
 | Cross Chop | fighting | Físico | 100 | 80% | 12 s | 0,5 s | 3 | 3 | 2,17 | 163% | — | 6,7 | D | D | nível (5) | Dois cortes cruzados acertam os inimigos num X de 3 passos à frente. Mais chance de acerto crítico. |
 | Silver Wind | bug | Especial | 60 | 100% | 12 s | 0,3 s | 3 | 3 | 2,17 | 163% | — | 5 | D | D | nível (5) | 10% de chance de subir o ATAQUE, a DEFESA, o AT. ESP., a DEF. ESP. e a VELOCIDADE do seu Pokémon por 10 s. |
 | Cotton Spore | grass | Status | — | 85% | 3 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (8) | Baixa muito a VELOCIDADE do alvo por 10 s. |
@@ -44,39 +44,39 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 | Growl | normal | Status | — | 100% | 3 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (78) | Baixa o ATAQUE do alvo por 10 s. |
 | Leer | normal | Status | — | 100% | 4 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (82) | Baixa a DEFESA do alvo por 10 s. |
 | Metal Sound | steel | Status | — | 85% | 3 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (8) | Baixa muito a DEF. ESP. do alvo por 10 s. |
-| Poison Gas | poison | Status | — | 55% | 3 s | 0,3 s | 2 | 2 | — | — | 7% | — | — | — | nível (8) | Envenena o alvo por 10 s: perde vida aos poucos. |
-| PoisonPowder | poison | Status | — | 75% | 3,4 s | 0,3 s | 2 | 2 | — | — | 7% | — | — | — | nível (21) | Envenena o alvo por 10 s: perde vida aos poucos. |
-| Roar | normal | Status | — | 100% | 6 s | 0,9 s | 3 | 3 | — | — | 54% | — | — | — | nível (19) | Não troca Pokémon: durante o combate, o próximo só entra após um desmaio |
-| Sand-Attack | ground | Status | — | 100% | 8 s | 0,3 s | 2 | 2 | — | — | 7% | — | — | — | nível (37) | Baixa a PRECISÃO do alvo por 10 s. |
+| Poison Gas | poison | Status | — | 55% | 3 s | 0,3 s | 2 | 2 | — | — | — | — | — | — | nível (8) | Envenena o alvo por 10 s: perde vida aos poucos. |
+| PoisonPowder | poison | Status | — | 75% | 3,4 s | 0,3 s | 2 | 2 | — | — | — | — | — | — | nível (21) | Envenena o alvo por 10 s: perde vida aos poucos. |
+| Roar | normal | Status | — | 100% | 6 s | 0,9 s | 3 | 3 | — | — | 33% | — | — | — | nível (19) | Não troca Pokémon: durante o combate, o próximo só entra após um desmaio |
+| Sand-Attack | ground | Status | — | 100% | 8 s | 0,3 s | 2 | 2 | — | — | — | — | — | — | nível (37) | Baixa a PRECISÃO do alvo por 10 s. |
 | Screech | normal | Status | — | 85% | 3 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (51) | Baixa muito a DEFESA do alvo por 10 s. |
 | Sing | normal | Status | — | 55% | 10 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (14) | Faz o alvo dormir por 2,5 s. |
-| Sleep Powder | grass | Status | — | 75% | 10 s | 0,3 s | 2 | 2 | — | — | 7% | — | — | — | nível (16) | Faz o alvo dormir por 2,5 s. |
-| Smokescreen | normal | Status | — | 100% | 6 s | 0,3 s | 2 | 2 | — | — | 7% | — | — | — | nível (14) | Baixa a PRECISÃO do alvo por 10 s. |
-| Snore | normal | Especial | 40 | 100% | 4 s | 0,3 s | 2 | 2 | 1,5 | 125% | 7% | — | — | — | nível (10) | 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
+| Sleep Powder | grass | Status | — | 75% | 10 s | 0,3 s | 2 | 2 | — | — | — | — | — | — | nível (16) | Faz o alvo dormir por 2,5 s. |
+| Smokescreen | normal | Status | — | 100% | 6 s | 0,3 s | 2 | 2 | — | — | — | — | — | — | nível (14) | Baixa a PRECISÃO do alvo por 10 s. |
+| Snore | normal | Especial | 40 | 100% | 4 s | 0,3 s | 2 | 2 | 1,5 | 125% | — | — | — | — | nível (10) | 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
 | String Shot | bug | Status | — | 95% | 3 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (5) | Baixa a VELOCIDADE do alvo por 10 s. |
-| Stun Spore | grass | Status | — | 75% | 4 s | 0,3 s | 2 | 2 | — | — | 7% | — | — | — | nível (21) | Paralisa o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
+| Stun Spore | grass | Status | — | 75% | 4 s | 0,3 s | 2 | 2 | — | — | — | — | — | — | nível (21) | Paralisa o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
 | Tail Whip | normal | Status | — | 100% | 4 s | 0,3 s | 3 | 3 | — | — | — | — | — | — | nível (47) | Baixa a DEFESA do alvo por 10 s. |
-| Whirlwind | normal | Status | — | 100% | 6 s | 0,9 s | 3 | 3 | — | — | 54% | — | — | — | nível (12) | Não troca Pokémon: durante o combate, o próximo só entra após um desmaio |
+| Whirlwind | normal | Status | — | 100% | 6 s | 0,9 s | 3 | 3 | — | — | 33% | — | — | — | nível (12) | Não troca Pokémon: durante o combate, o próximo só entra após um desmaio |
 
 ## Círculo em volta do usuário (15)
 
 | Golpe | Tipo | Cat. | Poder | Prec. | Recarga | Preparo | Alcance | Raio | Alvos na caça | Dano na caça | Desvio PvP | Poder/s | Caça | PvP | Origem | Descrição do jogo |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:-:|:-:|---|---|
-| Spark | electric | Físico | 65 | 100% | 3 s | 0,4 s | — | 2 | 2,83 | 213% | 21% | 21,7 | S | C | nível (11) | Uma descarga elétrica atinge os inimigos até 2 passos ao redor do seu Pokémon. 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
-| Stomp | normal | Físico | 65 | 100% | 3 s | 0,4 s | — | 2 | 2,83 | 213% | 21% | 21,7 | S | C | nível (16) | Um pisão atinge os inimigos até 2 passos ao redor do seu Pokémon. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
-| Earthquake | ground | Físico | 100 | 100% | 6 s | 0,6 s | — | 3 | 3 | 225% | 12% | 16,7 | A | C | nível (20) + TM |  |
-| Rapid Spin | normal | Físico | 20 | 100% | 1,5 s | 0,4 s | — | 1 | 1,5 | 125% | 21% | 13,3 | C | C | nível (11) |  |
-| Bide | normal | Físico | 60 | 100% | 15 s | 0,4 s | — | 1 | 1,5 | 125% | 21% | — | — | — | nível (10) |  |
-| Eruption | fire | Especial | — | 100% | 12 s | 0,6 s | — | 4 | — | — | 12% | — | — | — | nível (2) | Mais forte com a vida cheia: 150 com a vida toda, menos conforme ela cai. |
-| Explosion | normal | Físico | 250 | 100% | 30 s | 1 s | — | 4 | 3 | 225% | 68% | — | — | — | nível (17) | O seu Pokémon desmaia ao usar; a DEFESA do alvo conta pela metade. Demora 1 s para sair. |
+| Spark | electric | Físico | 65 | 100% | 3 s | 0,4 s | — | 2 | 2,83 | 213% | — | 21,7 | S | B | nível (11) | Uma descarga elétrica atinge os inimigos até 2 passos ao redor do seu Pokémon. 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
+| Stomp | normal | Físico | 65 | 100% | 3 s | 0,4 s | — | 2 | 2,83 | 213% | — | 21,7 | S | B | nível (16) | Um pisão atinge os inimigos até 2 passos ao redor do seu Pokémon. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
+| Earthquake | ground | Físico | 100 | 100% | 6 s | 0,6 s | — | 3 | 3 | 225% | — | 16,7 | A | C | nível (20) + TM |  |
+| Rapid Spin | normal | Físico | 20 | 100% | 1,5 s | 0,4 s | — | 1 | 1,5 | 125% | — | 13,3 | C | C | nível (11) |  |
+| Bide | normal | Físico | 60 | 100% | 15 s | 0,4 s | — | 1 | 1,5 | 125% | — | — | — | — | nível (10) |  |
+| Eruption | fire | Especial | — | 100% | 12 s | 0,6 s | — | 4 | — | — | — | — | — | — | nível (2) | Mais forte com a vida cheia: 150 com a vida toda, menos conforme ela cai. |
+| Explosion | normal | Físico | 250 | 100% | 30 s | 1 s | — | 4 | 3 | 225% | 47% | — | — | — | nível (17) | O seu Pokémon desmaia ao usar; a DEFESA do alvo conta pela metade. Demora 1 s para sair. |
 | Follow Me | normal | Status | — | 100% | 12 s | — | — | 4 | — | — | — | — | — | — | nível (5) | Ainda não faz nada neste jogo: usá-lo só gasta a recarga. |
 | Haze | ice | Status | — | 100% | 12 s | 0,4 s | — | 4 | — | — | — | — | — | — | nível (13) | Ainda não faz nada neste jogo: usá-lo só gasta a recarga. |
 | Magnitude | ground | Físico | — | 100% | 2,7 s | 0,4 s | — | 3 | — | — | — | — | — | — | nível (9) | Poder ao acaso, de 10 a 150. |
 | Perish Song | normal | Status | — | 100% | 30 s | 0,4 s | — | 4 | — | — | — | — | — | — | nível (9) | Ainda não faz nada neste jogo: usá-lo só gasta a recarga. |
-| Selfdestruct | normal | Físico | 200 | 100% | 30 s | 1 s | — | 3 | 3 | 225% | 68% | — | — | — | nível (11) | O seu Pokémon desmaia ao usar; a DEFESA do alvo conta pela metade. Demora 1 s para sair. |
+| Selfdestruct | normal | Físico | 200 | 100% | 30 s | 1 s | — | 3 | 3 | 225% | 47% | — | — | — | nível (11) | O seu Pokémon desmaia ao usar; a DEFESA do alvo conta pela metade. Demora 1 s para sair. |
 | Sweet Scent | normal | Status | — | 100% | 6 s | 0,4 s | — | 3 | — | — | — | — | — | — | nível (15) | Baixa a EVASÃO do alvo por 10 s. |
 | Teeter Dance | normal | Status | — | 100% | 6 s | 0,4 s | — | 3 | — | — | — | — | — | — | nível (1) | Confunde o alvo por 4 s: às vezes ele bate em si mesmo. |
-| Water Spout | water | Especial | — | 100% | 12 s | 0,6 s | — | 4 | — | — | 12% | — | — | — | nível (3) | Mais forte com a vida cheia: 150 com a vida toda, menos conforme ela cai. |
+| Water Spout | water | Especial | — | 100% | 12 s | 0,6 s | — | 4 | — | — | — | — | — | — | nível (3) | Mais forte com a vida cheia: 150 com a vida toda, menos conforme ela cai. |
 
 ## Campo em volta do usuário (11)
 
@@ -98,22 +98,22 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 
 | Golpe | Tipo | Cat. | Poder | Prec. | Recarga | Preparo | Alcance | Raio | Alvos na caça | Dano na caça | Desvio PvP | Poder/s | Caça | PvP | Origem | Descrição do jogo |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:-:|:-:|---|---|
-| Sludge | poison | Especial | 65 | 100% | 3 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 21,7 | B | C | nível (6) | Lança uma bola de lodo até 6 passos, que explode a 1 passo ao redor do impacto; paredes bloqueiam a bola e a explosão. 30% de chance de envenenar o alvo por 10 s: perde vida aos poucos. |
-| Water Pulse | water | Especial | 60 | 100% | 3 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 20 | B | C | nível (7) + TM | 20% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
-| Psycho Boost | psychic | Especial | 140 | 90% | 12 s | 0,8 s | 6 | 2 | 3 | 225% | 40% | 10,5 | B | D | nível (1) | Baixa muito o AT. ESP. do seu Pokémon por 10 s. |
-| Sludge Bomb | poison | Especial | 90 | 100% | 6 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 15 | C | C | nível (5) + TM | 30% de chance de envenenar o alvo por 10 s: perde vida aos poucos. |
-| Fire Blast | fire | Especial | 120 | 85% | 12 s | 0,8 s | 6 | 2 | 3 | 225% | 40% | 8,5 | C | D | nível (7) + TM | 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
-| Thunder | electric | Especial | 120 | 70% | 6 s | 0,8 s | 6 | 1 | 1,67 | 133% | 70% | 14 | C | D | nível (13) + TM | Na chuva, nunca erra e sai em 0,3 s. Acerta até quem está no meio de um salto. 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
-| Egg Bomb | normal | Físico | 100 | 75% | 6 s | 0,8 s | 6 | 1 | 1,67 | 133% | 70% | 12,5 | C | D | nível (3) |  |
-| Blizzard | ice | Especial | 120 | 70% | 12 s | 0,8 s | 6 | 2 | 3 | 225% | 40% | 7 | C | D | nível (10) + TM | 10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela). |
-| Rock Slide | rock | Físico | 75 | 90% | 6 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 11,3 | C | D | nível (9) | 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
-| Rock Tomb | rock | Físico | 50 | 80% | 6 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 6,7 | D | D | nível (3) | Baixa a VELOCIDADE do alvo por 10 s. |
-| Fire Spin | fire | Especial | 15 | 70% | 4 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 2,6 | D | D | nível (13) | Prende o alvo por 3 s: ele não anda e perde vida. |
-| Sand Tomb | ground | Físico | 15 | 70% | 4 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 2,6 | D | D | nível (7) | Prende o alvo por 3 s: ele não anda e perde vida. |
-| Whirlpool | water | Especial | 15 | 70% | 4 s | 0,6 s | 6 | 1 | 1,67 | 133% | 49% | 2,6 | D | D | nível (6) | Prende o alvo por 3 s: ele não anda e perde vida. |
-| Doom Desire | steel | Especial | 120 | 85% | 12 s | 0,3 s | 6 | 1 | 1,67 | 133% | 7% | — | — | — | nível (1) |  |
-| Future Sight | psychic | Especial | 80 | 90% | 6 s | 0,3 s | 6 | 1 | 1,67 | 133% | 7% | — | — | — | nível (20) |  |
-| Present | normal | Físico | — | 90% | 4 s | 0,6 s | 6 | 1 | — | — | 49% | — | — | — | nível (1) | Poder 40, 80 ou 120 ao acaso; 1 vez em 5 não tira nada. |
+| Sludge | poison | Especial | 65 | 100% | 3 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 21,7 | B | C | nível (6) | Lança uma bola de lodo até 6 passos, que explode a 1 passo ao redor do impacto; paredes bloqueiam a bola e a explosão. 30% de chance de envenenar o alvo por 10 s: perde vida aos poucos. |
+| Water Pulse | water | Especial | 60 | 100% | 3 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 20 | B | C | nível (7) + TM | 20% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
+| Psycho Boost | psychic | Especial | 140 | 90% | 12 s | 0,8 s | 6 | 2 | 3 | 225% | 19% | 10,5 | B | C | nível (1) | Baixa muito o AT. ESP. do seu Pokémon por 10 s. |
+| Sludge Bomb | poison | Especial | 90 | 100% | 6 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 15 | C | C | nível (5) + TM | 30% de chance de envenenar o alvo por 10 s: perde vida aos poucos. |
+| Fire Blast | fire | Especial | 120 | 85% | 12 s | 0,8 s | 6 | 2 | 3 | 225% | 19% | 8,5 | C | D | nível (7) + TM | 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
+| Thunder | electric | Especial | 120 | 70% | 6 s | 0,8 s | 6 | 1 | 1,67 | 133% | 56% | 14 | C | D | nível (13) + TM | Na chuva, nunca erra e sai em 0,3 s. Acerta até quem está no meio de um salto. 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
+| Egg Bomb | normal | Físico | 100 | 75% | 6 s | 0,8 s | 6 | 1 | 1,67 | 133% | 56% | 12,5 | C | D | nível (3) |  |
+| Blizzard | ice | Especial | 120 | 70% | 12 s | 0,8 s | 6 | 2 | 3 | 225% | 19% | 7 | C | D | nível (10) + TM | 10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela). |
+| Rock Slide | rock | Físico | 75 | 90% | 6 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 11,3 | C | D | nível (9) | 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
+| Rock Tomb | rock | Físico | 50 | 80% | 6 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 6,7 | D | D | nível (3) | Baixa a VELOCIDADE do alvo por 10 s. |
+| Fire Spin | fire | Especial | 15 | 70% | 4 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 2,6 | D | D | nível (13) | Prende o alvo por 3 s: ele não anda e perde vida. |
+| Sand Tomb | ground | Físico | 15 | 70% | 4 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 2,6 | D | D | nível (7) | Prende o alvo por 3 s: ele não anda e perde vida. |
+| Whirlpool | water | Especial | 15 | 70% | 4 s | 0,6 s | 6 | 1 | 1,67 | 133% | 28% | 2,6 | D | D | nível (6) | Prende o alvo por 3 s: ele não anda e perde vida. |
+| Doom Desire | steel | Especial | 120 | 85% | 12 s | 0,3 s | 6 | 1 | 1,67 | 133% | — | — | — | — | nível (1) |  |
+| Future Sight | psychic | Especial | 80 | 90% | 6 s | 0,3 s | 6 | 1 | 1,67 | 133% | — | — | — | — | nível (20) |  |
+| Present | normal | Físico | — | 90% | 4 s | 0,6 s | 6 | 1 | — | — | 28% | — | — | — | nível (1) | Poder 40, 80 ou 120 ao acaso; 1 vez em 5 não tira nada. |
 
 ## Salto (área onde cai) (4)
 
@@ -128,29 +128,29 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 
 | Golpe | Tipo | Cat. | Poder | Prec. | Recarga | Preparo | Alcance | Raio | Alvos na caça | Dano na caça | Desvio PvP | Poder/s | Caça | PvP | Origem | Descrição do jogo |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:-:|:-:|---|---|
-| Thunderbolt | electric | Especial | 95 | 100% | 4 s | 0,4 s | 8 | — | 2,17 | 163% | 21% | 23,8 | S | B | nível (4) + TM | 10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
+| Thunderbolt | electric | Especial | 95 | 100% | 4 s | 0,4 s | 8 | — | 2,17 | 163% | — | 23,8 | S | B | nível (4) + TM | 10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
 | SolarBeam | grass | Especial | 120 | 100% | 6 s | 1,5 s | 8 | — | 2,17 | 163% | 70% | 20 | A | D | nível (12) + TM | Demora 1,5 s para sair; no sol, sai na hora. |
-| Aurora Beam | ice | Especial | 65 | 100% | 3 s | 0,4 s | 7 | — | 2 | 150% | 21% | 21,7 | A | B | nível (11) | 10% de chance de baixar o ATAQUE do alvo por 10 s. |
-| BubbleBeam | water | Especial | 65 | 100% | 3 s | 0,4 s | 7 | — | 2 | 150% | 21% | 21,7 | A | B | nível (13) | 10% de chance de baixar a VELOCIDADE do alvo por 10 s. |
-| Psybeam | psychic | Especial | 65 | 100% | 3 s | 0,4 s | 7 | — | 2 | 150% | 21% | 21,7 | A | B | nível (20) | 10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
-| Signal Beam | bug | Especial | 75 | 100% | 4 s | 0,4 s | 7 | — | 2 | 150% | 21% | 18,8 | B | C | nível (1) | 10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
-| Psychic | psychic | Especial | 90 | 100% | 5 s | 0,4 s | 7 | — | 2 | 150% | 21% | 18 | B | C | nível (32) + TM | 10% de chance de baixar a DEF. ESP. do alvo por 10 s. |
-| Ice Beam | ice | Especial | 95 | 100% | 6 s | 0,4 s | 8 | — | 2,17 | 163% | 21% | 15,8 | B | C | nível (10) + TM | 10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela). |
-| Water Gun | water | Especial | 40 | 100% | 2,4 s | 0,4 s | 6 | — | 1,83 | 142% | 21% | 16,7 | B | C | nível (51) + TM |  |
-| Hyper Beam | normal | Especial | 150 | 90% | 10 s | 0,6 s | 8 | — | 2,17 | 163% | 49% | 13,5 | B | D | nível (22) + TM | Depois de acertar, o seu Pokémon fica 1,5 s sem agir. |
-| Tri Attack | normal | Especial | 80 | 100% | 6 s | 0,4 s | 4 | — | 1,5 | 125% | 21% | 13,3 | C | C | nível (6) | Dispara três faixas paralelas até 4 passos à frente; cada inimigo é atingido uma vez. 20% de chance de queimar, congelar ou paralisar o alvo. |
-| Comet Punch | normal | Físico | 18×3 | 85% | 4 s | 0,4 s | 3 | — | 1,33 | 117% | 21% | 11,5 | C | C | nível (4) | Uma sequência de socos atinge os inimigos numa faixa de 3 passos à frente. Acerta de 2 a 5 vezes seguidas. |
-| Hydro Pump | water | Especial | 120 | 80% | 12 s | 0,6 s | 8 | — | 2,17 | 163% | 49% | 8 | C | D | nível (38) |  |
-| Aeroblast | flying | Especial | 100 | 95% | 12 s | 0,6 s | 8 | — | 2,17 | 163% | 49% | 7,9 | C | D | nível (1) | Mais chance de acerto crítico. |
-| Smog | poison | Especial | 20 | 70% | 3 s | 0,4 s | 3 | — | 1,33 | 117% | 21% | 4,7 | D | D | nível (10) | Uma nuvem de veneno cobre três faixas por até 3 passos à frente. 40% de chance de envenenar o alvo por 10 s: perde vida aos poucos. |
-| Dragon Rage | dragon | Especial | — | 100% | 6 s | 0,4 s | 6 | — | — | — | 21% | — | — | — | nível (7) | Dano fixo: o mesmo em qualquer alvo, sem contar ATAQUE, DEFESA nem tipo. |
-| Fissure | ground | Físico | — | 30% | 15 s | 0,8 s | 5 | — | — | — | 70% | — | — | — | nível (6) | Derruba de uma vez um selvagem do nível do seu Pokémon ou menor (acerta 30% mais a diferença de nível); de um chefe ou de um treinador, tira 1/4 da vida. |
+| Aurora Beam | ice | Especial | 65 | 100% | 3 s | 0,4 s | 7 | — | 2 | 150% | — | 21,7 | A | B | nível (11) | 10% de chance de baixar o ATAQUE do alvo por 10 s. |
+| BubbleBeam | water | Especial | 65 | 100% | 3 s | 0,4 s | 7 | — | 2 | 150% | — | 21,7 | A | B | nível (13) | 10% de chance de baixar a VELOCIDADE do alvo por 10 s. |
+| Psybeam | psychic | Especial | 65 | 100% | 3 s | 0,4 s | 7 | — | 2 | 150% | — | 21,7 | A | B | nível (20) | 10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
+| Signal Beam | bug | Especial | 75 | 100% | 4 s | 0,4 s | 7 | — | 2 | 150% | — | 18,8 | B | B | nível (1) | 10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
+| Psychic | psychic | Especial | 90 | 100% | 5 s | 0,4 s | 7 | — | 2 | 150% | — | 18 | B | B | nível (32) + TM | 10% de chance de baixar a DEF. ESP. do alvo por 10 s. |
+| Ice Beam | ice | Especial | 95 | 100% | 6 s | 0,4 s | 8 | — | 2,17 | 163% | — | 15,8 | B | C | nível (10) + TM | 10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela). |
+| Water Gun | water | Especial | 40 | 100% | 2,4 s | 0,4 s | 6 | — | 1,83 | 142% | — | 16,7 | B | B | nível (51) + TM |  |
+| Hyper Beam | normal | Especial | 150 | 90% | 10 s | 0,6 s | 8 | — | 2,17 | 163% | 28% | 13,5 | B | C | nível (22) + TM | Depois de acertar, o seu Pokémon fica 1,5 s sem agir. |
+| Tri Attack | normal | Especial | 80 | 100% | 6 s | 0,4 s | 4 | — | 1,5 | 125% | — | 13,3 | C | C | nível (6) | Dispara três faixas paralelas até 4 passos à frente; cada inimigo é atingido uma vez. 20% de chance de queimar, congelar ou paralisar o alvo. |
+| Comet Punch | normal | Físico | 18×3 | 85% | 4 s | 0,4 s | 3 | — | 1,33 | 117% | — | 11,5 | C | C | nível (4) | Uma sequência de socos atinge os inimigos numa faixa de 3 passos à frente. Acerta de 2 a 5 vezes seguidas. |
+| Hydro Pump | water | Especial | 120 | 80% | 12 s | 0,6 s | 8 | — | 2,17 | 163% | 28% | 8 | C | D | nível (38) |  |
+| Aeroblast | flying | Especial | 100 | 95% | 12 s | 0,6 s | 8 | — | 2,17 | 163% | 28% | 7,9 | C | D | nível (1) | Mais chance de acerto crítico. |
+| Smog | poison | Especial | 20 | 70% | 3 s | 0,4 s | 3 | — | 1,33 | 117% | — | 4,7 | D | D | nível (10) | Uma nuvem de veneno cobre três faixas por até 3 passos à frente. 40% de chance de envenenar o alvo por 10 s: perde vida aos poucos. |
+| Dragon Rage | dragon | Especial | — | 100% | 6 s | 0,4 s | 6 | — | — | — | — | — | — | — | nível (7) | Dano fixo: o mesmo em qualquer alvo, sem contar ATAQUE, DEFESA nem tipo. |
+| Fissure | ground | Físico | — | 30% | 15 s | 0,8 s | 5 | — | — | — | 56% | — | — | — | nível (6) | Derruba de uma vez um selvagem do nível do seu Pokémon ou menor (acerta 30% mais a diferença de nível); de um chefe ou de um treinador, tira 1/4 da vida. |
 
 ## Projétil (34)
 
 | Golpe | Tipo | Cat. | Poder | Prec. | Recarga | Preparo | Alcance | Raio | Alvos na caça | Dano na caça | Desvio PvP | Poder/s | Caça | PvP | Origem | Descrição do jogo |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:-:|:-:|---|---|
-| ThunderShock | electric | Especial | 40 | 100% | 1,3 s | 0,2 s | 5 | — | 1 | 100% | — | 30,8 | B | S | nível (11) + TM | 10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
+| ThunderShock | electric | Especial | 40 | 100% | 1,3 s | 0,2 s | 5 | — | 1 | 100% | — | 30,8 | B | A | nível (11) + TM | 10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
 | Shadow Ball | ghost | Especial | 80 | 100% | 2,7 s | 0,2 s | 6 | — | 1 | 100% | — | 29,6 | B | A | nível (7) + TM | 20% de chance de baixar a DEF. ESP. do alvo por 10 s. |
 | Bone Club | ground | Físico | 65 | 85% | 2 s | 0,2 s | 6 | — | 1 | 100% | — | 27,6 | B | A | nível (2) | 10% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
 | Ember | fire | Especial | 40 | 100% | 1,6 s | 0,2 s | 5 | — | 1 | 100% | — | 25 | B | A | nível (31) + TM | 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
@@ -170,7 +170,7 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 | Sacred Fire | fire | Físico | 100 | 95% | 8 s | 0,2 s | 7 | — | 1 | 100% | — | 11,9 | D | C | nível (1) | 50% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
 | Luster Purge | psychic | Especial | 70 | 100% | 8 s | 0,2 s | 6 | — | 1 | 100% | — | 8,8 | D | C | nível (1) | 50% de chance de baixar a DEF. ESP. do alvo por 10 s. |
 | Mist Ball | psychic | Especial | 70 | 100% | 8 s | 0,2 s | 6 | — | 1 | 100% | — | 8,8 | D | C | nível (1) | 50% de chance de baixar o AT. ESP. do alvo por 10 s. |
-| AncientPower | rock | Especial | 60 | 100% | 8 s | 0,2 s | 5 | — | 1 | 100% | — | 7,5 | D | C | nível (24) | 10% de chance de subir o ATAQUE, a DEFESA, o AT. ESP., a DEF. ESP. e a VELOCIDADE do seu Pokémon por 10 s. |
+| AncientPower | rock | Especial | 60 | 100% | 8 s | 0,2 s | 5 | — | 1 | 100% | — | 7,5 | D | D | nível (24) | 10% de chance de subir o ATAQUE, a DEFESA, o AT. ESP., a DEF. ESP. e a VELOCIDADE do seu Pokémon por 10 s. |
 | Zap Cannon | electric | Especial | 100 | 50% | 8 s | 0,2 s | 7 | — | 1 | 100% | — | 6,3 | D | D | nível (8) | Paralisa o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
 | Mud-Slap | ground | Especial | 20 | 100% | 4 s | 0,2 s | 5 | — | 1 | 100% | — | 5 | D | D | nível (13) + TM | Baixa a PRECISÃO do alvo por 10 s. |
 | Confuse Ray | ghost | Status | — | 100% | 12 s | 0,2 s | 5 | — | — | — | — | — | — | — | nível (29) | Confunde o alvo por 4 s: às vezes ele bate em si mesmo. |
@@ -189,21 +189,21 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 
 | Golpe | Tipo | Cat. | Poder | Prec. | Recarga | Preparo | Alcance | Raio | Alvos na caça | Dano na caça | Desvio PvP | Poder/s | Caça | PvP | Origem | Descrição do jogo |
 |---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|:-:|:-:|---|---|
-| Double-Edge | normal | Físico | 120 | 100% | 3 s | 0,5 s | 5 | — | 1 | 100% | 35% | 40 | S | A | nível (34) | O seu Pokémon perde 1/3 do dano que causar. |
-| Flame Wheel | fire | Físico | 60 | 100% | 1,6 s | 0,3 s | 3 | — | 1 | 100% | 7% | 37,5 | A | S | nível (4) | 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
+| Double-Edge | normal | Físico | 120 | 100% | 3 s | 0,5 s | 5 | — | 1 | 100% | 14% | 40 | S | S | nível (34) | O seu Pokémon perde 1/3 do dano que causar. |
+| Flame Wheel | fire | Físico | 60 | 100% | 1,6 s | 0,3 s | 3 | — | 1 | 100% | — | 37,5 | A | S | nível (4) | 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
 | Skull Bash | normal | Físico | 100 | 100% | 2,7 s | 1 s | 4 | — | 1 | 100% | 70% | 37 | A | C | nível (4) | Sobe a DEFESA do seu Pokémon por 10 s. Demora 1 s para sair. |
-| Jump Kick | fighting | Físico | 70 | 95% | 1,8 s | 0,3 s | 4 | — | 1 | 100% | 7% | 36,9 | A | S | nível (1) | Se errar, o seu Pokémon perde 1/8 da vida. |
-| Hi Jump Kick | fighting | Físico | 85 | 90% | 2,1 s | 0,3 s | 4 | — | 1 | 100% | 7% | 36,4 | A | S | nível (3) | Se errar, o seu Pokémon perde 1/8 da vida. |
-| Take Down | normal | Físico | 90 | 85% | 2,3 s | 0,3 s | 4 | — | 1 | 100% | 7% | 33,3 | A | A | nível (45) | O seu Pokémon perde 1/4 do dano que causar. |
+| Jump Kick | fighting | Físico | 70 | 95% | 1,8 s | 0,3 s | 4 | — | 1 | 100% | — | 36,9 | A | S | nível (1) | Se errar, o seu Pokémon perde 1/8 da vida. |
+| Hi Jump Kick | fighting | Físico | 85 | 90% | 2,1 s | 0,3 s | 4 | — | 1 | 100% | — | 36,4 | A | S | nível (3) | Se errar, o seu Pokémon perde 1/8 da vida. |
+| Take Down | normal | Físico | 90 | 85% | 2,3 s | 0,3 s | 4 | — | 1 | 100% | — | 33,3 | A | S | nível (45) | O seu Pokémon perde 1/4 do dano que causar. |
 | Mach Punch | fighting | Físico | 40 | 100% | 1,3 s | — | 2 | — | 1 | 100% | — | 30,8 | B | A | nível (2) | Sai mesmo logo depois de outro golpe (não espera a vez). |
 | Quick Attack | normal | Físico | 40 | 100% | 1,3 s | — | 3 | — | 1 | 100% | — | 30,8 | B | A | nível (48) | Sai mesmo logo depois de outro golpe (não espera a vez). |
-| Aerial Ace | flying | Físico | 60 | 100% | 2 s | 0,3 s | 3 | — | 1 | 100% | 7% | 30 | B | A | nível (3) + TM |  |
-| Wing Attack | flying | Físico | 60 | 100% | 2,3 s | 0,3 s | 4 | — | 1 | 100% | 7% | 26,1 | B | B | nível (17) | Avança num rasante até 4 passos, atingindo os inimigos no caminho e terminando num espaço livre. |
-| Low Kick | fighting | Físico | 60 | 100% | 3 s | 0,3 s | 3 | — | 1 | 100% | 7% | 20 | C | B | nível (6) | Avança com uma bicuda por até 3 passos e acerta os inimigos no caminho; termina num espaço livre. Poder 60 em qualquer alvo (o peso ainda não conta). |
-| Megahorn | bug | Físico | 120 | 85% | 6 s | 0,5 s | 4 | — | 1 | 100% | 35% | 17 | C | C | nível (3) | Avança até 4 passos e acerta os inimigos no caminho; termina num espaço livre, sem atravessar paredes. |
+| Aerial Ace | flying | Físico | 60 | 100% | 2 s | 0,3 s | 3 | — | 1 | 100% | — | 30 | B | A | nível (3) + TM |  |
+| Wing Attack | flying | Físico | 60 | 100% | 2,3 s | 0,3 s | 4 | — | 1 | 100% | — | 26,1 | B | A | nível (17) | Avança num rasante até 4 passos, atingindo os inimigos no caminho e terminando num espaço livre. |
+| Low Kick | fighting | Físico | 60 | 100% | 3 s | 0,3 s | 3 | — | 1 | 100% | — | 20 | C | B | nível (6) | Avança com uma bicuda por até 3 passos e acerta os inimigos no caminho; termina num espaço livre. Poder 60 em qualquer alvo (o peso ainda não conta). |
+| Megahorn | bug | Físico | 120 | 85% | 6 s | 0,5 s | 4 | — | 1 | 100% | 14% | 17 | C | C | nível (3) | Avança até 4 passos e acerta os inimigos no caminho; termina num espaço livre, sem atravessar paredes. |
 | Sky Attack | flying | Físico | 140 | 90% | 8 s | 1,5 s | 6 | — | 1 | 100% | 70% | 15,8 | C | D | nível (2) | Mais chance de acerto crítico. 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. Demora 1,5 s para sair. |
-| Ice Ball | ice | Físico | 30 | 90% | 2 s | 0,3 s | 3 | — | 1 | 100% | 7% | 13,5 | C | C | nível (3) |  |
-| Rollout | rock | Físico | 30 | 90% | 2 s | 0,3 s | 3 | — | 1 | 100% | 7% | 13,5 | C | C | nível (14) |  |
+| Ice Ball | ice | Físico | 30 | 90% | 2 s | 0,3 s | 3 | — | 1 | 100% | — | 13,5 | C | C | nível (3) |  |
+| Rollout | rock | Físico | 30 | 90% | 2 s | 0,3 s | 3 | — | 1 | 100% | — | 13,5 | C | C | nível (14) |  |
 | ExtremeSpeed | normal | Físico | 80 | 100% | 8 s | — | 5 | — | 1 | 100% | — | 10 | D | C | nível (3) | Sai mesmo logo depois de outro golpe (não espera a vez). |
 
 ## Corpo a corpo (79)
@@ -215,8 +215,8 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 | Drill Peck | flying | Físico | 80 | 100% | 2 s | — | 1 | — | 1 | 100% | — | 40 | S | S | nível (5) |  |
 | Bite | dark | Físico | 60 | 100% | 1,6 s | — | 1 | — | 1 | 100% | — | 37,5 | A | S | nível (53) | 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
 | Metal Claw | steel | Físico | 50 | 95% | 1,3 s | — | 1 | — | 1 | 100% | — | 36,5 | A | S | nível (11) + TM | 10% de chance de subir o ATAQUE do seu Pokémon por 10 s. |
-| Slash | normal | Físico | 70 | 100% | 2 s | — | 1 | — | 1 | 100% | — | 35 | A | S | nível (35) | Mais chance de acerto crítico. |
-| Steel Wing | steel | Físico | 70 | 90% | 1,8 s | — | 1 | — | 1 | 100% | — | 35 | A | S | nível (1) | 10% de chance de subir a DEFESA do seu Pokémon por 10 s. |
+| Slash | normal | Físico | 70 | 100% | 2 s | — | 1 | — | 1 | 100% | — | 35 | A | A | nível (35) | Mais chance de acerto crítico. |
+| Steel Wing | steel | Físico | 70 | 90% | 1,8 s | — | 1 | — | 1 | 100% | — | 35 | A | A | nível (1) | 10% de chance de subir a DEFESA do seu Pokémon por 10 s. |
 | Mega Punch | normal | Físico | 80 | 85% | 2 s | — | 1 | — | 1 | 100% | — | 34 | A | A | nível (3) |  |
 | Covet | normal | Físico | 40 | 100% | 1 s | — | 1 | — | 1 | 100% | — | 33,3 | A | A | nível (7) |  |
 | False Swipe | normal | Físico | 40 | 100% | 1 s | — | 1 | — | 1 | 100% | — | 33,3 | A | A | nível (9) | Nunca derruba: deixa o alvo com pelo menos 1 de vida (bom para capturar). |
@@ -235,7 +235,7 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 | Sky Uppercut | fighting | Físico | 85 | 90% | 2,7 s | — | 1 | — | 1 | 100% | — | 28,3 | B | A | nível (4) | Acerta até quem está no meio de um salto. |
 | Brick Break | fighting | Físico | 75 | 100% | 2,7 s | — | 1 | — | 1 | 100% | — | 27,8 | B | A | nível (3) + TM |  |
 | Iron Tail | steel | Físico | 100 | 75% | 2,7 s | — | 1 | — | 1 | 100% | — | 27,8 | B | A | nível (5) + TM | 30% de chance de baixar a DEFESA do alvo por 10 s. |
-| Tackle | normal | Físico | 35 | 95% | 1,1 s | — | 1 | — | 1 | 100% | — | 27,7 | B | A | nível (106) |  |
+| Tackle | normal | Físico | 35 | 95% | 1,1 s | — | 1 | — | 1 | 100% | — | 27,7 | B | B | nível (106) |  |
 | Strength | normal | Físico | 80 | 100% | 3 s | — | 1 | — | 1 | 100% | — | 26,7 | B | B | HM |  |
 | Hyper Fang | normal | Físico | 80 | 90% | 2,7 s | — | 1 | — | 1 | 100% | — | 26,7 | B | B | nível (2) | 10% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
 | Headbutt | normal | Físico | 70 | 100% | 2,7 s | — | 1 | — | 1 | 100% | — | 25,9 | B | B | nível (22) | 30% de chance de fazer o alvo recuar: o próximo golpe dele atrasa, e o que ele preparava se perde. |
@@ -251,10 +251,10 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 | Fire Punch | fire | Físico | 75 | 100% | 4 s | — | 1 | — | 1 | 100% | — | 18,8 | C | B | nível (5) + TM | 10% de chance de queimar o alvo por 8 s: perde vida aos poucos e bate mais fraco. |
 | Ice Punch | ice | Físico | 75 | 100% | 4 s | — | 1 | — | 1 | 100% | — | 18,8 | C | B | nível (3) + TM | 10% de chance de congelar o alvo por 2 s (um golpe de FOGO descongela). |
 | ThunderPunch | electric | Físico | 75 | 100% | 4 s | — | 1 | — | 1 | 100% | — | 18,8 | C | B | nível (5) + TM | 10% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
-| Poison Fang | poison | Físico | 50 | 100% | 2,7 s | — | 1 | — | 1 | 100% | — | 18,5 | C | B | nível (4) | 30% de chance de envenenar gravemente o alvo por 10 s: perde cada vez mais vida. |
-| Crush Claw | normal | Físico | 75 | 95% | 4 s | — | 1 | — | 1 | 100% | — | 17,8 | C | B | nível (1) | 50% de chance de baixar a DEFESA do alvo por 10 s. |
-| Dizzy Punch | normal | Físico | 70 | 100% | 4 s | — | 1 | — | 1 | 100% | — | 17,5 | C | B | nível (2) | 20% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
-| Vital Throw | fighting | Físico | 70 | 100% | 4 s | 0,2 s | 1 | — | 1 | 100% | — | 17,5 | C | B | nível (5) |  |
+| Poison Fang | poison | Físico | 50 | 100% | 2,7 s | — | 1 | — | 1 | 100% | — | 18,5 | C | C | nível (4) | 30% de chance de envenenar gravemente o alvo por 10 s: perde cada vez mais vida. |
+| Crush Claw | normal | Físico | 75 | 95% | 4 s | — | 1 | — | 1 | 100% | — | 17,8 | C | C | nível (1) | 50% de chance de baixar a DEFESA do alvo por 10 s. |
+| Dizzy Punch | normal | Físico | 70 | 100% | 4 s | — | 1 | — | 1 | 100% | — | 17,5 | C | C | nível (2) | 20% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
+| Vital Throw | fighting | Físico | 70 | 100% | 4 s | 0,2 s | 1 | — | 1 | 100% | — | 17,5 | C | C | nível (5) |  |
 | Fury Swipes | normal | Físico | 18×3 | 80% | 2,7 s | — | 1 | — | 1 | 100% | — | 16 | C | C | nível (26) | Acerta de 2 a 5 vezes seguidas. |
 | Lick | ghost | Físico | 20 | 100% | 1,3 s | — | 1 | — | 1 | 100% | — | 15,4 | C | C | nível (12) | 30% de chance de paralisar o alvo por 6 s: mais lento, e 1 em cada 4 golpes dele falha. |
 | Superpower | fighting | Físico | 120 | 100% | 8 s | — | 1 | — | 1 | 100% | — | 15 | C | C | nível (3) | Baixa o ATAQUE e a DEFESA do seu Pokémon por 10 s. |
@@ -301,7 +301,7 @@ Gerado por `build-reference.mjs` a partir de `pokepedia-data.json` (340 golpes d
 | Confusion | psychic | Especial | 50 | 100% | 4 s | 0,2 s | 5 | — | 1 | 100% | — | 12,5 | C | C | nível (37) + TM | 10% de chance de confundir o alvo por 4 s: às vezes ele bate em si mesmo. |
 | Absorb | grass | Especial | 20 | 100% | 2 s | 0,2 s | 5 | — | 1 | 100% | — | 10 | D | C | nível (21) + TM | Recupera metade do dano que causar. |
 | Mega Drain | grass | Especial | 40 | 100% | 4 s | 0,2 s | 5 | — | 1 | 100% | — | 10 | D | C | nível (14) | Recupera metade do dano que causar. |
-| Giga Drain | grass | Especial | 60 | 100% | 8 s | 0,2 s | 5 | — | 1 | 100% | — | 7,5 | D | C | nível (7) + TM | Recupera metade do dano que causar. |
+| Giga Drain | grass | Especial | 60 | 100% | 8 s | 0,2 s | 5 | — | 1 | 100% | — | 7,5 | D | D | nível (7) + TM | Recupera metade do dano que causar. |
 | Attract | normal | Status | — | 100% | 8 s | 0,2 s | 5 | — | — | — | — | — | — | — | nível (5) | Deixa o alvo apaixonado por 5 s: 1 em cada 4 golpes dele falha. |
 | Beat Up | dark | Físico | 10 | 100% | 4 s | 0,2 s | 5 | — | 1 | 100% | — | — | — | — | nível (1) |  |
 | Block | normal | Status | — | 100% | 24 s | 0,2 s | 5 | — | — | — | — | — | — | — | nível (3) | Impede o alvo de andar por 4 s. |

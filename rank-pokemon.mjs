@@ -33,11 +33,13 @@ const AREA_FACTOR = 0.75;
 const PACK_SIZE = 3;
 const PACK_SPREAD_TILES = 12;
 // PvP (decided with the user): wild Pokémon do not dodge, players do. Moves that mark the ground
-// before landing can be dodged; melee and target-following moves always land. A cast under ~0.25 s
-// arrives before anyone can react (measured with the dodge script, 2026-11-22); from there the
-// chance grows with the cast time, up to DODGE_MAX.
+// before landing can be dodged; melee and target-following moves always land. A cast under ~0.4 s
+// arrives before anyone can react: in the hunt, 0.3 s cones never left time and 0.6 s moves did
+// (dodge script, 2026-11-22); in the arena, only warnings on screen for 450 ms or more (the cast
+// plus ~100 ms) could be dodged by reacting (fight recordings, 2026-11-27; referencia/mecanicas.md).
+// From there the chance grows with the cast time, up to DODGE_MAX.
 const TELEGRAPH_SHAPES = new Set(['projectile', 'beam', 'dash', 'cone', 'circle', 'area', 'leap']);
-const DODGE_MIN_CAST = 0.25;
+const DODGE_MIN_CAST = 0.4;
 const DODGE_PER_SECOND = 1.4;
 const DODGE_MAX = 0.7;
 // The reference opponents also throw dodgeable moves: this share of their hits is dodged, except

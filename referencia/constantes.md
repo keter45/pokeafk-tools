@@ -13,7 +13,7 @@ Gerado por `build-reference.mjs` a partir de `MODEL` em `rank-pokemon.mjs`. O qu
   "AREA_FACTOR": 0.75,
   "PACK_SIZE": 3,
   "PACK_SPREAD_TILES": 12,
-  "DODGE_MIN_CAST": 0.25,
+  "DODGE_MIN_CAST": 0.4,
   "DODGE_PER_SECOND": 1.4,
   "DODGE_MAX": 0.7,
   "INCOMING_DODGE": 0.25,

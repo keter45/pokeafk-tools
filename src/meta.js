@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PokeAFK Tools
 // @namespace    pokeafk-tools
-// @version      2.0.0
+// @version      2.0.1
 // @description  Ferramentas para o pokeAFK só de leitura: filtros e base de preços no mercado, tiers no mapa e na ficha, recomendações de builds, potencial no PC e monitor de contas. Não clica nem aperta teclas no jogo.
 // @homepageURL  https://github.com/keter45/pokeafk-tools
 // @supportURL   https://github.com/keter45/pokeafk-tools/issues
